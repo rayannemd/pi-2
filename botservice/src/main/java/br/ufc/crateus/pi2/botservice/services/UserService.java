@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import br.ufc.crateus.pi2.botservice.controllers.exceptions.UserNotFoundException;
 import br.ufc.crateus.pi2.botservice.models.Address;
 import br.ufc.crateus.pi2.botservice.models.User;
 import br.ufc.crateus.pi2.botservice.repositories.UserRepository;
@@ -61,7 +62,7 @@ public class UserService
         User existingUser = getById(id).get();
 
         if(existingUser == null) 
-            return null;
+            throw new UserNotFoundException();
 
         existingUser.setName(command.getName());
         existingUser.setEmail(command.getEmail());
@@ -81,14 +82,14 @@ public class UserService
     {
         User user = getById(id).get();
 
-        if(user != null) 
-        {
-            user.softDelete();
+        if(user == null) 
+            throw new UserNotFoundException();
 
-            if (user.getAddress() != null)
-                user.getAddress().softDelete();
+        user.softDelete();
 
-            userRepository.save(user);
-        }
+        if (user.getAddress() != null)
+            user.getAddress().softDelete();
+
+        userRepository.save(user);
     }
 }
