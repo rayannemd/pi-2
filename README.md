@@ -1,5 +1,5 @@
 # pi-2
-Projeto Integrador 2
+Este sistema oferece gerenciamento de usuários e integração com um chatbot inteligente, capaz de atender clientes e solucionar dúvidas de forma automática. 
 
 ## Pré-requisitos
 - **Java 17** 
