@@ -32,3 +32,11 @@ html, body, #root {
   height: auto;
   z-index: 10;         /* garante que fique acima do texto */
 }
+
+@font-face {
+  font-family: "NotoSansBengali";
+  src: url("./assets/fonts/Noto_Sans_Bengali/NotoSansBengali-VariableFont_wdth,wght.ttf")
+ format("truetype");
+  font-weight: 100 900;
+  font-style: normal;
+}

@@ -1,0 +1,63 @@
+.sidebar{
+    top: 0;
+    left: 0;
+width: 300px;
+height: 100vh;
+display: flex;
+position: fixed;
+background: linear-gradient(to top, #AE3841, #8D212A );
+
+
+
+}
+
+.logoConversas{
+    position: absolute;
+    
+width: 50px;
+margin-top: 15px;
+left: 15px;
+opacity: 0.8;
+
+}
+
+.filtro-bottom{
+  position: absolute;
+width: 50px;
+margin-top: 22px;
+left: 190px;
+font-size: 21px;
+font-family:  "NotoSansBengali";
+font-weight: 700;
+
+}
+
+.line-horizontal{
+  position: absolute;
+background-color: #FFF7F7;
+margin-top: 82px;
+height: 1.4px;
+width: 95%;
+left: 5px;
+
+}
+
+.homeIcon{
+    position: absolute;
+    bottom:  10px;
+    left: 15px;
+
+}
+
+.box-chat{
+    position: absolute;
+background-color: #D9D9D9;
+top: 100px;
+height: 65px;
+width: 260px;
+border-radius: 25px;
+margin-left: 15px;
+
+
+
+}

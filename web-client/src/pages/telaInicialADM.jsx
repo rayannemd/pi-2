@@ -1,6 +1,7 @@
 import "./TelaInicialADM.css";
 import { useNavigate } from "react-router-dom";
 import logoPlanetaNet from "../assets/images/logoPlanetaNet.png";
+import { HomeIcon } from "lucide-react";
 
 export default function TelaInicialADM() {
   const navigate = useNavigate();
@@ -8,7 +9,7 @@ export default function TelaInicialADM() {
   return (
     <div className="home-container">
       <header className="top-bar">
-        <div className="home-icon">🏠</div>
+        <div className="home-icon"><HomeIcon size={20}/></div>
 
         {/* Menu ChatBot */}
         <nav className="menu-chatbot">

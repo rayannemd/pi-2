@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import TelaInicialADM from "./pages/telaInicialADM";
 import ConversasInit from "./pages/ConversasInit";
 import ChatBot from './pages/ChatBot';
-import Painel from "./pages/Painel"; // <-- nova tela
+
 
 function App() {
   return (
@@ -17,8 +17,6 @@ function App() {
         <Route path="/ChatBot" element={<ChatBot />} />
         
 
-        {/* NOVA TELA COM SIDEBAR */}
-        <Route path="/painel" element={<Painel />} />
 
       </Routes>
     </Router>
