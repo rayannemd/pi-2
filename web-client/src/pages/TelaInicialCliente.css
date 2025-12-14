@@ -45,7 +45,7 @@ html, body, #root {
 .logo {
     width: 300px;
     height: 300px;
-    margin-right: 0px;
+    margin-right: 300px;
     object-fit: contain;
 }
 
@@ -55,7 +55,7 @@ html, body, #root {
     font-size: 38px;
     font-weight: 700;
     letter-spacing: 1px;
-    text-align: center;
+    text-align: left
 }
 
 .dot-telecom {
