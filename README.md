@@ -6,11 +6,7 @@ Este sistema oferece gerenciamento de usuários e integração com um chatbot in
 - **Maven** (o repositório já possui o wrapper, então não é obrigatório instalá-lo) 
 - **MySQL 8+**, com o banco `chatbot` previamente criado (configuração atualmente em [application.properties](botservice/src/main/resources/application.properties)):
 
-As configurações padrão estão em: botservice/src/main/resources/application.properties
-  - URL: `jdbc:mysql://localhost:3306/chatbot?useSSL=false`
-  - usuário: `root`
-  - senha: (vazia por padrão)
-  - ou ajuste `botservice/src/main/resources/application.properties`
+As configurações padrão estão em: botservice/src/main/resources/application.properties, ajuste conforme necessário.
 
 ---
 
