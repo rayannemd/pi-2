@@ -1,4 +1,4 @@
-# pi-2
+# PI-2 Web-Api
 Este sistema oferece gerenciamento de usuários e integração com um chatbot inteligente, capaz de atender clientes e solucionar dúvidas de forma automática. 
 
 ## Pré-requisitos
