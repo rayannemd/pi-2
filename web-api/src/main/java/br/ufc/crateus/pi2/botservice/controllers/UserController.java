@@ -1,9 +1,10 @@
 package br.ufc.crateus.pi2.botservice.controllers;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,10 +15,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.ufc.crateus.pi2.botservice.models.Service;
 import br.ufc.crateus.pi2.botservice.models.User;
 import br.ufc.crateus.pi2.botservice.services.UserService;
 import br.ufc.crateus.pi2.botservice.services.commands.CreateUserCommand;
 import br.ufc.crateus.pi2.botservice.services.commands.UpdateUserCommand;
+
 
 @RestController
 @RequestMapping("api/users")
@@ -36,10 +39,7 @@ public class UserController
     @GetMapping("/{id}")
     public ResponseEntity<User> getUserById(@PathVariable Long id) 
     {
-        if(id == null)
-            return ResponseEntity.badRequest().build();
-
-        Optional<User> user = userService.getById(id);
+        var user = userService.getById(id);
 
         if(user.isEmpty()) 
             return ResponseEntity.notFound().build();
@@ -47,23 +47,37 @@ public class UserController
             return ResponseEntity.ok(user.get());
     }
 
-    @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody CreateUserCommand user) 
+    @GetMapping("/{id}/services")
+    public Set<Service> getUserServices(@PathVariable Long id) 
     {
-        if(user == null)
-            return ResponseEntity.badRequest().build();
+        return userService.getUserServices(id);
+    }
 
-        userService.add(user);
-        return ResponseEntity.status(201).build();
+    @PostMapping("/{id}/services")
+    public HttpStatus addService(@PathVariable Long id, @RequestBody String serviceName) 
+    {
+        try 
+        {
+            userService.addService(id, serviceName);
+            return HttpStatus.OK;
+        } 
+        catch (IllegalArgumentException e) 
+        {
+            return HttpStatus.NOT_FOUND;
+        }
+    }
+
+    @PostMapping
+    public HttpStatus createUser(@RequestBody CreateUserCommand command) 
+    {
+        userService.add(command);
+        return HttpStatus.CREATED;
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody UpdateUserCommand user) 
+    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody UpdateUserCommand command) 
     {
-        if(id == null || user == null)
-            return ResponseEntity.badRequest().build();
-
-        User updatedUser = userService.update(id, user);
+        User updatedUser = userService.update(id, command);
 
         if(updatedUser == null)
             return ResponseEntity.notFound().build();
@@ -72,12 +86,9 @@ public class UserController
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) 
+    public HttpStatus deleteUser(@PathVariable Long id) 
     {
-        if(id == null)
-            return ResponseEntity.badRequest().build();
-        
         userService.delete(id);
-        return ResponseEntity.noContent().build();
+        return HttpStatus.NO_CONTENT;
     }
 }

@@ -1,7 +1,5 @@
 package br.ufc.crateus.pi2.botservice.models;
 
-import jakarta.persistence.*;
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -9,6 +7,16 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 import br.ufc.crateus.pi2.botservice.models.enums.EUserType;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToOne;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -36,7 +44,7 @@ public class User extends BaseEntity
     @Column(unique = true)
     private String cpf_cnpj;
 
-    private EUserType userType;
+    private EUserType type;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
@@ -60,8 +68,9 @@ public class User extends BaseEntity
         this.address.setZipCode(newAddress.getZipCode());
     }
 
-    public void updateServices(Set<Service> newServices) 
+    public void addService(Service service) 
     {
-        this.services = newServices;
+        this.services.add(service);
+        service.getUsers().add(this);
     }
 }
