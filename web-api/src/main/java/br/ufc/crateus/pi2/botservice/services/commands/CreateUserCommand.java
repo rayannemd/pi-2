@@ -3,14 +3,12 @@ package br.ufc.crateus.pi2.botservice.services.commands;
 import br.ufc.crateus.pi2.botservice.models.Address;
 import br.ufc.crateus.pi2.botservice.models.User;
 import br.ufc.crateus.pi2.botservice.models.enums.EUserType;
-
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 @Getter
 @Setter
@@ -31,7 +29,7 @@ public class CreateUserCommand
     private String cpf_cnpj;
 
     @NotNull(message = "É necessário informar o tipo do usuário")
-    private EUserType userType;
+    private EUserType type;
 
     @NotNull(message = "É necessário informar o endereço do usuário")
     private Address address;    
@@ -43,7 +41,7 @@ public class CreateUserCommand
         user.setEmail(this.email);
         user.setPassword(this.password);
         user.setCpf_cnpj(this.cpf_cnpj);
-        user.setUserType(this.userType);
+        user.setType(this.type);
 
         Address addr = new Address();
             addr.setStreet(this.address.getStreet());
