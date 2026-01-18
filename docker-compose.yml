@@ -1,5 +1,5 @@
 services:
-  app:
+  agente:
     build: ./agent-api
     ports:
       - "5000:5000"
