@@ -1,0 +1,38 @@
+.flex {
+  display: flex;
+  justify-content: center;
+}
+
+.container {
+  background: linear-gradient(
+    137.27deg,
+    #d9d9d9 24.01%,
+    #c2aaac 66.69%,
+    #d0aaae 90.75%
+  );
+  width: 100%;
+  min-height: 100vh;
+  color: #000;
+
+  align-items: flex-start;
+}
+
+.cards {
+  gap: 1rem;
+  margin-top: 2rem;
+}
+.card-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.card-content {
+  flex-direction: column;
+  background: linear-gradient(90deg, #ae3841 0%, #8d212a 100%);
+  color: #fff;
+}
+
+.card-data {
+  background: rgba(125, 97, 97, 1);
+  color: #fff;
+}
