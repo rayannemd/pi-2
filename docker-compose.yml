@@ -34,6 +34,13 @@ services:
       SPRING_DATASOURCE_PASSWORD: root
     networks:
       - default
+  frontend:
+    build:
+      context: ./web-client
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+ 
 
 volumes:
   mysql_data:
