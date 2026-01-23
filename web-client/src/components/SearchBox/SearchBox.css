@@ -13,7 +13,7 @@
 
 .search-input::placeholder {
   color: #3b3737;
-  opacity: 70%;
+  opacity: 100%;
 }
 
 .search-input {
@@ -23,7 +23,7 @@
   background: transparent;
   font-size: 16px;
   padding: 8px;
-  color: black;
+  color: #3b3737;
 }
 
 .send-button {

@@ -1,0 +1,17 @@
+.forms {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+input {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 48px;
+  background: #e9e9ea;
+  border-radius: 10px;
+  border: none;
+  padding: 0 20px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+}
