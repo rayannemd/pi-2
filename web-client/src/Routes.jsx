@@ -9,6 +9,7 @@ export const AppRountes = () => {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/" element={<TelaLogin />} />
         <Route path="/home" element={<TelaInicialCliente />} />
         <Route path="/login" element={<TelaLogin />} />
         <Route path="/chat-client" element={<TelaChatClient />} />

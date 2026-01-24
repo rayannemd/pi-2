@@ -16,6 +16,10 @@ import br.ufc.crateus.pi2.botservice.services.UserService;
 import br.ufc.crateus.pi2.botservice.services.commands.CreateUserCommand;
 import br.ufc.crateus.pi2.botservice.services.commands.LoginCommand;
 
+// Ajuste temporário de cors para o navegador permitir o front de acessar a resposta de login do back
+import org.springframework.web.bind.annotation.CrossOrigin;
+@CrossOrigin(origins = "http://localhost:5173")
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthenticationController 
@@ -29,10 +33,23 @@ public class AuthenticationController
     public ResponseEntity<LoginResponseDto> login(@RequestBody LoginCommand command) 
         throws UserNotFoundException, InvalidPasswordException
     {
+        /* Código original 
         if(command == null)
             return ResponseEntity.badRequest().build();
 
         return new ResponseEntity<>(authenticationService.login(command), HttpStatus.OK);
+        */
+
+        // login fake 
+        if(command == null)
+            return ResponseEntity.badRequest().build();
+
+        if ( "teste@gmail.com".equals(command.getEmail()) && "123456".equals(command.getPassword()) ) { 
+            LoginResponseDto response = new LoginResponseDto( command.getEmail(), "Usuário Teste", "token_fake_123", null );
+            return ResponseEntity.ok(response); 
+        } 
+        // credenciais inválidas 
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
     @PostMapping()
