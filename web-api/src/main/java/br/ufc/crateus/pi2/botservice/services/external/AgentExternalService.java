@@ -14,7 +14,7 @@ import br.ufc.crateus.pi2.botservice.services.dtos.AgentResponseDto;
 @Service
 public class AgentExternalService 
 {
-    private static final String BASE_URL = "http://agent-api:5000";
+    private static final String BASE_URL = "http://agente:5000";
 
     @Autowired
     private WebClient webClient;
@@ -41,7 +41,7 @@ public class AgentExternalService
 
         
         var chatToUpdate = chat.get();
-        if(chatToUpdate.getTitle() == null)
+        if(chatToUpdate.getTitle() == null || chatToUpdate.getTitle().isBlank())
             chatToUpdate.setTitle(response.getSummary());
 
         var handledResponse = handleResponseType(chatToUpdate, response);
