@@ -24,26 +24,11 @@ public class SecurityConfig
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception 
     {
         http
-            .cors(cors -> 
-            {
-                    CorsConfiguration configuration = new CorsConfiguration();
-
-                    configuration.addAllowedMethod("*");
-                    configuration.addAllowedHeader("*");
-
-                    UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-                    source.registerCorsConfiguration("/**", configuration);
-
-                    cors.configurationSource(source);
-            })
             .csrf(AbstractHttpConfigurer::disable)
             .authorizeHttpRequests(auth -> auth
-
-                .requestMatchers("/api/**").permitAll()
-
-                .anyRequest().authenticated()
+                .anyRequest().permitAll()
             );
-            
+
         return http.build();
     }
 
@@ -56,7 +41,7 @@ public class SecurityConfig
         configuration.setAllowedOriginPatterns(Arrays.asList("*"));
         configuration.setAllowedMethods(Arrays.asList("POST", "GET", "PUT", "DELETE", "PATCH"));
         configuration.setAllowedHeaders(Arrays.asList("*"));
-        configuration.setAllowCredentials(true);
+        configuration.setAllowCredentials(false);
         configuration.setAllowedOriginPatterns(Arrays.asList("*"));
 
         source.registerCorsConfiguration("/**", configuration);
