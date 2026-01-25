@@ -1,49 +1,41 @@
 import React from 'react';
 import { Box, Typography, Avatar } from '@mui/material';
 
-// 1. Mock atualizado com o campo 'horario' para a futura API
-const conversasMock = [
-  { id: 1, nome: "João Silva", ultimaMensagem: "Preciso de ajuda com o código", categoria: "urgente", horario: "14:30", foto: "" },
-  { id: 2, nome: "Maria Souza", ultimaMensagem: "O relatório está pronto", categoria: "todos", horario: "10:15", foto: "" },
-  { id: 3, nome: "Suporte Técnico", ultimaMensagem: "Chamado em aberto", categoria: "pendentes", horario: "Ontem", foto: "" },
-  { id: 4, nome: "Ana Paula", ultimaMensagem: "Até amanhã!", categoria: "todos", horario: "Segunda", foto: "" },
-];
 
-export default function ListaConversa({ filtro, aoClicarNoChat }) {
+
+export default function ListaConversa({ conversas = [], aoClicarNoChat }) {
   
-  // 2. Lógica de filtragem
-  const conversasFiltradas = conversasMock.filter(conversa => {
-    if (filtro === 'todos') return true;
-    return conversa.categoria === filtro;
-  });
 
   // 3. Função das cores das bordas
-  const definirCorBorda = (categoria) => {
-    switch (categoria) {
-      case 'urgente': return '#ff0033ff'; 
-      case 'pendentes': return '#ffc95dff'; 
-      default: return 'transparent';    
-    }
-  };
+ const definirCorBorda = (categoria) => {
+if(categoria == 'todos')
+  return ('transparent')
+  // Se não estiver resolvido, ele segue a cor da categoria
+  switch (categoria) {
+    case 'urgente': return '#ff0033';
+    case 'pendentes': return '#ffc95d';
+    default: return 'transparent';
+  }
+}
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, p: 1 }}>
-      {conversasFiltradas.map((conversa) => (
+      {conversas.map((conversa) => (
         <Box
           key={conversa.id}
           onClick={() => aoClicarNoChat(conversa)}
           sx={{
             display: 'flex',
-            alignItems: 'flex-start', // Alinhado ao topo para o horário ficar correto
+            alignItems: 'flex-start', 
             p: 1.5,
             borderRadius: '12px',
             cursor: 'pointer',
-            bgcolor: 'rgba(255, 255, 255, 1)', // Balão 100% branco
+            bgcolor: 'rgba(255, 255, 255, 1)', 
             transition: '0.3s',
             borderLeft: `5px solid ${definirCorBorda(conversa.categoria)}`,
             
             '&:hover': {
-              bgcolor: 'rgba(230, 230, 230, 1)', // Um cinza mais suave que o 164 para não sumir o texto
+              bgcolor: 'rgba(230, 230, 230, 1)',
               transform: 'translateX(5px)' 
             }
           }}
@@ -73,15 +65,15 @@ export default function ListaConversa({ filtro, aoClicarNoChat }) {
                 overflow: 'hidden'
               }}
             >
-              {conversa.ultimaMensagem}
+              {conversa.ultimaMsg}
             </Typography>
           </Box>
         </Box>
       ))}
 
       {/* Caso o filtro não encontre nada */}
-      {conversasFiltradas.length === 0 && (
-        <Typography sx={{ color: 'black', textAlign: 'center', mt: 4 }}>
+      {conversas.length === 0 && (
+        <Typography sx={{ color: 'white', textAlign: 'center', mt: 4, opacity: 0.4 }}>
           Nenhuma conversa encontrada nesta categoria.
         </Typography>
       )}

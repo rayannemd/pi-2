@@ -4,13 +4,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 
-import br.ufc.crateus.pi2.botservice.models.Address;
 import br.ufc.crateus.pi2.botservice.models.User;
 import br.ufc.crateus.pi2.botservice.repositories.ServiceRepository;
 import br.ufc.crateus.pi2.botservice.repositories.UserRepository;
@@ -73,16 +71,8 @@ public class UserService
     public void add(CreateUserCommand command) 
     {
         User newUser = command.toUser();
-
-        if(newUser.getAddress() != null) 
-        {
-            Address address = new Address();
-            BeanUtils.copyProperties(command.getAddress(), address);
-
-            newUser.setAddress(address);
-        }
-
         newUser.setPassword(encoder.encode(newUser.getPassword()));
+
         userRepository.save(newUser);
     }
 
@@ -98,9 +88,6 @@ public class UserService
         userToUpdate.setEmail(command.getEmail());
         userToUpdate.setType(command.getType());
 
-        if(command.getAddress() != null) 
-            userToUpdate.updateAddress(command.getAddress());
-
         userRepository.save(userToUpdate);
         return userToUpdate;
     }
@@ -112,9 +99,6 @@ public class UserService
         if(user.isPresent()) 
         {
             user.get().softDelete();
-            if (user.get().getAddress() != null)
-                user.get().getAddress().softDelete();
-
             userRepository.save(user.get());
         }
     }

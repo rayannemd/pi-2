@@ -17,17 +17,17 @@ import {
 
 import FiltrosConversas from "../FiltrosConversas/FiltrosConversas.jsx";
 
-// Adicionamos 'aoSelecionarChat' como parâmetro para avisar a página principal
-export default function BarraLateral({ aoSelecionarChat }) {
+// Adicionamos 'listaDeConversas' vinda do Pai (ConversasInit)
+export default function BarraLateral({filtroAtivo, conversas, aoSelecionarChat, aoSelecionarFiltro }) {
   const theme = useTheme();
-  const [filtroSelecionado, setFiltroSelecionado] = useState('todos');
+ 
 
   return (
     <Drawer 
       variant="permanent" 
       className="BarraLateral"
       sx={{
-        width: theme.spacing(35), // Define a largura do componente pai
+        width: theme.spacing(35), 
         flexShrink: 0,
         height: '100vh',
         '& .MuiDrawer-paper': {
@@ -36,7 +36,7 @@ export default function BarraLateral({ aoSelecionarChat }) {
           flexDirection: 'column',
           boxSizing: 'border-box',
           borderRight: 'none',
-          position: 'relative', // Importante para não flutuar por cima do chat
+          position: 'relative', 
         },
       }}
     >
@@ -58,8 +58,8 @@ export default function BarraLateral({ aoSelecionarChat }) {
 
         <Box>
           <FiltrosConversas 
-            aoSelecionarFiltro={(f) => setFiltroSelecionado(f)}
-            filtroAtivo={filtroSelecionado} 
+            aoSelecionarFiltro={aoSelecionarFiltro}
+            filtroAtivo={filtroAtivo} 
           />
         </Box>
       </Box>
@@ -68,10 +68,10 @@ export default function BarraLateral({ aoSelecionarChat }) {
 
       {/* MEIO: Lista de Conversas */}
       <Box sx={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
-        {/* Agora a ListaConversa também recebe a função de clique */}
+        {/* Passamos a listaDeConversas que veio do Pai para o Neto */}
         <ListaConversa 
-          filtro={filtroSelecionado} 
-          aoClicarNoChat={aoSelecionarChat} 
+          aoClicarNoChat={aoSelecionarChat}
+          conversas={conversas}
         />
       </Box>
 

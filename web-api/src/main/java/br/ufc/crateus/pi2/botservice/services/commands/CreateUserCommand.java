@@ -1,6 +1,5 @@
 package br.ufc.crateus.pi2.botservice.services.commands;
 
-import br.ufc.crateus.pi2.botservice.models.Address;
 import br.ufc.crateus.pi2.botservice.models.User;
 import br.ufc.crateus.pi2.botservice.models.enums.EUserType;
 import jakarta.validation.constraints.NotBlank;
@@ -31,9 +30,6 @@ public class CreateUserCommand
     @NotNull(message = "É necessário informar o tipo do usuário")
     private EUserType type;
 
-    @NotNull(message = "É necessário informar o endereço do usuário")
-    private Address address;    
-
     public User toUser() 
     {
         User user = new User();
@@ -42,17 +38,6 @@ public class CreateUserCommand
         user.setPassword(this.password);
         user.setCpf_cnpj(this.cpf_cnpj);
         user.setType(this.type);
-
-        Address addr = new Address();
-            addr.setStreet(this.address.getStreet());
-            addr.setNumber(this.address.getNumber());
-            addr.setNeighborhood(this.address.getNeighborhood());
-            addr.setCity(this.address.getCity());
-            addr.setState(this.address.getState());
-            addr.setZipCode(this.address.getZipCode());
-
-            user.setAddress(addr);
-            addr.setUser(user);
         
         return user;
     }

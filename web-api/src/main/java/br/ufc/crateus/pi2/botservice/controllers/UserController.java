@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 import br.ufc.crateus.pi2.botservice.models.Service;
 import br.ufc.crateus.pi2.botservice.models.User;
 import br.ufc.crateus.pi2.botservice.services.UserService;
-import br.ufc.crateus.pi2.botservice.services.commands.CreateUserCommand;
 import br.ufc.crateus.pi2.botservice.services.commands.UpdateUserCommand;
 
 
@@ -65,13 +64,6 @@ public class UserController
         {
             return HttpStatus.NOT_FOUND;
         }
-    }
-
-    @PostMapping
-    public HttpStatus createUser(@RequestBody CreateUserCommand command) 
-    {
-        userService.add(command);
-        return HttpStatus.CREATED;
     }
 
     @PutMapping("/{id}")
