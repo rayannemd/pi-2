@@ -45,13 +45,15 @@ export default function TelaLogin() {
     })
     .then(async (response) => {
     if (!response.ok) {
+      window.alert("Email ou senha inválidos");
       throw new Error("Email ou senha inválidos");
     }
     return response.json();
     })
     .then((data) => {
+      alert("Login realizado com sucesso");
       console.log("Resposta do backend:", data);
-
+      
       
       localStorage.setItem("token", data.token);
 
