@@ -1,6 +1,7 @@
 {
   "devDependencies": {
     "@shelex/cypress-allure-plugin": "^2.41.2",
+    "allure-commandline": "^2.36.0",
     "cypress": "^15.9.0"
   },
   "name": "tests",
@@ -171,9 +172,8 @@
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "test:report": "rmdir /s /q allure-results && rmdir /s /q cypress\\screenshots && cypress run --browser chrome",
-    "report:generate": "allure generate allure-results --clean -o allure-report",
-    "report:open": "allure open allure-report"
+    "test:report": "(if exist allure-results rmdir /s /q allure-results) & (if exist cypress\\screenshots rmdir /s /q cypress\\screenshots) & npx cypress run --browser chrome",
+    "report:open": "allure generate allure-results --clean -o allure-report && allure open allure-report"
   },
   "author": "",
   "license": "ISC",
