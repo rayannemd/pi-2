@@ -1,3 +1,7 @@
+//throw new Error("TESTE LISTA CONVERSA CARREGOU");
+
+
+
 import React from 'react';
 import { Box, Typography, Avatar } from '@mui/material';
 
@@ -5,6 +9,9 @@ import { Box, Typography, Avatar } from '@mui/material';
 
 export default function ListaConversa({ conversas = [], aoClicarNoChat }) {
   
+  //console.log("TESTE LISTA CONVERSA CARREGOU");
+
+
 
   // 3. Função das cores das bordas
  const definirCorBorda = (categoria) => {
@@ -19,6 +26,7 @@ if(categoria == 'todos')
 }
 
   return (
+    
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, p: 1 }}>
       {conversas.map((conversa) => (
         <Box
