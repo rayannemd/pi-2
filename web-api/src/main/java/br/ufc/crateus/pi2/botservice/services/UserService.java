@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
+import br.ufc.crateus.pi2.botservice.controllers.exceptions.DuplicatedResourceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -68,8 +69,11 @@ public class UserService
         userRepository.save(user.get());
     }
 
-    public void add(CreateUserCommand command) 
-    {
+    public void add(CreateUserCommand command) {
+        if (userRepository.existsByCpfCnpj(command.getCpfCnpj())) {
+            throw new DuplicatedResourceException();
+        }
+
         User newUser = command.toUser();
         newUser.setPassword(encoder.encode(newUser.getPassword()));
 
