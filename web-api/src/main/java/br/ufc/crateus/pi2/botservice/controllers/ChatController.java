@@ -51,10 +51,10 @@ public class ChatController
     }
 
     @PostMapping
-    public HttpStatus createChat(@RequestBody CreateChatCommand command) 
+    public ResponseEntity<Void> createChat(@RequestBody CreateChatCommand command)
     {
         chatService.add(command);
-        return HttpStatus.CREATED;
+        return new ResponseEntity<>(HttpStatus.CREATED);
     }
     
     @PostMapping("/{id}/message")

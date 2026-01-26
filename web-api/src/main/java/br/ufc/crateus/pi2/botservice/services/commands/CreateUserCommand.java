@@ -25,7 +25,7 @@ public class CreateUserCommand
     private String password;
 
     @NotBlank(message = "É necessário informar o CPF ou CNPJ do usuário")
-    private String cpf_cnpj;
+    private String cpfCnpj;
 
     @NotNull(message = "É necessário informar o tipo do usuário")
     private EUserType type;
@@ -36,7 +36,7 @@ public class CreateUserCommand
         user.setName(this.name);
         user.setEmail(this.email);
         user.setPassword(this.password);
-        user.setCpf_cnpj(this.cpf_cnpj);
+        user.setCpfCnpj(this.cpfCnpj);
         user.setType(this.type);
         
         return user;

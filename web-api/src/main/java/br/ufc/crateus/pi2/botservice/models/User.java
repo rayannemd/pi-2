@@ -38,8 +38,8 @@ public class User extends BaseEntity
     @JsonIgnore
     private String password;
 
-    @Column(unique = true)
-    private String cpf_cnpj;
+    @Column(name = "cpf_cnpj", unique = true)
+    private String cpfCnpj;
 
     private EUserType type;
 

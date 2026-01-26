@@ -7,10 +7,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import jakarta.validation.Valid;
 
 import br.ufc.crateus.pi2.botservice.controllers.dtos.LoginResponseDto;
 import br.ufc.crateus.pi2.botservice.controllers.exceptions.InvalidPasswordException;
 import br.ufc.crateus.pi2.botservice.controllers.exceptions.UserNotFoundException;
+import br.ufc.crateus.pi2.botservice.controllers.exceptions.DuplicatedResourceException;
 import br.ufc.crateus.pi2.botservice.services.AuthenticationService;
 import br.ufc.crateus.pi2.botservice.services.UserService;
 import br.ufc.crateus.pi2.botservice.services.commands.CreateUserCommand;
@@ -26,7 +28,7 @@ public class AuthenticationController
     private UserService userService;
 
     @PostMapping("/login")
-    public ResponseEntity<LoginResponseDto> login(@RequestBody LoginCommand command) 
+    public ResponseEntity<LoginResponseDto> login(@Valid @RequestBody LoginCommand command)
         throws UserNotFoundException, InvalidPasswordException
     {
         if(command == null)
@@ -36,12 +38,13 @@ public class AuthenticationController
     }
 
     @PostMapping()
-    public HttpStatus createUser(@RequestBody CreateUserCommand command) 
+    public ResponseEntity<Void> createUser(@Valid @RequestBody CreateUserCommand command)
+       throws DuplicatedResourceException
     {
         if(command == null)
-            return HttpStatus.BAD_REQUEST;
+            return ResponseEntity.badRequest().build();
 
         userService.add(command);
-        return HttpStatus.CREATED;
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }
