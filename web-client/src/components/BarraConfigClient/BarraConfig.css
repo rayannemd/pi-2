@@ -18,11 +18,12 @@
 }
 
 .logo-wrapper {
-  width: 60px;
-  height: 60px;
+  width: 80px;
+  height: 80px;
   display: flex;
   align-items: center;
   justify-content: center;
+  margin-left: 65px;
 }
 
 /* MEIO */
@@ -35,6 +36,7 @@
 
 .acoes {
   display: flex;
+  margin-top: 835px;
   justify-content: space-between;
   padding: 8px;
 }

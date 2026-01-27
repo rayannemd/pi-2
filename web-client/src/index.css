@@ -54,6 +54,58 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.chat-messages {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.message-row {
+  display: flex;
+  margin-bottom: 8px;
+}
+
+.message-row.me {
+  justify-content: flex-end;
+}
+
+.message-row.other {
+  justify-content: flex-start;
+}
+
+.message-bubble {
+  max-width: 60%;
+  padding: 10px 14px;
+  border-radius: 16px;
+  background: #eee;
+}
+
+.message-row.me .message-bubble {
+  background: #4f46e5;
+  color: white;
+}
+
+.chat-input {
+  display: flex;
+  padding: 8px;
+  border-top: 1px solid #ddd;
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 8px;
+}
+
+.chat-input button {
+  margin-left: 8px;
+}
+
 @media (prefers-color-scheme: light) {
   :root {
     color: #213547;

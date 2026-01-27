@@ -39,34 +39,35 @@ export default function TelaLogin() {
     console.log("Login enviado:", formData);
 
     fetch("http://localhost:8080/api/auth/login", {
-      mothod: "POST",
+      method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(formData),
     })
-    .then(async (response) => {
-    if (!response.ok) {
-      throw new Error("Email ou senha inválidos");
-    }
-    return response.json();
-    })
-    .then((data) => {
-      console.log("Resposta do backend:", data);
+      .then(async (response) => {
+        if (!response.ok) {
+          window.alert("Email ou senha inválidos");
+          throw new Error("Email ou senha inválidos");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        alert("Login realizado com sucesso");
+        console.log("Resposta do backend:", data);
 
-      // exemplo:
-      localStorage.setItem("token", data.token);
+        localStorage.setItem("token", data.token);
 
-      navigate("/");
-    })
-    .catch(() => {
-      console.error( {password: "Email ou senha inválidos"});
-    });
+        navigate("/home");
+      })
+      .catch(() => {
+        console.error({ password: "Email ou senha inválidos" });
+      });
   }
 
   return (
     <div className="tela-root flex">
       <div className="flex">
         <div>
-          <Logo size={300}/>
+          <Logo size={300} />
           <h1 className="brand">
             PLANETA NET <span className="dot-telecom">.TELECOM</span>
           </h1>

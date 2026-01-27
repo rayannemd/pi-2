@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button, Menu, MenuItem, Box, Chip, Typography } from '@mui/material';
 import FilterListIcon from '@mui/icons-material/FilterList';
 
-export default function FiltrosConversas({ aoSelecionarFiltro, filtroAtivo }) {
+export default function FiltrosConversas({ aoSelecionarFiltro, filtroAtivo = 'todos' }) {
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
 

@@ -4,6 +4,7 @@ import Logo from "../../components/Logo/Logo.jsx";
 import ListaConversa from "../ListaConversa/ListaConversa.jsx";
 import HomeIcon from '@mui/icons-material/Home';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { useNavigate } from 'react-router-dom';
 
 import { 
   Avatar, 
@@ -12,22 +13,38 @@ import {
   Drawer, 
   useTheme, 
   Stack, 
-  Typography 
+  Typography, 
+  Menu, 
+  MenuItem
 } from "@mui/material";
 
 import FiltrosConversas from "../FiltrosConversas/FiltrosConversas.jsx";
+import { Navigate } from 'react-router-dom';
 
-// Adicionamos 'aoSelecionarChat' como parâmetro para avisar a página principal
-export default function BarraLateral({ aoSelecionarChat }) {
+// Adicionamos 'listaDeConversas' vinda do Pai (ConversasInit)
+export default function BarraLateral({filtroAtivo, conversas, aoSelecionarChat, aoSelecionarFiltro }) {
+
+  //console.log("BarraLateral recebeu conversas:", conversas);
+//console.log("Filtro ativo:", filtroAtivo);
+const [anchorEl, setAnchorEl] = useState(null);
+const open = Boolean(anchorEl);
+const navigate = useNavigate();
+
+  // Abrir menu
+const handleClick = (event) => setAnchorEl(event.currentTarget);
+const handleClose = () => setAnchorEl(null);
+const irPara = (rota) => { navigate(rota); handleClose(); }
+
   const theme = useTheme();
-  const [filtroSelecionado, setFiltroSelecionado] = useState('todos');
+
+  console.log("Conversas recebidas na BarraLateral:", conversas);
 
   return (
     <Drawer 
       variant="permanent" 
       className="BarraLateral"
       sx={{
-        width: theme.spacing(35), // Define a largura do componente pai
+        width: theme.spacing(35), 
         flexShrink: 0,
         height: '100vh',
         '& .MuiDrawer-paper': {
@@ -36,7 +53,7 @@ export default function BarraLateral({ aoSelecionarChat }) {
           flexDirection: 'column',
           boxSizing: 'border-box',
           borderRight: 'none',
-          position: 'relative', // Importante para não flutuar por cima do chat
+          position: 'relative', 
         },
       }}
     >
@@ -58,8 +75,8 @@ export default function BarraLateral({ aoSelecionarChat }) {
 
         <Box>
           <FiltrosConversas 
-            aoSelecionarFiltro={(f) => setFiltroSelecionado(f)}
-            filtroAtivo={filtroSelecionado} 
+            aoSelecionarFiltro={aoSelecionarFiltro}
+            filtroAtivo={filtroAtivo} 
           />
         </Box>
       </Box>
@@ -68,35 +85,52 @@ export default function BarraLateral({ aoSelecionarChat }) {
 
       {/* MEIO: Lista de Conversas */}
       <Box sx={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
-        {/* Agora a ListaConversa também recebe a função de clique */}
+        {/* Passamos a listaDeConversas que veio do Pai para o Neto */}
         <ListaConversa 
-          filtro={filtroSelecionado} 
-          aoClicarNoChat={aoSelecionarChat} 
+          aoClicarNoChat={aoSelecionarChat}
+          conversas={conversas}
         />
       </Box>
 
       {/* RODAPÉ */}
-      <Box sx={{ mt: 'auto', p: 2 }}> 
-        <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.5)', mb: 2, mx: 1 }} />
-        
-        <Stack 
-          direction="row" 
-          spacing={4} 
-          justifyContent="space-between" 
-          alignItems="center"
-          sx={{ px: 1 }}
-        >
-          <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', color: 'white', '&:hover': { opacity: 0.8 } }}>
-            <HomeIcon sx={{ mr: 0.5 }} />
-            <Typography variant="body2">Início</Typography>
-          </Box>
+<Box sx={{ mt: 'auto', p: 2 }}> 
+  <Divider sx={{ borderColor: 'rgba(255, 255, 255, 0.5)', mb: 2, mx: 1 }} />
 
-          <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', color: 'white', '&:hover': { opacity: 0.8 } }}>
-            <MoreVertIcon sx={{ mr: 0.5 }} />
-            <Typography variant="body2">Mais</Typography>
-          </Box>
-        </Stack>
-      </Box>
+  <Stack 
+    direction="row" 
+    spacing={4} 
+    justifyContent="space-between" 
+    alignItems="center"
+    sx={{ px: 1 }}
+  >
+    {/* Botão Início */}
+    <Box 
+      sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', color: 'white', '&:hover': { opacity: 0.8 } }}
+      onClick={() => navigate("/home")}
+    >
+      <HomeIcon sx={{ mr: 0.5 }} />
+      <Typography variant="body2">Início</Typography>
+    </Box>
+
+    {/* Menu Mais */}
+    <Box 
+      sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', color: 'white', '&:hover': { opacity: 0.8 } }}
+      onClick={handleClick} // abre o menu
+    >
+      <MoreVertIcon sx={{ mr: 0.5 }} />
+      <Typography variant="body2">Mais</Typography>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose} // fecha clicando fora
+      >
+        <MenuItem onClick={() => irPara("/dashboard")}>Dashboard</MenuItem>
+      </Menu>
+    </Box>
+  </Stack>
+</Box>
+
     </Drawer>
   );
 }

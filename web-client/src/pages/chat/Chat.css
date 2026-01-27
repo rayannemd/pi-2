@@ -1,0 +1,121 @@
+html, body, #root {
+  height: 100%;
+  margin: 0;
+}
+
+/* ===== CONTAINER GERAL ===== */
+.chat-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  margin: 0 auto;
+  background-color: #d6d3cf;
+  font-family: Arial, Helvetica, sans-serif;
+  border-left: 1px solid #bbb;
+  border-right: 1px solid #bbb;
+}
+/* Barra lateral */
+.app-layout {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+/* ===== ÁREA DE MENSAGENS ===== */
+.chat__messages {
+  flex: 1;
+  min-height: 0;
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background-image: radial-gradient(#cfcfcf 1px, transparent 1px);
+  background-size: 12px 12px;
+}
+
+.chat__form {
+  flex-shrink: 0;
+}
+
+/* ===== BALÃO BASE ===== */
+.message--self,
+.message--other {
+  max-width: 65%;
+  padding: 12px 16px;
+  border-radius: 14px;
+  line-height: 1.4;
+  font-size: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+  word-wrap: break-word;
+}
+
+/* ===== AGENTE (ESQUERDA) ===== */
+.message--other {
+  align-self: flex-start;
+  background-color: #ffffff;
+  border-top-left-radius: 4px;
+  margin-left: 30px;
+  color: black;
+  position: relative;
+}
+
+/* Ícone do agente (bolinha lateral) */
+.message--other::before {
+  content: "🤖";
+  position: absolute;
+  left: -35px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-image: url("../../assets/images/logo.png");
+  background: #fff;
+  border-radius: 50%;
+  padding: 4px;
+  font-size: 14px;
+  box-shadow: 0 0 2px rgba(0,0,0,0.3);
+}
+
+/* ===== USUÁRIO (DIREITA) ===== */
+.message--self {
+  align-self: flex-end;
+  background-color: #ffffff;
+  border-top-right-radius: 4px;
+  color: black;
+}
+
+/* ===== FORMULÁRIO ===== */
+.chat__form {
+  display: flex;
+  padding: 12px;
+  background-color: #e6e6e6;
+  border-top: 1px solid #bbb;
+}
+
+/* ===== INPUT ===== */
+.chat__input {
+  flex: 1;
+  padding: 12px 14px;
+  border-radius: 20px;
+  border: 1px solid #aaa;
+  outline: none;
+  font-size: 14px;
+  color: black;
+}
+
+/* ===== BOTÃO ===== */
+.chat__button {
+  margin-left: 10px;
+  padding: 0 20px;
+  border-radius: 20px;
+  border: none;
+  background-color: #2ee002;
+  color: white;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+.chat__button:hover {
+  background-color: #3e5555;
+}
