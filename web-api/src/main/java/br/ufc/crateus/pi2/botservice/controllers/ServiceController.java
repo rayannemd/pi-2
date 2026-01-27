@@ -45,10 +45,10 @@ public class ServiceController
     }
 
     @PostMapping
-    public HttpStatus createService(@RequestBody CreateServiceCommand command) 
+    public ResponseEntity<Service> createService(@RequestBody CreateServiceCommand command)
     {
         serviceAppService.add(command);
-        return HttpStatus.CREATED;
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @PutMapping("/{id}")
@@ -63,9 +63,9 @@ public class ServiceController
     }
     
     @DeleteMapping("/{id}")
-    public HttpStatus deleteService(@PathVariable Long id) 
+    public ResponseEntity<Service> deleteService(@PathVariable Long id)
     {
         serviceAppService.delete(id);
-        return HttpStatus.NO_CONTENT;
+        return ResponseEntity.noContent().build();
     }
 }

@@ -1,9 +1,24 @@
 describe('API - Authentication', () => {
   let authToken;
   const userCredentials = {
-    email: 'nathantest@test.test',
+    email: 'testuser@test.test',
     password: '123456'
   };
+
+  before(() => {
+    cy.request({
+      method: 'POST',
+      url: '/api/auth',
+      body: {
+        name: 'Usuário Teste',
+        email: 'testuser@test.test',
+        password: '123456',
+        cpfCnpj: '12345678901',
+        type: 'CUSTOMER'
+      },
+      failOnStatusCode: false
+    });
+  });
 
   const randomCpf = () => Array.from({ length: 11 }, () => Math.floor(Math.random() * 10)).join('');
 
@@ -152,7 +167,7 @@ describe('API - Authentication', () => {
         name: 'Novo Usuário Teste',
         email: `teste${Date.now()}@test.test`,
         password: '123456',
-        cpfCnpj: '123456',
+        cpfCnpj: '12345678901',
         type: 'CUSTOMER'
       };
 

@@ -43,7 +43,7 @@ public class ChatService
     {
         var existingChat = getById(id);
 
-        if(existingChat == null) 
+        if(existingChat.isEmpty())
             return null;
 
         var chatToUpdate = existingChat.get();
