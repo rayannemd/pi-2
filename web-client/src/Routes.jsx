@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import TelaInicialCliente from "./pages/TelaInicialClient/TelaInicialCliente";
 import TelaLogin from "./pages/TelaLogin/TelaLogin";
-import TelaChatClient from "./pages/TelaChatAdmin/TelaChatAdmin";
+import TelaChatClient from "./pages/TelaChatClient/TelaChatClient";
 import Dashboard from "./pages/Dashboard/Dashboard";
 import Chat from "./pages/chat/Chat";
 

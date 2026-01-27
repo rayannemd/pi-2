@@ -11,44 +11,318 @@
   justify-content: center;
 }
 
-.card-container {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  align-items: center;
+.container {
+  background: linear-gradient(
+    137.27deg,
+    #d9d9d9 24.01%,
+    #c2aaac 66.69%,
+    #d0aaae 90.75%
+  );
+  width: 100%;
+  min-height: 100vh;
+  color: #000;
+
+  align-items: flex-start;
 }
 
-.card {
-  background: linear-gradient(90deg, #ae3841 0%, #8d212a 100%);
+.background--box {
+  background: linear-gradient(137.27deg, #d9d9d9 24.01%, #c2aaac 66.69%, #d0aaae 90.75%);
+  width: 100%;
+  min-height: 100vh;
+  padding: 5px 20px; 
+  box-sizing: border-box;
+}
+
+.cards--container {
+  display: flex;
+  flex-direction: row;     
+  justify-content: center;   
+  align-items: flex-start;
+  gap: 15px;                
+  width: 100%;
+  max-width: 1200px;
+  margin: 40px auto 0 auto;  
+}
+.card--wrapper {
+  display: flex;
+  flex-direction: column;    /* Garante o empilhamento vertical das duas caixas */
+  gap: 8px;                  /* Espaço entre a vermelha e a branca */
+  width: 165px;              /* Largura fixa para manter a simetria */
+  flex-shrink: 0;            /* Impede que o navegador amasse as caixas */
+}
+
+.dashboard--card {
+  background: linear-gradient(#AE3841, #8D212A);
+  height: 130px;
+  width: 100%;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  padding: 5x;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+  box-sizing: border-box;
+}
+.card--footer {
+  background-color: #7D6161;
+  height: 35px;
+  width: 100%;
   border-radius: 8px;
-  padding: 16px;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-  margin-top: 1.8rem;
-  width: 80%;
-  height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
 }
 
-.card-header {
+.card--title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-top: 10px;
+  text-align: center;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.footer--data {
+  color: #ffffff;
+  font-size: 0.95rem;
+  font-weight: bold;
+}
+
+.card--data {
+  font-size: 1.5rem;  /* Valor numérico um pouco menor */
+  margin: 0;
+  font-weight: bold;
+  text-align: right;
+}
+
+.dashboard--card:hover {
+  transform: translateY(-5px); /* Efeito de flutuar ao passar o mouse */
+}
+
+.card--header {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card--title {
+  font-size: 0.85rem;
+  font-weight: 500;
+  margin: 0;
+  opacity: 0.9;
+}
+
+.card--data {
+  font-size: 2rem;
+  margin: 0;
+  font-weight: bold;
+  text-align: right;
+}
+/* Container que segura as duas caixas grandes */
+.content--container {
+  display: flex;
+  flex-direction: row;      /* Lado a lado */
+  justify-content: center;   /* Centralizado horizontalmente */
+  gap: 20px;                 /* Espaço entre as duas caixas */
+  width: 100%;
+  max-width: 1100px;         /* Ajustado para alinhar com os cards de cima */
+  margin: 30px auto 0 auto;  /* Margem de 30px para separar dos cards */
+  padding-bottom: 40px;      /* Respiro no final da página */
+}
+
+/* Estilo das caixas grandes */
+.grande--box {
+  background-color: #E6DDDD;
+  flex: 1;                   /* Faz as duas terem exatamente o mesmo tamanho */
+  height: auto;  
+  border-radius: 15px;
+  padding: 20px;
+  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e0e0e0; /* Opcional: bordinha leve */
+  display: flex;           /* 👈 Obrigatório para o alinhamento funcionar */
+  flex-direction: column;  /* 👈 Mantém o título em cima e gráfico embaixo */
+  align-items: center;     /* Centraliza horizontalmente */
+  justify-content: flex-start;
+  padding-bottom: 30px;
+}
+
+.box--title {
+  color: black;
+  font-size: 1.1rem;
+  margin-top: 0;
+  border-bottom: 0.5px solid black;
+  padding-bottom: 10px;
+  width: 100%;
+}
+.graficos-estatisticos{
+color: #AE3841;
+font-size: 1.5rem;
+background-color: #E6DDDD;
+width: 90%;            /* Ocupa 90% da tela em dispositivos pequenos */
+  max-width: 1100px;     /* Não deixa passar de 1200px em telas grandes */
+  margin: 20px auto;
+  padding: 5px;         /* Espaço interno para o conteúdo não grudar na borda */
+  border-radius: 12px;   /* Para combinar com seus cards vermelhos */
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center; /* Alinha horizontalmente ao centro */
+  align-items: center;     /* Alinha verticalmente ao centro */
+  text-align: center;
+  font-weight: bold;
+  border: 1px solid #AE3841 ;
+}
+.resumo--container {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  gap: 80px;
+  max-width: 1100px; /* Mesma largura das caixas de cima */
+  margin: 15px auto 40px auto;
+  width: 100%;
+  
+}
+
+.resumo--coluna {
+  display: flex;
+  flex: 1; /* Faz a coluna ter a mesma largura da grande--box acima */
+  gap: 25px;
+}
+
+.pequena--box {
+  background-color: #E6DDDD;
+  flex: 1;
+  min-width: 140px; /* Garante que o texto não quebre em telas menores */
+  height: 90px;    /* Aumentei levemente a altura */
+  border-radius: 12px;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  border: 1px solid #c2aaac;
+  box-sizing: border-box;
+  padding: 10px;
 }
 
-.card-title {
-  font-size: 14px;
+.resumo--label {
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: #555;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+
+.resumo--valor {
+  font-size: 1.3rem; /* Um pouco maior para dar destaque ao número */
+  font-weight: 900;
+  color: #8D212A;
+}
+.resumo--grupo {
+  display: flex;
+  flex: 1;    /* Faz o par ter a mesma largura da caixa de gráfico acima */
+  gap: 15px;  /* Distância entre as duas caixinhas do par */
+}
+.resumo--info {
+  display: flex;
+  flex-direction: column; /* Deixa o nome em cima e o valor embaixo */
+  align-items: center;
+  justify-content: center;
+}
+.resumo--nome {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 2px;
+}
+
+/* Container das colunas */
+.duas--colunas--container {
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+  flex: 1;
+  gap: 40px; /* Aumentei o espaço entre as colunas */
+}
+
+.coluna--dados {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Título principal da seção */
+.secaoMensagens--box {
+ color: #AE3841;
+font-size: 1.5rem;
+background-color: #E6DDDD;
+width: 90%;            /* Ocupa 90% da tela em dispositivos pequenos */
+  max-width: 1100px;     /* Não deixa passar de 1200px em telas grandes */
+  margin: 20px auto;
+  padding: 5px;         /* Espaço interno para o conteúdo não grudar na borda */
+  border-radius: 12px;   /* Para combinar com seus cards vermelhos */
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center; /* Alinha horizontalmente ao centro */
+  align-items: center;     /* Alinha verticalmente ao centro */
+  text-align: center;
+  font-weight: bold;
+  border: 1px solid #AE3841 ;
+}
+
+.lista--canais {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+/* Item com linha separadora preta */
+.item--canal {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 5px; /* Espaço interno para a linha não colar no texto */
+  border-bottom: 1px solid #2c2828; /* Linha preta separando cada info */
+  color: #2c2828; /* Texto dos canais em preto */
   font-weight: 500;
 }
 
-.card-data {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 70px;
-  background: rgba(125, 97, 97, 1);
+/* Remove a linha do último item para não sobrar no fundo */
+.item--canal:last-child {
+  border-bottom: none;
 }
 
-.card-value {
-  font-size: 24px;
+/* Estilo dos números (Dados) em Preto */
+.valor--stats {
   font-weight: bold;
+  color: #2c2828; 
+  font-family: 'Inter', sans-serif;
+}
+
+/* Divisória Vertical Central em Preto */
+.divisor--vertical {
+  width: 2px; /* Um pouco mais grossa para destacar a divisão */
+  background-color: #2c2828;
+  margin: 10px 0;
+  opacity: 0.8;
+}
+
+
+.grafico--proporcao {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 30px; /* Espaço entre a lista e o gráfico */
+  width: 100%;
+}
+
+.legenda--grafico {
+  font-size: 0.8rem;
+  font-weight: bold;
+  color: #555;
+  margin-top: 15px;
+  text-transform: uppercase;
+  bottom: 10px;
 }

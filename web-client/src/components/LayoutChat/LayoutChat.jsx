@@ -1,71 +1,120 @@
-import React, { useState } from "react";
-import "./LayoutChat.css";
-import { FaPaperPlane, FaEllipsisV } from "react-icons/fa";
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, Avatar, TextField, IconButton, Menu, MenuItem } from '@mui/material';
+import SendIcon from '@mui/icons-material/Send';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import { mensagensMock } from '../../Mock/mensagensMock';
 
-export default function LayoutChat({ conversa }) {
-  const [mensagem, setMensagem] = useState("");
+export default function LayoutChat({ conversaAtual, aoResolver }) {
 
-  // Sem conversa selecionada
-  if (!conversa) {
+  console.log("Conversa selecionada:", conversaAtual);
+
+  const [anchorEl, setAnchorEl] = useState(null);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event) => setAnchorEl(event.currentTarget);
+  const handleClose = () => setAnchorEl(null);
+
+  const [mensagem, setMensagem] = useState('');
+  const [mensagensDoBackEnd, setMensagensDoBackEnd] = useState([]);
+
+  // Carregar mensagens do mock da conversa selecionada
+  useEffect(() => {
+    if (!conversaAtual) return;
+
+    const msgsDaConversa = mensagensMock.filter(
+      msg => msg.conversaId === conversaAtual.id
+    );
+
+    setMensagensDoBackEnd(msgsDaConversa);
+  }, [conversaAtual]);
+
+  const enviarMensagem = () => {
+    if (mensagem.trim() === "") return;
+    const novaMsg = {
+      id: Math.random(),
+      texto: mensagem,
+      remetente: 'adm',
+      hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
+    setMensagensDoBackEnd([...mensagensDoBackEnd, novaMsg]);
+    setMensagem('');
+  };
+
+  // Mensagem de "nenhuma conversa selecionada"
+  if (!conversaAtual) {
     return (
-      <div className="chat-vazio">
-        <p>Selecione uma conversa para começar a interagir.</p>
-      </div>
+      <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', bgcolor: '#f0f2f5' }}>
+        <Typography variant="h6" sx={{ color: '#667781' }}>
+          Selecione uma conversa para começar.
+        </Typography>
+      </Box>
     );
   }
 
   return (
-    <div className="layout-chat">
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', bgcolor: '#f0f2f5', flex: 1 }}>
+      
       {/* CABEÇALHO */}
-      <div className="chat-header">
-        <div className="chat-header-info">
-          <div className="avatar">
-            {conversa.foto ? (
-              <img src={conversa.foto} alt={conversa.nome} />
-            ) : (
-              conversa.nome[0]
-            )}
-          </div>
+      <Box sx={{ p: 2, bgcolor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0px 2px 5px rgba(0,0,0,0.1)', zIndex: 1 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+          <Avatar sx={{ mr: 2, bgcolor: '#3f51b5' }}>
+            {conversaAtual.nome ? conversaAtual.nome[0] : "?"}
+          </Avatar>
+          <Box>
+            <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{conversaAtual.nome}</Typography>
+            <Typography variant="caption" color="success.main">Online</Typography>
+          </Box>
+        </Box>
 
-          <div>
-            <strong>{conversa.nome}</strong>
-            <span className="status">Online</span>
-          </div>
-        </div>
-
-        <button className="icon-btn">
-          <FaEllipsisV />
-        </button>
-      </div>
+        <Box>
+          <IconButton onClick={handleClick}>
+            <MoreVertIcon />
+          </IconButton>
+          <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
+            <MenuItem onClick={aoResolver} sx={{ color: 'green', fontWeight: 'bold' }}>
+              Marcar como Resolvida
+            </MenuItem>
+          </Menu>
+        </Box>
+      </Box>
 
       {/* MENSAGENS */}
-      <div className="chat-messages">
-        {/* RECEBIDA */}
-        <div className="mensagem recebida">
-          <p>Olá! Como posso te ajudar hoje?</p>
-          <span className="hora">14:35</span>
-        </div>
-
-        {/* ENVIADA */}
-        <div className="mensagem enviada">
-          <p>Oi! Estou com uma dúvida sobre o meu pedido.</p>
-          <span className="hora">14:36</span>
-        </div>
-      </div>
+      <Box sx={{ flex: 1, overflowY: 'auto', p: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {mensagensDoBackEnd.map(msg => (
+          <Box 
+            key={msg.id}
+            sx={{ 
+              alignSelf: msg.remetente === 'cliente' ? 'flex-start' : 'flex-end', 
+              maxWidth: '70%', 
+              bgcolor: msg.remetente === 'cliente' ? 'white' : '#dcf8c6', 
+              p: 1.5, 
+              borderRadius: msg.remetente === 'cliente' ? '0px 15px 15px 15px' : '15px 15px 0px 15px', 
+              boxShadow: '0px 1px 3px rgba(0,0,0,0.1)'
+            }}
+          >
+            <Typography variant="body2">{msg.texto}</Typography>
+            <Typography variant="caption" sx={{ display: 'block', textAlign: 'right', mt: 0.5, color: 'gray' }}>
+              {msg.hora}
+            </Typography>
+          </Box>
+        ))}
+      </Box>
 
       {/* INPUT */}
-      <div className="chat-input">
-        <input
-          type="text"
+      <Box sx={{ p: 2, bgcolor: 'white', display: 'flex', alignItems: 'center', gap: 2 }}>
+        <TextField
+          fullWidth
           placeholder="Digite sua mensagem..."
+          size="small"
           value={mensagem}
           onChange={(e) => setMensagem(e.target.value)}
+          onKeyDown={(e) => e.key === 'Enter' && enviarMensagem()}
+          sx={{ '& .MuiOutlinedInput-root': { borderRadius: '25px' } }}
         />
-
-        <button className="btn-enviar">
-          <FaPaperPlane />
-        </button>
-      </div>
-    </div>
+        <IconButton onClick={enviarMensagem} sx={{ bgcolor: '#A3313A', color: 'white', '&:hover': { bgcolor: '#8e2a32' } }}>
+          <SendIcon />
+        </IconButton>
+      </Box>
+    </Box>
   );
 }
