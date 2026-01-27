@@ -1,82 +1,58 @@
 import "./NavBar.css";
-
-import * as React from "react";
-import AppBar from "@mui/material/AppBar";
-import Box from "@mui/material/Box";
-import Toolbar from "@mui/material/Toolbar";
-import IconButton from "@mui/material/IconButton";
-import Typography from "@mui/material/Typography";
-import Menu from "@mui/material/Menu";
-import Divider from "@mui/material/Divider";
-import Container from "@mui/material/Container";
-import Button from "@mui/material/Button";
-import MenuItem from "@mui/material/MenuItem";
-import HomeIcon from "@mui/icons-material/Home";
 import { Link } from "react-router-dom";
+import { FaHome, FaBars } from "react-icons/fa";
+import { useState } from "react";
 
-const pages = ["ChatBot", "Conversas"];
+const pages = [
+  { label: "ChatBot", path: "/chatbot" },
+  { label: "Conversas", path: "/conversas" },
+];
 
 export default function NavBar() {
+  const [menuAberto, setMenuAberto] = useState(false);
+
   return (
-    <AppBar
-      position="static"
-      sx={{
-        background: "linear-gradient(180deg, #AE3841 0%, #8D212A 100%)",
-      }}
-    >
-      <Container maxWidth="xl">
-        <Toolbar disableGutters="true">
-          {/* HOME */}
-          <Link to={"/home"}>
-            <IconButton>
-              <HomeIcon sx={{ color: "white" }} />
-            </IconButton>
-          </Link>
+    <header className="navbar">
+      <div className="navbar-container">
+        {/* HOME */}
+        <Link to="/home" className="home-btn">
+          <FaHome size={20} />
+        </Link>
 
-          <Divider orientation="vertical" flexItem />
+        <div className="divider" />
 
-          {/* MOBILE MENU */}
-          <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
-            <Menu
-              id="menu-appbar"
-              anchorOrigin={{
-                vertical: "bottom",
-                horizontal: "left",
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "left",
-              }}
-              sx={{ display: { xs: "block", md: "none" } }}
+        {/* DESKTOP MENU */}
+        <nav className="nav-links desktop">
+          {pages.map((page) => (
+            <Link key={page.path} to={page.path}>
+              {page.label}
+            </Link>
+          ))}
+        </nav>
+
+        {/* MOBILE MENU */}
+        <button
+          className="menu-toggle mobile"
+          onClick={() => setMenuAberto(!menuAberto)}
+        >
+          <FaBars />
+        </button>
+      </div>
+
+      {/* MOBILE DROPDOWN */}
+      {menuAberto && (
+        <div className="mobile-menu">
+          {pages.map((page) => (
+            <Link
+              key={page.path}
+              to={page.path}
+              onClick={() => setMenuAberto(false)}
             >
-              {pages.map((page) => (
-                <MenuItem
-                  key={page}
-                  component={Link}
-                  to={page === "ChatBot" ? "/chatbot" : "/conversas"}
-                >
-                  <Typography>{page}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
-
-          {/* DESKTOP MENU */}
-          <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-            {pages.map((page) => (
-              <Button
-                key={page}
-                component={Link}
-                to={page === "ChatBot" ? "/chatbot" : "/conversas"}
-                sx={{ my: 2, color: "white", display: "block" }}
-              >
-                {page}
-              </Button>
-            ))}
-          </Box>
-        </Toolbar>
-      </Container>
-    </AppBar>
+              {page.label}
+            </Link>
+          ))}
+        </div>
+      )}
+    </header>
   );
 }

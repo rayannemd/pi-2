@@ -1,0 +1,7 @@
+.message-bubble {
+  background: linear-gradient(180deg, #8d212a 0%, #ae3841 100%);
+}
+
+.message-row.me .message-bubble {
+  background: rgba(217, 217, 217, 1);
+}

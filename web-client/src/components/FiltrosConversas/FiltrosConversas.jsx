@@ -1,55 +1,51 @@
-import React, { useState } from 'react';
-import { Button, Menu, MenuItem, Box, Chip, Typography } from '@mui/material';
-import FilterListIcon from '@mui/icons-material/FilterList';
+import React, { useState, useRef, useEffect } from "react";
+import "./FiltrosConversas.css";
+import { FaFilter, FaTimes } from "react-icons/fa";
 
 export default function FiltrosConversas({ aoSelecionarFiltro, filtroAtivo }) {
-  const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
+  const [aberto, setAberto] = useState(false);
+  const ref = useRef(null);
 
-  const handleClick = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
+  function selecionarFiltro(filtro) {
+    setAberto(false);
+    aoSelecionarFiltro?.(filtro);
+  }
 
-  const handleClose = (filtro) => {
-    setAnchorEl(null);
-    if (filtro && aoSelecionarFiltro) {
-      aoSelecionarFiltro(filtro);
+  // Fecha o menu ao clicar fora
+  useEffect(() => {
+    function handleClickOutside(e) {
+      if (ref.current && !ref.current.contains(e.target)) {
+        setAberto(false);
+      }
     }
-  };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   return (
-    <Box>
-      {/* O Botão de Filtrar que você já tinha */}
-      <Button
-        onClick={handleClick}
-        startIcon={<FilterListIcon />}
-        sx={{ color: 'white', textTransform: 'none' }}
-      >
-        Filtrar
-      </Button>
+    <div className="filtros" ref={ref}>
+      <button className="btn-filtrar" onClick={() => setAberto(!aberto)}>
+        <FaFilter />
+        <span>Filtrar</span>
+      </button>
 
-      <Menu anchorEl={anchorEl} open={open} onClose={() => handleClose()}>
-        <MenuItem onClick={() => handleClose('todos')}>Todos</MenuItem>
-        <MenuItem onClick={() => handleClose('urgente')}>Urgente</MenuItem>
-        <MenuItem onClick={() => handleClose('pendentes')}>Pendentes</MenuItem>
-      </Menu>
-
-      {/* --- O MARCADOR AGORA VIVE AQUI DENTRO --- */}
-      {filtroAtivo !== 'todos' && (
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-          <Chip 
-            label={filtroAtivo.toUpperCase()} 
-            size="small" 
-            onDelete={() => aoSelecionarFiltro('todos')} // Botão de fechar volta para 'todos'
-            sx={{ 
-              bgcolor: 'rgba(255,255,255,0.1)', 
-              color: 'white', 
-              fontSize: '0.65rem',
-              '& .MuiChip-deleteIcon': { color: 'white' }
-            }} 
-          />
-        </Box>
+      {aberto && (
+        <div className="menu-filtro">
+          <div onClick={() => selecionarFiltro("todos")}>Todos</div>
+          <div onClick={() => selecionarFiltro("urgente")}>Urgente</div>
+          <div onClick={() => selecionarFiltro("pendentes")}>Pendentes</div>
+        </div>
       )}
-    </Box>
+
+      {filtroAtivo !== "todos" && (
+        <div className="chip">
+          <span>{filtroAtivo.toUpperCase()}</span>
+          <button onClick={() => aoSelecionarFiltro("todos")}>
+            <FaTimes />
+          </button>
+        </div>
+      )}
+    </div>
   );
 }

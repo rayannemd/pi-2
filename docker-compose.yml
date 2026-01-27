@@ -38,6 +38,8 @@ services:
     build:
       context: ./web-client
       dockerfile: Dockerfile
+      args:
+        VITE_WS_URL: http://localhost:8080/ws-chat
     ports:
       - "5173:5173"
  

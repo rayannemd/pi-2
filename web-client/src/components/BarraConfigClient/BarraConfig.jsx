@@ -1,9 +1,7 @@
 import React, { useState } from "react";
-import "./BarraLateral.css";
+import "./BarraConfig.css";
 
 import Logo from "../../components/Logo/Logo.jsx";
-import ListaConversa from "../ListaConversa/ListaConversa.jsx";
-import FiltrosConversas from "../FiltrosConversas/FiltrosConversas.jsx";
 
 import { FaHome, FaEllipsisV } from "react-icons/fa";
 
@@ -13,24 +11,11 @@ export default function BarraLateral({ aoSelecionarChat }) {
   return (
     <aside className="barra-lateral">
       {/* TOPO */}
-      <div className="barra-topo">
-        <div className="logo-wrapper">
-          <Logo />
+        <div className="barra-topo">
+            <div className="logo-wrapper">
+            <Logo />
+            </div>
         </div>
-
-        <FiltrosConversas
-          filtroAtivo={filtroSelecionado}
-          aoSelecionarFiltro={setFiltroSelecionado}
-        />
-      </div>
-
-      {/* MEIO */}
-      <div className="barra-meio">
-        <ListaConversa
-          filtro={filtroSelecionado}
-          aoClicarNoChat={aoSelecionarChat}
-        />
-      </div>
 
       {/* RODAPÉ */}
       <div className="barra-rodape">

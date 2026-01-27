@@ -1,0 +1,149 @@
+/* CHAT VAZIO */
+.chat-vazio {
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #667781;
+  font-size: 16px;
+}
+
+/* LAYOUT */
+.layout-chat {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: #f0f2f5;
+}
+
+/* HEADER */
+.chat-header {
+  background: linear-gradient(180deg, #ae3841 0%, #8d212a 100%);
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.chat-header-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  background: #3f51b5;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+}
+
+.avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+}
+
+.status {
+  display: block;
+  font-size: 12px;
+  color: green;
+  font-weight: 800;
+}
+
+/* BOTÃO ÍCONE */
+.icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+/* MENSAGENS */
+.chat-messages {
+  flex: 1;
+  padding: 24px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: linear-gradient(
+    137.27deg,
+    #d9d9d9 24.01%,
+    #c2aaac 66.69%,
+    #d0aaae 90.75%
+  );
+}
+
+.mensagem {
+  max-width: 70%;
+  padding: 12px;
+  border-radius: 15px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.mensagem p {
+  margin: 0;
+  color: black;
+}
+
+.mensagem .hora {
+  display: block;
+  font-size: 11px;
+  color: gray;
+  margin-top: 4px;
+  text-align: right;
+}
+
+.mensagem.recebida {
+  background: white;
+  align-self: flex-start;
+  border-radius: 0 15px 15px 15px;
+}
+
+.mensagem.enviada {
+  background: #dcf8c6;
+  align-self: flex-end;
+  border-radius: 15px 15px 0 15px;
+}
+
+/* INPUT */
+.chat-input {
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: linear-gradient(180deg, #8d212a 0%, #ae3841 100%);
+}
+
+.chat-input input {
+  flex: 1;
+  padding: 10px 16px;
+  border-radius: 25px;
+  border: 1px solid #ccc;
+  outline: none;
+}
+
+.btn-enviar {
+  background: #a3313a;
+  border: none;
+  color: white;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-enviar:hover {
+  opacity: 0.9;
+}

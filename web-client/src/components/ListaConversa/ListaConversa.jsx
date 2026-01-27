@@ -1,90 +1,90 @@
-import React from 'react';
-import { Box, Typography, Avatar } from '@mui/material';
+import React from "react";
+import "./ListaConversa.css";
 
-// 1. Mock atualizado com o campo 'horario' para a futura API
+// Mock atualizado
 const conversasMock = [
-  { id: 1, nome: "João Silva", ultimaMensagem: "Preciso de ajuda com o código", categoria: "urgente", horario: "14:30", foto: "" },
-  { id: 2, nome: "Maria Souza", ultimaMensagem: "O relatório está pronto", categoria: "todos", horario: "10:15", foto: "" },
-  { id: 3, nome: "Suporte Técnico", ultimaMensagem: "Chamado em aberto", categoria: "pendentes", horario: "Ontem", foto: "" },
-  { id: 4, nome: "Ana Paula", ultimaMensagem: "Até amanhã!", categoria: "todos", horario: "Segunda", foto: "" },
+  {
+    id: 1,
+    nome: "João Silva",
+    ultimaMensagem: "Preciso de ajuda com o código",
+    categoria: "urgente",
+    horario: "14:30",
+    foto: "",
+  },
+  {
+    id: 2,
+    nome: "Maria Souza",
+    ultimaMensagem: "O relatório está pronto",
+    categoria: "todos",
+    horario: "10:15",
+    foto: "",
+  },
+  {
+    id: 3,
+    nome: "Suporte Técnico",
+    ultimaMensagem: "Chamado em aberto",
+    categoria: "pendentes",
+    horario: "Ontem",
+    foto: "",
+  },
+  {
+    id: 4,
+    nome: "Ana Paula",
+    ultimaMensagem: "Até amanhã!",
+    categoria: "todos",
+    horario: "Segunda",
+    foto: "",
+  },
 ];
 
 export default function ListaConversa({ filtro, aoClicarNoChat }) {
-  
-  // 2. Lógica de filtragem
-  const conversasFiltradas = conversasMock.filter(conversa => {
-    if (filtro === 'todos') return true;
+  const conversasFiltradas = conversasMock.filter((conversa) => {
+    if (filtro === "todos") return true;
     return conversa.categoria === filtro;
   });
 
-  // 3. Função das cores das bordas
-  const definirCorBorda = (categoria) => {
-    switch (categoria) {
-      case 'urgente': return '#ff0033ff'; 
-      case 'pendentes': return '#ffc95dff'; 
-      default: return 'transparent';    
-    }
-  };
+  function definirClasseBorda(categoria) {
+    if (categoria === "urgente") return "urgente";
+    if (categoria === "pendentes") return "pendente";
+    return "";
+  }
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, p: 1 }}>
+    <div className="lista-conversa">
       {conversasFiltradas.map((conversa) => (
-        <Box
+        <div
           key={conversa.id}
+          className={`item-conversa ${definirClasseBorda(
+            conversa.categoria
+          )}`}
           onClick={() => aoClicarNoChat(conversa)}
-          sx={{
-            display: 'flex',
-            alignItems: 'flex-start', // Alinhado ao topo para o horário ficar correto
-            p: 1.5,
-            borderRadius: '12px',
-            cursor: 'pointer',
-            bgcolor: 'rgba(255, 255, 255, 1)', // Balão 100% branco
-            transition: '0.3s',
-            borderLeft: `5px solid ${definirCorBorda(conversa.categoria)}`,
-            
-            '&:hover': {
-              bgcolor: 'rgba(230, 230, 230, 1)', // Um cinza mais suave que o 164 para não sumir o texto
-              transform: 'translateX(5px)' 
-            }
-          }}
         >
-          <Avatar src={conversa.foto} sx={{ mr: 2 }}>{conversa.nome[0]}</Avatar>
-          
-          <Box sx={{ flex: 1 }}>
-            {/* Linha superior: Nome e Horário */}
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant="body1" sx={{ color: 'black', fontWeight: 'bold' }}>
-                {conversa.nome}
-              </Typography>
-              
-              <Typography variant="caption" sx={{ color: 'rgba(0, 0, 0, 0.5)', fontWeight: '500' }}>
-                {conversa.horario}
-              </Typography>
-            </Box>
+          <div className="avatar">
+            {conversa.foto ? (
+              <img src={conversa.foto} alt={conversa.nome} />
+            ) : (
+              conversa.nome[0]
+            )}
+          </div>
 
-            {/* Linha inferior: Mensagem */}
-            <Typography 
-              variant="caption" 
-              sx={{ 
-                color: 'rgba(0, 0, 0, 0.84)',
-                display: '-webkit-box',
-                WebkitLineClamp: 1, // Limita a uma linha
-                WebkitBoxOrient: 'vertical',
-                overflow: 'hidden'
-              }}
-            >
+          <div className="conteudo">
+            <div className="linha-topo">
+              <strong>{conversa.nome}</strong>
+              <span className="horario">{conversa.horario}</span>
+            </div>
+
+            <p className="ultima-mensagem">
               {conversa.ultimaMensagem}
-            </Typography>
-          </Box>
-        </Box>
+            </p>
+          </div>
+        </div>
       ))}
 
-      {/* Caso o filtro não encontre nada */}
       {conversasFiltradas.length === 0 && (
-        <Typography sx={{ color: 'black', textAlign: 'center', mt: 4 }}>
+        <p className="vazio">
           Nenhuma conversa encontrada nesta categoria.
-        </Typography>
+        </p>
       )}
-    </Box>
+    </div>
   );
 }

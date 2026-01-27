@@ -22,6 +22,10 @@ import br.ufc.crateus.pi2.botservice.services.commands.UpdateChatCommand;
 import br.ufc.crateus.pi2.botservice.services.dtos.AgentHandledResponseDto;
 import br.ufc.crateus.pi2.botservice.services.external.AgentExternalService;
 
+// Ajuste temporário de cors para o navegador permitir o front de acessar a resposta de login do back
+import org.springframework.web.bind.annotation.CrossOrigin;
+@CrossOrigin(origins = "http://localhost:5173")
+
 @RestController
 @RequestMapping("api/chats")
 public class ChatController 
