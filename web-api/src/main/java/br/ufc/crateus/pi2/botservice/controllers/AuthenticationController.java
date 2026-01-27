@@ -33,23 +33,11 @@ public class AuthenticationController
     public ResponseEntity<LoginResponseDto> login(@RequestBody LoginCommand command) 
         throws UserNotFoundException, InvalidPasswordException
     {
-        /* Código original 
+
         if(command == null)
             return ResponseEntity.badRequest().build();
 
         return new ResponseEntity<>(authenticationService.login(command), HttpStatus.OK);
-        */
-
-        // login fake 
-        if(command == null)
-            return ResponseEntity.badRequest().build();
-
-        if ( "teste@gmail.com".equals(command.getEmail()) && "123456".equals(command.getPassword()) ) { 
-            LoginResponseDto response = new LoginResponseDto( command.getEmail(), "Usuário Teste", "token_fake_123", null );
-            return ResponseEntity.ok(response); 
-        } 
-        // credenciais inválidas 
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
     }
 
     @PostMapping()
