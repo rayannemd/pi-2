@@ -53,17 +53,16 @@ public class UserController
     }
 
     @PostMapping("/{id}/services")
-    public HttpStatus addService(@PathVariable Long id, @RequestBody String serviceName) 
+    public ResponseEntity<String> addService(@PathVariable Long id, @RequestBody String serviceName)
     {
         try 
         {
             userService.addService(id, serviceName);
-            return HttpStatus.OK;
+            return ResponseEntity.ok().build();
         } 
         catch (IllegalArgumentException e) 
         {
-            return HttpStatus.NOT_FOUND;
-        }
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());        }
     }
 
     @PutMapping("/{id}")
@@ -78,9 +77,9 @@ public class UserController
     }
 
     @DeleteMapping("/{id}")
-    public HttpStatus deleteUser(@PathVariable Long id) 
+    public ResponseEntity<User> deleteUser(@PathVariable Long id)
     {
         userService.delete(id);
-        return HttpStatus.NO_CONTENT;
+        return ResponseEntity.noContent().build();
     }
 }

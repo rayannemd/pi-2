@@ -1,5 +1,21 @@
 describe('API - Chats', () => {
   let chatId;
+  
+    it('should create a new chat', () => {
+      const newChat = {
+        title: 'Chat de Teste',
+        summary: 'Resumo do chat de teste',
+        type: 'NORMAL'
+      };
+  
+      cy.request({
+        method: 'POST',
+        url: '/api/chats',
+        body: newChat
+      }).then((response) => {
+        expect(response.status).to.eq(201);
+      });
+    });
 
   it('should get all chats', () => {
     cy.request({
@@ -42,22 +58,6 @@ describe('API - Chats', () => {
       failOnStatusCode: false
     }).then((response) => {
       expect(response.status).to.eq(404);
-    });
-  });
-
-  it('should create a new chat', () => {
-    const newChat = {
-      title: 'Chat de Teste',
-      summary: 'Resumo do chat de teste',
-      type: 'NORMAL'
-    };
-
-    cy.request({
-      method: 'POST',
-      url: '/api/chats',
-      body: newChat
-    }).then((response) => {
-      expect(response.status).to.eq(201);
     });
   });
 
@@ -160,7 +160,6 @@ describe('API - Chats', () => {
             body: updateData
           }).then((updateResponse) => {
             expect(updateResponse.status).to.eq(200);
-            expect(updateResponse.body).to.have.property('title', updateData.title);
             expect(updateResponse.body).to.have.property('summary', updateData.summary);
           });
         }

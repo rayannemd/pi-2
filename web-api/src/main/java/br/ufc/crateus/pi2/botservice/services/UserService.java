@@ -8,7 +8,6 @@ import br.ufc.crateus.pi2.botservice.controllers.exceptions.DuplicatedResourceEx
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
 import br.ufc.crateus.pi2.botservice.models.User;
 import br.ufc.crateus.pi2.botservice.repositories.ServiceRepository;
@@ -57,16 +56,16 @@ public class UserService
         return user.get().getServices();
     }
 
-    public void addService(Long id, String serviceName) 
+    public void addService(Long id, String serviceName)
     {
-        var user = userRepository.findById(id);
-        Assert.notNull(user, "O usuário não foi encontrado.");
+        var user = userRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
 
-        var service = serviceRepository.findByName(serviceName);
-        Assert.notNull(service, "O serviço não foi encontrado.");
-        
-        user.get().addService(service.get());
-        userRepository.save(user.get());
+        var service = serviceRepository.findByName(serviceName)
+                .orElseThrow(() -> new IllegalArgumentException("Serviço não encontrado"));
+
+        user.addService(service);
+        userRepository.save(user);
     }
 
     public void add(CreateUserCommand command) {

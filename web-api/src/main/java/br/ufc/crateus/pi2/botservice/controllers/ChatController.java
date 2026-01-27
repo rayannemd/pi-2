@@ -80,9 +80,9 @@ public class ChatController
     }
 
     @DeleteMapping("/{id}")
-    public HttpStatus deleteChat(@PathVariable Long id) 
+    public ResponseEntity<Chat> deleteChat(@PathVariable Long id)
     {
         chatService.delete(id);
-        return HttpStatus.NO_CONTENT;
+        return ResponseEntity.noContent().build();
     }
 }
