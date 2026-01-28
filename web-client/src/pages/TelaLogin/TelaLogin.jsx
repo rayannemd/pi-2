@@ -53,7 +53,7 @@ export default function TelaLogin() {
       type: "ADMIN",
     };
 
-    // Criar o usuário no banco
+    // Criar o usuário cliente
     fetch("http://localhost:8080/api/auth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -79,7 +79,7 @@ export default function TelaLogin() {
         })
         .then((response) => {
           if (!response.ok && response.status !== 400) {
-            throw new Error("Admin já salvo no banco");
+            console.log("Admin existente no banco");
           }
           if(response.ok){
             console.log("Usuário admin salvo no banco de dados")

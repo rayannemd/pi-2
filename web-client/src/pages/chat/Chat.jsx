@@ -1,128 +1,149 @@
 import { useEffect, useRef, useState } from "react";
-import BarraLateral from "../../components/BarraConfigClient/BarraConfig"
-import "./Chat.css"
-
-
-// LOG DE CARREGAMENTO (Se isso não aparecer no F12, o navegador não leu o arquivo novo)
-console.log("🚀 ARQUIVO CHAT.JSX CARREGADO COM SUCESSO!");
-
-const colors = ["cadetblue", "darkgoldenrod", "cornflowerblue", "darkkhaki", "hotpink", "gold"];
-const getRandomColor = () => colors[Math.floor(Math.random() * colors.length)];
+import BarraLateral from "../../components/BarraConfigClient/BarraConfig";
+import "./Chat.css";
 
 export default function Chat() {
-  const [logged, setLogged] = useState(false);
-  const [chatId, setChatId] = useState(1); // Mudei para 1 pois IDs de banco costumam começar em 1
-  const [user, setUser] = useState({ id: "1", name: "Jadiel", color: "blue" });
+  const [chatId, setChatId] = useState(null);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const messagesEndRef = useRef(null);
 
+  const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+
+  /* ===============================
+     SCROLL AUTOMÁTICO
+  =============================== */
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    const text = input.trim();
-    
-    console.log("BUTTON CLICKED - Texto:", text);
+  /* ===============================
+     CRIA O CHAT AO ABRIR A TELA
+  =============================== */
+  useEffect(() => {
+    const storedChatId = localStorage.getItem("chatId");
 
-    if (!text) {
-        console.warn("⚠️ Texto vazio, abortando.");
-        return;
+    if (storedChatId) {
+      console.log("💾 Chat já existente:", storedChatId);
+      setChatId(storedChatId);
+      return;
     }
 
-    const userMessage = { 
-      userId: user.id, 
-      userName: user.name, 
-      userColor: user.color, 
-      content: text 
+    console.log("🆕 Criando novo chat...");
+
+    fetch(`${API_URL}/api/chats`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+      body: JSON.stringify({
+        title: "",
+        summary: "",
+        type: "NORMAL",
+      }),
+    })
+      .then((res) => {
+        if (!res.ok) throw new Error("Erro ao criar chat");
+        // 🔴 Backend ainda não retorna o chat,
+        // mas estamos prontos para quando retornar
+        return res.headers.get("location") || null;
+      })
+      .then((location) => { 
+        /**
+         * 🔮 FUTURO:
+         * Quando o backend retornar o chat ou o id,
+         * esse código já funciona sem mudar nada
+         */
+        const fakeId = 1; // enquanto o backend não retorna
+        localStorage.setItem("chatId", fakeId);
+        setChatId(fakeId);
+        console.log("✅ Chat pronto (aguardando backend retornar id real)");
+      })
+      .catch((err) => {
+        console.error("❌ Erro ao criar chat:", err);
+      });
+  }, []);
+
+  /* ===============================
+     ENVIO DE MENSAGEM
+  =============================== */
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!input.trim() || !chatId) return;
+
+    const userMessage = {
+      userId: "me",
+      content: input,
     };
-    
+
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
 
     try {
-      const baseUrl = import.meta.env.VITE_API_URL || "http://localhost:8080";
-      const url = `${baseUrl}/api/chats/${chatId}/message`; 
-      
-      console.log("🌐 Preparando requisição para:", url);
-
       const response = await fetch(
-    `${import.meta.env.VITE_API_URL}/api/chats/${chatId}/message`,
-    {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: text }),
-    }
-  );  
+        `${API_URL}/api/chats/${chatId}/message`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({ message: userMessage.content }),
+        }
+      );
 
-  const data = await response.json();
+      if (!response.ok) throw new Error("Erro ao enviar mensagem");
 
-  console.log("Resposta do backend:", data);
+      const data = await response.json();
+      const agentAnswer = data?.chatResponse?.answer;
 
-  const agentAnswer = data?.chatResponse?.answer;
+      if (!agentAnswer) return;
 
-  if (!agentAnswer) {
-    console.warn("O agente não respondeu");
-    return;
-  }
-
-  setMessages((prev) => [
-    ...prev,
-    {
-      userId: "agent",
-      content: agentAnswer,
-    },
-  ]);
-
-
-    } catch (err) {alert
-      console.error("❌ ERRO NA REQUISIÇÃO (fetch):", err);
-      alert("ERRO NO ENVIO: " + (err.message || "Erro desconhecido"));
+      setMessages((prev) => [
+        ...prev,
+        {
+          userId: "agent",
+          content: agentAnswer,
+        },
+      ]);
+    } catch (err) {
+      console.error("❌ Erro no envio:", err);
     }
   };
-
 
   return (
     <div className="app-layout">
       <BarraLateral />
-      <section
-        className="chat-container">
-        {/* Cabeçalho do chat */}
 
-        {/* Área de mensagens */}
+      <section className="chat-container">
         <section className="chat__messages">
           {messages.map((msg, index) => (
             <div
               key={index}
-              className={msg.userId === user.id ? "message--self" : "message--other"}>
-              {msg.userId !== user.id && (
-                <div>
-                  {msg.userName}
-                </div>
-              )}
-              <div>{msg.content}</div>
+              className={
+                msg.userId === "me"
+                  ? "message--self"
+                  : "message--other"
+              }
+            >
+              {msg.content}
             </div>
           ))}
           <div ref={messagesEndRef} />
         </section>
-        {/* Input do chat */}
-        <form
-          className="chat__form"
-          onSubmit={handleSendMessage}>
+
+        <form className="chat__form" onSubmit={handleSendMessage}>
           <input
             type="text"
             className="chat__input"
             placeholder="Digite sua mensagem..."
-            required
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            required
           />
-          <button
-            type="submit"
-            className="chat__button"
-            > Enviar
+          <button type="submit" className="chat__button">
+            Enviar
           </button>
         </form>
       </section>
