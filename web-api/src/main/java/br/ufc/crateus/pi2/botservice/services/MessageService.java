@@ -1,15 +1,12 @@
 package br.ufc.crateus.pi2.botservice.services;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import br.ufc.crateus.pi2.botservice.dto.ChatMessageDTO;
+import br.ufc.crateus.pi2.botservice.controllers.dtos.ChatMessageDTO;
 import br.ufc.crateus.pi2.botservice.models.Chat;
 import br.ufc.crateus.pi2.botservice.models.Message;
 import br.ufc.crateus.pi2.botservice.repositories.MessageRepository;
-
-//Classe usada pelo websocket
 
 @Service
 public class MessageService {
