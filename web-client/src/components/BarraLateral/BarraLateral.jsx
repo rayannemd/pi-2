@@ -54,6 +54,7 @@ const irPara = (rota) => { navigate(rota); handleClose(); }
           boxSizing: 'border-box',
           borderRight: 'none',
           position: 'relative', 
+          background: 'linear-gradient(180deg, #8D212A, #AE3841)'
         },
       }}
     >
