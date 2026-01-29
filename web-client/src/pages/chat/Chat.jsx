@@ -18,7 +18,7 @@ export default function Chat() {
   }, [messages]);
 
   /* ===============================
-     CRIA O CHAT AO ABRIR A TELA
+     CRIA OU REUTILIZA CHAT
   =============================== */
   useEffect(() => {
     const storedChatId = localStorage.getItem("chatId");
@@ -45,25 +45,43 @@ export default function Chat() {
     })
       .then((res) => {
         if (!res.ok) throw new Error("Erro ao criar chat");
-        // 🔴 Backend ainda não retorna o chat,
-        // mas estamos prontos para quando retornar
         return res.headers.get("location") || null;
       })
-      .then((location) => {
-        /**
-         * 🔮 FUTURO:
-         * Quando o backend retornar o chat ou o id,
-         * esse código já funciona sem mudar nada
-         */
-        const fakeId = 1; // enquanto o backend não retorna
+      .then(() => {
+        // ⚠️ enquanto o backend não retorna o id real
+        const fakeId = 1;
         localStorage.setItem("chatId", fakeId);
         setChatId(fakeId);
-        console.log("✅ Chat pronto (aguardando backend retornar id real)");
+        console.log("✅ Chat criado (aguardando backend retornar id)");
       })
       .catch((err) => {
         console.error("❌ Erro ao criar chat:", err);
       });
   }, []);
+
+  /* ===============================
+     CARREGA MENSAGENS SALVAS
+  =============================== */
+  useEffect(() => {
+    if (!chatId) return;
+
+    fetch(`${API_URL}/api/chats/${chatId}/messages`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
+      .then((res) => res.json())
+      .then((data) => {
+        const formattedMessages = data.map((msg) => ({
+          issuer: msg.issuer, // USER | AGENT
+          content: msg.content,
+        }));
+        setMessages(formattedMessages);
+      })
+      .catch((err) => {
+        console.error("❌ Erro ao carregar mensagens:", err);
+      });
+  }, [chatId]);
 
   /* ===============================
      ENVIO DE MENSAGEM
@@ -73,13 +91,13 @@ export default function Chat() {
     if (!input.trim() || !chatId) return;
 
     const userMessage = {
-      userId: "me",
+      issuer: "USER",
       content: input,
     };
 
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
-
+ 
     try {
       const response = await fetch(
         `${API_URL}/api/chats/${chatId}/messages`,
@@ -103,7 +121,7 @@ export default function Chat() {
       setMessages((prev) => [
         ...prev,
         {
-          userId: "agent",
+          issuer: "AGENT",
           content: agentAnswer,
         },
       ]);
@@ -122,7 +140,7 @@ export default function Chat() {
             <div
               key={index}
               className={
-                msg.userId === "me"
+                msg.issuer === "USER"
                   ? "message--self"
                   : "message--other"
               }
