@@ -42,7 +42,7 @@ public class ChatService
         return chatRepository.findById(id);
     }
     
-    public void add(Long userId, CreateChatCommand command) 
+    public Chat add(Long userId, CreateChatCommand command) 
     {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new UserNotFoundException());
@@ -51,6 +51,7 @@ public class ChatService
         newChat.setUser(user);
         
         chatRepository.save(newChat);
+        return newChat;
     }
 
     public Chat update(Long id, UpdateChatCommand command) 
