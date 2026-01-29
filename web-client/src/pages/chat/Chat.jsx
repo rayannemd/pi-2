@@ -82,7 +82,7 @@ export default function Chat() {
 
     try {
       const response = await fetch(
-        `${API_URL}/api/chats/${chatId}/message`,
+        `${API_URL}/api/chats/${chatId}/messages`,
         {
           method: "POST",
           headers: {

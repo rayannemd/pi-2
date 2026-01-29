@@ -4,13 +4,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import br.ufc.crateus.pi2.botservice.controllers.exceptions.DuplicatedResourceException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import br.ufc.crateus.pi2.botservice.controllers.exceptions.DuplicatedResourceException;
+import br.ufc.crateus.pi2.botservice.models.Chat;
 import br.ufc.crateus.pi2.botservice.models.User;
-import br.ufc.crateus.pi2.botservice.repositories.ServiceRepository;
 import br.ufc.crateus.pi2.botservice.repositories.UserRepository;
 import br.ufc.crateus.pi2.botservice.services.commands.CreateUserCommand;
 import br.ufc.crateus.pi2.botservice.services.commands.UpdateUserCommand;
@@ -21,19 +21,14 @@ public class UserService
     @Autowired
     private final UserRepository userRepository;
 
-    @Autowired
-    private final ServiceRepository serviceRepository;
-
     private final PasswordEncoder encoder;
     
     public UserService(
         UserRepository userRepository,
-        PasswordEncoder encoder,
-        ServiceRepository serviceRepository) 
+        PasswordEncoder encoder) 
     {
         this.userRepository = userRepository;
         this.encoder = encoder;
-        this.serviceRepository = serviceRepository;
     }
 
     public List<User> getAll() 
@@ -56,22 +51,20 @@ public class UserService
         return user.get().getServices();
     }
 
-    public void addService(Long id, String serviceName)
+    public List<Chat> getUserChats(Long id) 
     {
-        var user = userRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Usuário não encontrado"));
+        var user = userRepository.findById(id);
 
-        var service = serviceRepository.findByName(serviceName)
-                .orElseThrow(() -> new IllegalArgumentException("Serviço não encontrado"));
+        if(user.isEmpty()) 
+            return null;
 
-        user.addService(service);
-        userRepository.save(user);
+        return user.get().getChats();
     }
-
-    public void add(CreateUserCommand command) {
-        if (userRepository.existsByCpfCnpj(command.getCpfCnpj())) {
+    
+    public void add(CreateUserCommand command) 
+    {
+        if (userRepository.existsByCpfCnpj(command.getCpfCnpj()))
             throw new DuplicatedResourceException();
-        }
 
         User newUser = command.toUser();
         newUser.setPassword(encoder.encode(newUser.getPassword()));

@@ -1,19 +1,21 @@
 package br.ufc.crateus.pi2.botservice.models;
 
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import br.ufc.crateus.pi2.botservice.models.enums.EUserType;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -43,17 +45,12 @@ public class User extends BaseEntity
 
     private EUserType type;
 
-    @ManyToMany
-    @JoinTable(
-        name = "user_service",
-        joinColumns = @JoinColumn(name = "user_id"),
-        inverseJoinColumns = @JoinColumn(name = "service_id")
-    )
-    private Set<Service> services = new HashSet<>();
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private List<Chat> chats = new ArrayList<>();
 
-    public void addService(Service service) 
-    {
-        this.services.add(service);
-        service.getUsers().add(this);
-    }
+    @ManyToMany
+    @JsonIgnore
+    //Não foi implementado pois essa é uma informação que pegaríamos com o parceiro
+    private Set<Service> services = new HashSet<>();
 }
