@@ -57,15 +57,15 @@ export default function TelaLogin() {
     fetch("http://localhost:8080/api/auth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(userDataCliente),
+      body: JSON.stringify(userDataAdmin),
     })
       .then((response) => {
         if (!response.ok && response.status !== 400) {
           // se der erro diferente de BAD_REQUEST, mostra alerta
-          console.log("Usuário existente no banco");
+          console.log("Admin existente no banco");
         }
         if(response.ok){
-          console.log("Usuário salvo no banco de dados")
+          console.log("Admin salvo no banco de dados")
         }
         return response;
       })
@@ -75,14 +75,14 @@ export default function TelaLogin() {
         fetch("http://localhost:8080/api/auth", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(userDataAdmin),
+          body: JSON.stringify(userDataCliente),
         })
         .then((response) => {
           if (!response.ok && response.status !== 400) {
-            console.log("Admin existente no banco");
+            console.log("Usuário existente no banco");
           }
           if(response.ok){
-            console.log("Usuário admin salvo no banco de dados")
+            console.log("Usuário salvo no banco de dados")
           }
           return response;
         })

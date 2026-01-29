@@ -49,7 +49,7 @@ export default function Chat() {
         // mas estamos prontos para quando retornar
         return res.headers.get("location") || null;
       })
-      .then((location) => { 
+      .then((location) => {
         /**
          * 🔮 FUTURO:
          * Quando o backend retornar o chat ou o id,
