@@ -61,7 +61,7 @@ public class UserService
         return user.get().getChats();
     }
     
-    public void add(CreateUserCommand command) 
+    public User add(CreateUserCommand command) 
     {
         if (userRepository.existsByCpfCnpj(command.getCpfCnpj()))
             throw new DuplicatedResourceException();
@@ -70,6 +70,7 @@ public class UserService
         newUser.setPassword(encoder.encode(newUser.getPassword()));
 
         userRepository.save(newUser);
+        return newUser;
     }
 
     public User update(Long id, UpdateUserCommand command) 

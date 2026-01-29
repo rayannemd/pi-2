@@ -3,23 +3,22 @@ package br.ufc.crateus.pi2.botservice.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import jakarta.validation.Valid;
 
 import br.ufc.crateus.pi2.botservice.controllers.dtos.LoginResponseDto;
+import br.ufc.crateus.pi2.botservice.controllers.exceptions.DuplicatedResourceException;
 import br.ufc.crateus.pi2.botservice.controllers.exceptions.InvalidPasswordException;
 import br.ufc.crateus.pi2.botservice.controllers.exceptions.UserNotFoundException;
-import br.ufc.crateus.pi2.botservice.controllers.exceptions.DuplicatedResourceException;
+import br.ufc.crateus.pi2.botservice.models.User;
 import br.ufc.crateus.pi2.botservice.services.AuthenticationService;
 import br.ufc.crateus.pi2.botservice.services.UserService;
 import br.ufc.crateus.pi2.botservice.services.commands.CreateUserCommand;
 import br.ufc.crateus.pi2.botservice.services.commands.LoginCommand;
-
-// Ajuste temporário de cors para o navegador permitir o front de acessar a resposta de login do back
-import org.springframework.web.bind.annotation.CrossOrigin;
+import jakarta.validation.Valid;
 @CrossOrigin(origins = "http://localhost:5173")
 
 @RestController
@@ -43,13 +42,13 @@ public class AuthenticationController
     }
 
     @PostMapping()
-    public ResponseEntity<Void> createUser(@Valid @RequestBody CreateUserCommand command)
+    public ResponseEntity<User> createUser(@Valid @RequestBody CreateUserCommand command)
        throws DuplicatedResourceException
     {
         if(command == null)
             return ResponseEntity.badRequest().build();
 
-        userService.add(command);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        var user = userService.add(command);
+        return new ResponseEntity<>(user, HttpStatus.CREATED);
     }
 }
