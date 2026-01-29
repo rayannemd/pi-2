@@ -4,14 +4,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
 @ResponseStatus(HttpStatus.NOT_FOUND)
-public class UserNotFoundException extends RuntimeException 
+public class ChatNotFoundException extends RuntimeException 
 {
-    public UserNotFoundException() 
+    public ChatNotFoundException() 
     {
-        super("Usuário não encontrado.");
+        super("Chat não encontrado.");
     }
 
-    public UserNotFoundException(String message) 
+    public ChatNotFoundException(String message)
     {
         super(message);
     }

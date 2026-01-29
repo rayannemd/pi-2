@@ -7,10 +7,10 @@ import java.util.Set;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.util.Assert;
 
+import br.ufc.crateus.pi2.botservice.controllers.exceptions.DuplicatedResourceException;
+import br.ufc.crateus.pi2.botservice.models.Chat;
 import br.ufc.crateus.pi2.botservice.models.User;
-import br.ufc.crateus.pi2.botservice.repositories.ServiceRepository;
 import br.ufc.crateus.pi2.botservice.repositories.UserRepository;
 import br.ufc.crateus.pi2.botservice.services.commands.CreateUserCommand;
 import br.ufc.crateus.pi2.botservice.services.commands.UpdateUserCommand;
@@ -21,19 +21,14 @@ public class UserService
     @Autowired
     private final UserRepository userRepository;
 
-    @Autowired
-    private final ServiceRepository serviceRepository;
-
     private final PasswordEncoder encoder;
     
     public UserService(
         UserRepository userRepository,
-        PasswordEncoder encoder,
-        ServiceRepository serviceRepository) 
+        PasswordEncoder encoder) 
     {
         this.userRepository = userRepository;
         this.encoder = encoder;
-        this.serviceRepository = serviceRepository;
     }
 
     public List<User> getAll() 
@@ -56,20 +51,21 @@ public class UserService
         return user.get().getServices();
     }
 
-    public void addService(Long id, String serviceName) 
+    public List<Chat> getUserChats(Long id) 
     {
         var user = userRepository.findById(id);
-        Assert.notNull(user, "O usuário não foi encontrado.");
 
-        var service = serviceRepository.findByName(serviceName);
-        Assert.notNull(service, "O serviço não foi encontrado.");
-        
-        user.get().addService(service.get());
-        userRepository.save(user.get());
+        if(user.isEmpty()) 
+            return null;
+
+        return user.get().getChats();
     }
-
+    
     public void add(CreateUserCommand command) 
     {
+        if (userRepository.existsByCpfCnpj(command.getCpfCnpj()))
+            throw new DuplicatedResourceException();
+
         User newUser = command.toUser();
         newUser.setPassword(encoder.encode(newUser.getPassword()));
 

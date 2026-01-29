@@ -6,9 +6,12 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import br.ufc.crateus.pi2.botservice.controllers.exceptions.UserNotFoundException;
 import br.ufc.crateus.pi2.botservice.models.Chat;
+import br.ufc.crateus.pi2.botservice.models.User;
 import br.ufc.crateus.pi2.botservice.models.enums.EChatType;
 import br.ufc.crateus.pi2.botservice.repositories.ChatRepository;
+import br.ufc.crateus.pi2.botservice.repositories.UserRepository;
 import br.ufc.crateus.pi2.botservice.services.commands.CreateChatCommand;
 import br.ufc.crateus.pi2.botservice.services.commands.UpdateChatCommand;
 
@@ -17,10 +20,16 @@ public class ChatService
 {
     @Autowired
     private final ChatRepository chatRepository;
+    
+    @Autowired
+    private final UserRepository userRepository;
 
-    public ChatService(ChatRepository chatRepository) 
+    public ChatService(
+        ChatRepository chatRepository, 
+        UserRepository userRepository) 
     {
         this.chatRepository = chatRepository;
+        this.userRepository = userRepository;   
     }
 
     public List<Chat> getAll() 
@@ -33,9 +42,14 @@ public class ChatService
         return chatRepository.findById(id);
     }
     
-    public void add(CreateChatCommand command) 
+    public void add(Long userId, CreateChatCommand command) 
     {
+        User user = userRepository.findById(userId)
+            .orElseThrow(() -> new UserNotFoundException());
+        
         Chat newChat = command.toChat();
+        newChat.setUser(user);
+        
         chatRepository.save(newChat);
     }
 
@@ -43,7 +57,7 @@ public class ChatService
     {
         var existingChat = getById(id);
 
-        if(existingChat == null) 
+        if(existingChat.isEmpty())
             return null;
 
         var chatToUpdate = existingChat.get();
