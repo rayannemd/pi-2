@@ -5,8 +5,12 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import br.ufc.crateus.pi2.botservice.controllers.dtos.ChatMessageDTO;
+import br.ufc.crateus.pi2.botservice.controllers.exceptions.ChatNotFoundException;
 import br.ufc.crateus.pi2.botservice.models.Chat;
+import br.ufc.crateus.pi2.botservice.models.enums.EMessageIssuer;
 import br.ufc.crateus.pi2.botservice.repositories.ChatRepository;
+import br.ufc.crateus.pi2.botservice.services.MessageService;
 import br.ufc.crateus.pi2.botservice.services.commands.SendMessageCommand;
 import br.ufc.crateus.pi2.botservice.services.dtos.AgentHandledResponseDto;
 import br.ufc.crateus.pi2.botservice.services.dtos.AgentResponseDto;
@@ -22,15 +26,18 @@ public class AgentExternalService
     @Autowired
     private ChatRepository chatRepository;
 
+    @Autowired
+    private MessageService messageService;
 
     public AgentHandledResponseDto sendMessage(Long chatId, SendMessageCommand command)
     {
-        var chat = chatRepository.findById(chatId);
+        var chat = chatRepository.findById(chatId)
+            .orElseThrow(() -> new ChatNotFoundException());
 
-        if(chat.isEmpty())
-            return null;
-        else if(chat.get().getSummary() != null)
-            command.setSummary(chat.get().getSummary());
+        if(chat.getSummary() != null)
+            command.setSummary(chat.getSummary());
+
+        messageService.save(new ChatMessageDTO(command.getMessage(), EMessageIssuer.USER, chat));
 
         var response = webClient.post()
                         .uri(BASE_URL + "/prompt-agent")
@@ -40,17 +47,14 @@ public class AgentExternalService
                         .bodyToMono(AgentResponseDto.class)
                         .block();
 
-        
-        var chatToUpdate = chat.get();
-        if(chatToUpdate.getTitle() == null || chatToUpdate.getTitle().isBlank())
-            chatToUpdate.setTitle(response.getSummary());
+        if(chat.getTitle() == null || chat.getTitle().isBlank())
+            chat.setTitle(response.getSummary());
 
-        var handledResponse = handleResponseType(chatToUpdate, response);
+        var handledResponse = handleResponseType(chat, response);
 
-        chatRepository.save(chatToUpdate);
+        chatRepository.save(chat);
         return handledResponse;
     }
-
 
     private AgentHandledResponseDto handleResponseType(Chat chat, AgentResponseDto response)
     {
@@ -60,6 +64,7 @@ public class AgentExternalService
         {
             case "chat":
                 chat.setSummary(response.getSummary());
+                messageService.save(new ChatMessageDTO(response.getAnswer(), EMessageIssuer.AGENT, chat));
                 return AgentHandledResponseDto.chat(response);
             
             case "consulta_plano":

@@ -32,7 +32,7 @@ public class Service extends BaseEntity
 
     private String description;
 
-    @JsonIgnore
     @ManyToMany(mappedBy = "services")
+    @JsonIgnore
     private Set<User> users = new HashSet<>();
 }
