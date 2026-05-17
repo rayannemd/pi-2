@@ -1,6 +1,6 @@
 //Dto usado pelo websocket
 
-package br.ufc.crateus.pi2.botservice.dto;
+package br.ufc.crateus.pi2.botservice.controllers.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
