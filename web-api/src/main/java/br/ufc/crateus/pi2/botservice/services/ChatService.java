@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import br.ufc.crateus.pi2.botservice.models.Chat;
+import br.ufc.crateus.pi2.botservice.models.enums.EChatStatus;
 import br.ufc.crateus.pi2.botservice.models.enums.EChatType;
 import br.ufc.crateus.pi2.botservice.repositories.ChatRepository;
 import br.ufc.crateus.pi2.botservice.services.commands.CreateChatCommand;
@@ -77,5 +78,30 @@ public class ChatService
             chat.get().setType(priority);
             chatRepository.save(chat.get());
         }
+    }
+
+    public void processarMensagem(Long id, String message){
+        Chat chat = chatRepository.findById(id).orElseThrow(() -> new RuntimeException("Chat não encontrado."));
+        if(chat.getChatStatus() == EChatStatus.ESPERANDO_AVALIACAO){
+            Integer nota = Integer.parseInt(message);
+            
+            if(message == null || message.isBlank()){
+                chat.setChatRating(null);
+            }else if(nota<1 || nota>5){
+                throw new IllegalArgumentException("A nota deve ser um número entre 1 e 5");
+            }
+
+            chat.setChatRating(nota);
+            chat.setChatStatus(EChatStatus.RESOLVIDO);
+
+            chatRepository.save(chat);
+        }
+    }
+
+    public void mudarParaEsperandoAvaliacao(Long id){
+        Chat chat = chatRepository.findById(id).orElseThrow(() -> new RuntimeException("Chat não encontrado."));
+
+        chat.setChatStatus(EChatStatus.ESPERANDO_AVALIACAO);
+        chatRepository.save(chat);
     }
 }

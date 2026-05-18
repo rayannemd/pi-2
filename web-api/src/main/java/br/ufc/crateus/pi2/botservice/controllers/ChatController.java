@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import br.ufc.crateus.pi2.botservice.models.Chat;
+import br.ufc.crateus.pi2.botservice.models.enums.EChatStatus;
 import br.ufc.crateus.pi2.botservice.services.ChatService;
 import br.ufc.crateus.pi2.botservice.services.commands.CreateChatCommand;
 import br.ufc.crateus.pi2.botservice.services.commands.SendMessageCommand;
@@ -64,12 +65,27 @@ public class ChatController
     @PostMapping("/{id}/message")
     public ResponseEntity<AgentHandledResponseDto> sendMessageToAgent(@PathVariable Long id, @RequestBody SendMessageCommand command)
     {
+        Chat chat = chatService.getById(id).orElseThrow(()-> new RuntimeException("Chat não encontrado."));
+
+        if(chat.getChatStatus() == EChatStatus.ESPERANDO_AVALIACAO){
+            chatService.processarMensagem(id, command.getMessage());
+            return ResponseEntity.ok().build();
+        }
+        
         AgentHandledResponseDto response = agentExternalService.sendMessage(id, command);
 
         if(response == null)
             return ResponseEntity.notFound().build();
-        else
-            return ResponseEntity.ok(response);
+
+        if (response.getChatResponse() != null &&
+            response.getChatResponse().getMessage() != null &&
+            response.getChatResponse().getMessage().toLowerCase().contains("avalie")) {
+
+            chatService.mudarParaEsperandoAvaliacao(id);
+        }
+        
+        return ResponseEntity.ok(response);
+
     }  
     
     @PutMapping("/{id}")

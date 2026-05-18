@@ -1,6 +1,7 @@
 package br.ufc.crateus.pi2.botservice.services.commands;
 
 import br.ufc.crateus.pi2.botservice.models.Chat;
+import br.ufc.crateus.pi2.botservice.models.enums.EChatStatus;
 import br.ufc.crateus.pi2.botservice.models.enums.EChatType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,6 +26,9 @@ public class CreateChatCommand
         chat.setTitle(this.title);
         chat.setSummary(this.summary);
         chat.setType(this.type);
+
+        // garante que todo chat criado tem o status de pendente
+        chat.setChatStatus(EChatStatus.PENDENTE);
         return chat;
     }
 }
