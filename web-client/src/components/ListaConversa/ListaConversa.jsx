@@ -9,8 +9,10 @@ import { Box, Typography, Avatar } from '@mui/material';
 
 export default function ListaConversa({ conversas = [], aoClicarNoChat }) {
  
-  console.log("ListaConversa recebeu:", conversas);
+  // console.log("ListaConversa recebeu:", conversas);
   //console.log("TESTE LISTA CONVERSA CARREGOU");
+
+  // Esse arquivo é referente a  lista de conversas que fica na barra lateral. 
 
 
 
@@ -20,8 +22,8 @@ if(categoria == 'todos')
   return ('transparent')
   // Se não estiver resolvido, ele segue a cor da categoria
   switch (categoria) {
-    case 'urgente': return '#ff0033';
-    case 'pendentes': return '#ffc95d';
+    case 'resolvido': return '#2f7c13';
+    case 'pendente': return '#ffc95d';
     default: return 'transparent';
   }
 }

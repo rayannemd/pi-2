@@ -4,18 +4,23 @@ import SendIcon from '@mui/icons-material/Send';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { mensagensMock } from '../../Mock/mensagensMock';
 
-export default function LayoutChat({ conversaAtual, aoResolver }) {
+
+export default function LayoutChat({ conversaAtual, resolverConversa, setExibirMensagem }) {
 
   // console.log("Conversa selecionada:", conversaAtual); teste para ver conversa selec.
 
-  const [anchorEl, setAnchorEl] = useState(null);
-  const open = Boolean(anchorEl);
+  const [ancora, setAncora] = useState(null);
+  const open = Boolean(ancora);
 
-  const handleClick = (event) => setAnchorEl(event.currentTarget);
-  const handleClose = () => setAnchorEl(null);
+  const handleClick = (event) => setAncora(event.currentTarget);
+  const handleClose = () => setAncora(null);
 
   const [mensagem, setMensagem] = useState('');
   const [mensagensDoBackEnd, setMensagensDoBackEnd] = useState([]);
+  
+
+
+
 
   // Carregar mensagens do mock da conversa selecionada
   // pega o id das conversas e exibe apenas o necessário na conversa, sem vazar de outros id (outra conversa)
@@ -55,13 +60,16 @@ export default function LayoutChat({ conversaAtual, aoResolver }) {
     );
   }
 
+
+
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', bgcolor: '#f0f2f5', flex: 1 }}>
+    // box
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', bgcolor: '#f0f2f5', flex: 1 }}> 
       
       {/* CABEÇALHO */}
       <Box sx={{ p: 2, bgcolor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0px 2px 5px rgba(0,0,0,0.1)', zIndex: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <Avatar sx={{ mr: 2, bgcolor: '#3f51b5' }}>
+          <Avatar sx={{ mr: 2, bgcolor: '#9d1a1a' }}>
             {conversaAtual.nome ? conversaAtual.nome[0] : "?"} {/*Aqui basicamente pega a 1º letra do nome e coloca no avatar. */}
           </Avatar>
           <Box>
@@ -71,14 +79,14 @@ export default function LayoutChat({ conversaAtual, aoResolver }) {
         </Box>
 
 {/* O trecho abaixo é sobre o MARCAR COMO RESOLVIDA que existe em todas as conversas - na teoria.
-Não funciona ainda, devemos implementar para resolver a conversa e impossibilitar de enviar msg nesse chat (inclusive o bor[t]) */}
+Não funciona ainda, devemos implementar para resolver a conversa e impossibilitar de enviar msg nesse chat (inclusive o bot) */}
 {/* Incio do bloco de marcar como resolvida */}
         <Box>
           <IconButton onClick={handleClick}>
             <MoreVertIcon />
           </IconButton>
-          <Menu anchorEl={anchorEl} open={open} onClose={handleClose}>
-            <MenuItem onClick={aoResolver} sx={{ color: 'green', fontWeight: 'bold' }}>
+          <Menu anchorEl={ancora} open={open} onClose={handleClose}>
+            <MenuItem onClick={() => {resolverConversa(conversaAtual.id); setExibirMensagem(true)}} sx={{ color: 'green', fontWeight: 'bold' }}>
               Marcar como Resolvida
             </MenuItem>
           </Menu>
@@ -87,8 +95,9 @@ Não funciona ainda, devemos implementar para resolver a conversa e impossibilit
 {/* fim do bloco de marcar como resolvida */}
 
 
-      {/* MENSAGENS */}
-      <Box sx={{ flex: 1, overflowY: 'auto', p: 3, display: 'flex', flexDirection: 'column', gap: 2 }}>
+      {/* MENSAGENS (bloco que fica as mensagens lá) */}
+      <Box sx={{ flex: 1, overflowY: 'auto', p: 3, display: 'flex', flexDirection: 'column', gap: 2 , 
+        overflowY: 'auto', scrollbarWidth: 'none',}}>
         {/* PAra cada mensagem do back, ele retorna esse box, que é a caixa de dialogo  */}
         {/* Sendo o remetendo esverdeada, e o cliente branca */}
         {mensagensDoBackEnd.map(msg => (
@@ -96,12 +105,13 @@ Não funciona ainda, devemos implementar para resolver a conversa e impossibilit
             key={msg.id}
             sx={{ 
               alignSelf: msg.remetente === 'cliente' ? 'flex-start' : 'flex-end', 
-              maxWidth: '70%', 
+              maxWidth: '50%', 
               bgcolor: msg.remetente === 'cliente' ? 'white' : '#dcf8c6', 
               p: 1.5, 
               borderRadius: msg.remetente === 'cliente' ? '0px 15px 15px 15px' : '15px 15px 0px 15px', 
               // Somente criar um sombra aoo redor, sem mudar a cor original (branca, nesse caso)
-              boxShadow: '0px 1px 3px rgba(0,0,0,0.2)'
+              boxShadow: '0px 1px 3px rgba(0,0,0,0.2)',
+              wordBreak: 'break-word'
             }}
           >
             <Typography variant="body2">{msg.texto}</Typography>
