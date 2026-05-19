@@ -2,7 +2,7 @@ from langchain_groq import ChatGroq
 from langgraph.graph import StateGraph, START, END
 from typing import TypedDict, Literal
 
-model = ChatGroq(model="openai/gpt-oss-20b", temperature=0)
+model = ChatGroq(model="meta-llama/llama-4-scout-17b-16e-instruct", temperature=0.7)
 
 
 class PromptType(TypedDict):
@@ -27,7 +27,20 @@ async def summary_to_model(state: MyState):
     return {"summary":summary.content}
 
 async def router(state: MyState):
-    classification_prompt = f"Resumo da conversa: {state['summary']} \n Mensagem do usuário: {state['message']} \n Se o usuário informar que deseja consultar seu plano de internet atual, classifique como 'consulta_plano'.\nCaso não seja necessário acessar nenhuma informação no banco de dados, classifique como 'chat'. Seja rígido e aceite apenas o que tiver ligação com serviço de internet.\n"
+    classification_prompt = f"""
+    <summary>
+    Resumo da conversa: {state['summary']}
+    </summary>
+
+    <prompt>
+    Mensagem do usuário: {state['message']}
+    </prompt>
+
+    Se o usuário informar que deseja consultar seu plano de internet atual, classifique como 'consulta_plano'. 
+    Caso não se encaixe em nenhuma das opções acima, classifique como 'chat'.
+    
+    Seja rígido e aceite apenas o que tiver ligação com serviço de internet. Responda sempre de maneira amigável e de forma concisa.
+    """
     model_classifier = model.with_structured_output(PromptType)
     classification = await model_classifier.ainvoke([{"role": "system", "content": classification_prompt}])
     return {"classification": classification}
