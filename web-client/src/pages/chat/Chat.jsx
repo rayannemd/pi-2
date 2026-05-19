@@ -9,6 +9,7 @@ export default function Chat() {
   const messagesEndRef = useRef(null);
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
+  const userId = localStorage.getItem("userId");
 
   /* ===============================
      SCROLL AUTOMÁTICO
@@ -31,7 +32,7 @@ export default function Chat() {
 
     console.log("🆕 Criando novo chat...");
 
-    fetch(`${API_URL}/api/chats`, {
+    fetch(`${API_URL}/api/users/${userId}/chats`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -82,7 +83,7 @@ export default function Chat() {
 
     try {
       const response = await fetch(
-        `${API_URL}/api/chats/${chatId}/message`,
+        `${API_URL}/api/chats/${chatId}/messages`,
         {
           method: "POST",
           headers: {

@@ -111,6 +111,7 @@ export default function TelaLogin() {
             console.log("Resposta do backend:", data);
 
             localStorage.setItem("token", data.token);
+            localStorage.setItem("userId", data.id)
 
             if(data.userType == "CUSTOMER"){
               navigate("/home")

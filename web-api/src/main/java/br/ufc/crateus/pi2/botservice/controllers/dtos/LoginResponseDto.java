@@ -13,6 +13,8 @@ import lombok.Setter;
 @NoArgsConstructor
 public class LoginResponseDto 
 {
+    private Long id;
+
     private String email;
 
     private String name;
@@ -24,6 +26,7 @@ public class LoginResponseDto
     public static LoginResponseDto fromUser(User user, String token) 
     {
         return new LoginResponseDto(
+            user.getId(),
             user.getEmail(),
             user.getName(),
             token,
