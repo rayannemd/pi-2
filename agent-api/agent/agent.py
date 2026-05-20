@@ -2,7 +2,7 @@ from langchain_groq import ChatGroq
 from langgraph.graph import StateGraph, START, END
 from typing import TypedDict, Literal
 
-model = ChatGroq(model="meta-llama/llama-4-scout-17b-16e-instruct", temperature=0.7)
+model = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.8)
 
 
 class PromptType(TypedDict):
@@ -16,30 +16,41 @@ class MyState(TypedDict):
     answer: str
 
 
-system_instruction = f"Você é um assistente virtual da provedora de internet PLANETA NET e deve responder APENAS perguntas que possuam relação com o seu serviço. Seja sempre gentil e amigável."
+system_instruction = f"Você é um assistente virtual da provedora de internet PLANETA NET e deve responder APENAS perguntas que possuam relação com o seu serviço. Seja sempre grosseiro e rude, responda sempre na ironia e tirando sarro do usuário."
 
 
 async def summary_to_model(state: MyState):
     if(state.get("summary", "") == ""):
-        summary = await model.ainvoke([{"role": "assistant", "content": f"Mensagem do usuário: {state['message']}\nBaseado nessa mensagem, responda apenas com um título breve para a conversa."}])
+        summary = await model.ainvoke([{"role": "user", "content": f"Mensagem do usuário: {state['message']}\nBaseado nessa mensagem, responda apenas com um título breve para a conversa."}])
     else:
-        summary = await model.ainvoke([{"role": "assistant", "content": f"Prompt atual: {state['message']}\nResumo da conversa até agora: {state['summary']}.\nBaseado nessa conversa, crie um resumo conciso levando em consideração os dados mais importantes."}])
+        summary = await model.ainvoke([{"role": "user", "content": f"""
+        Crie um resumo para uma conversa entre um assistente virtual de uma provedora de internet e um cliente. Você deve criar um resumo conciso que compreenda as informações principais da conversa.
+                                        
+        Exemplo:
+        Prompt atual: Tudo bem?
+                                        
+        Resumo da conversa até agora: O usuário cumprimentou o assistente com um "oi", o assistente respondeu que sim e estava disposto a ajudar com problemas na internet.
+                                        
+        Seu resumo:
+        O usuário iniciou a conversa cumprimentando o assistente com um "oi" e o assistente respondeu que estava disposto a ajudar com a internet. Em seguida, o usuário perguntou se o assistente estava bem. 
+                                        
+        Agora faça para os seguintes dados:
+                                        
+        Prompt atual: {state['message']}
+
+        Resumo da conversa até agora: {state['summary']}.
+        """}])
     return {"summary":summary.content}
 
 async def router(state: MyState):
     classification_prompt = f"""
-    <summary>
     Resumo da conversa: {state['summary']}
-    </summary>
 
-    <prompt>
     Mensagem do usuário: {state['message']}
-    </prompt>
 
     Se o usuário informar que deseja consultar seu plano de internet atual, classifique como 'consulta_plano'. 
     Caso não se encaixe em nenhuma das opções acima, classifique como 'chat'.
     
-    Seja rígido e aceite apenas o que tiver ligação com serviço de internet. Responda sempre de maneira amigável e de forma concisa.
     """
     model_classifier = model.with_structured_output(PromptType)
     classification = await model_classifier.ainvoke([{"role": "system", "content": classification_prompt}])
@@ -50,7 +61,11 @@ async def output(state: MyState):
 
 
 async def answer(state: MyState):
-    answer = await model.ainvoke([{"role": "system", "content": system_instruction}, {"role": "assistant", "content": f"Resumo da conversa: {state['summary']}"}, {"role": "user", "content": state['message']}])
+    global system_instruction
+    system_instruction += f'\nResumo da conversa: {state['summary']}. Use o resumo para saber o histórico da conversa com o usuário.'
+
+
+    answer = await model.ainvoke([{"role": "system", "content": system_instruction}, {"role": "user", "content": state["message"]}])
     return {"answer": answer.content, "summary":state['summary']}
 
 
