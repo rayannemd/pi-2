@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import BarraLateral from "../../components/BarraConfigClient/BarraConfig";
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm";
 import "./Chat.css";
 
 export default function Chat() {
@@ -128,7 +130,9 @@ export default function Chat() {
                   : "message--other"
               }
             >
-              {msg.content}
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {msg.content}
+              </ReactMarkdown>
             </div>
           ))}
           <div ref={messagesEndRef} />
