@@ -6,7 +6,7 @@ model = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.8)
 
 
 class PromptType(TypedDict):
-    type: Literal['chat', 'consulta_plano']
+    type: Literal['chat', 'consulta_plano', 'pagamento_plano']
 
 
 class MyState(TypedDict):
@@ -16,7 +16,7 @@ class MyState(TypedDict):
     answer: str
 
 
-system_instruction = f"Você é um assistente virtual da provedora de internet PLANETA NET e deve responder APENAS perguntas que possuam relação com o seu serviço. Seja sempre grosseiro e rude, responda sempre na ironia e tirando sarro do usuário."
+system_instruction = f"Você é um assistente virtual da provedora de internet PLANETA NET e deve responder APENAS perguntas que possuam relação com o seu serviço. Seja sempre gentil e amigável."
 
 
 async def summary_to_model(state: MyState):
@@ -48,7 +48,8 @@ async def router(state: MyState):
 
     Mensagem do usuário: {state['message']}
 
-    Se o usuário informar que deseja consultar seu plano de internet atual, classifique como 'consulta_plano'. 
+    Se o usuário informar que deseja consultar seu plano de internet atual, classifique como 'consulta_plano'.
+    Se o usuário NÃO informar nenhuma dificuldade, mas deseja realizar o pagamento do seu plano de internet, classifique como 'pagamento_plano'. 
     Caso não se encaixe em nenhuma das opções acima, classifique como 'chat'.
     
     """
