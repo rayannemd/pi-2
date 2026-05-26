@@ -11,11 +11,9 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChatMessageDTO 
-{
-    private String content;
+public class ChatMessageDTO {
 
+    private String content;
     private EMessageIssuer issuer;
-    
     private Chat chat;
 }

@@ -2,6 +2,10 @@ package br.ufc.crateus.pi2.botservice.controllers;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
+
+import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,7 +25,7 @@ import br.ufc.crateus.pi2.botservice.services.commands.SendMessageCommand;
 import br.ufc.crateus.pi2.botservice.services.commands.UpdateChatCommand;
 import br.ufc.crateus.pi2.botservice.services.dtos.AgentHandledResponseDto;
 import br.ufc.crateus.pi2.botservice.services.external.AgentExternalService;
-//@CrossOrigin(origins = "http://localhost:5173")
+@CrossOrigin(origins = "http://localhost:5173")
 
 @RestController
 @RequestMapping("api/chats")
@@ -33,6 +37,9 @@ public class ChatController
     @Autowired
     private AgentExternalService agentExternalService;
     
+    @Autowired
+    private MessageService messageService;
+
     @Autowired
     private MessageService messageService;
 

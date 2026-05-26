@@ -3,6 +3,8 @@ package br.ufc.crateus.pi2.botservice.controllers;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,6 +24,7 @@ import br.ufc.crateus.pi2.botservice.services.ChatService;
 import br.ufc.crateus.pi2.botservice.services.UserService;
 import br.ufc.crateus.pi2.botservice.services.commands.CreateChatCommand;
 import br.ufc.crateus.pi2.botservice.services.commands.UpdateUserCommand;
+@CrossOrigin(origins = "http://localhost:5173")
 
 @RestController
 @RequestMapping("api/users")
