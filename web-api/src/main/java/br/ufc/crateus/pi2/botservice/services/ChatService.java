@@ -20,6 +20,9 @@ public class ChatService
 {
     @Autowired
     private final ChatRepository chatRepository;
+    
+    @Autowired
+    private final UserRepository userRepository;
 
     @Autowired
     private final UserRepository userRepository;
@@ -58,7 +61,7 @@ public class ChatService
     {
         var existingChat = getById(id);
 
-        if(existingChat == null) 
+        if(existingChat.isEmpty())
             return null;
 
         var chatToUpdate = existingChat.get();

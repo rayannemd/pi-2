@@ -36,6 +36,9 @@ public class ChatController
     
     @Autowired
     private AgentExternalService agentExternalService;
+    
+    @Autowired
+    private MessageService messageService;
 
     @Autowired
     private MessageService messageService;
@@ -88,9 +91,9 @@ public class ChatController
     }
 
     @DeleteMapping("/{id}")
-    public HttpStatus deleteChat(@PathVariable Long id) 
+    public ResponseEntity<Chat> deleteChat(@PathVariable Long id)
     {
         chatService.delete(id);
-        return HttpStatus.NO_CONTENT;
+        return ResponseEntity.noContent().build();
     }
 }
