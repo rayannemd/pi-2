@@ -69,8 +69,8 @@ public class UserController
     @PostMapping("/{id}/chats")
     public ResponseEntity<Chat> createChat(@PathVariable Long id, @RequestBody CreateChatCommand command)
     {
-        chatService.add(id, command);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+        var chat = chatService.add(id, command);
+        return new ResponseEntity<>(chat, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")

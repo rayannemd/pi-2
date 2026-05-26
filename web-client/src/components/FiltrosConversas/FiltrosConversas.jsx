@@ -30,8 +30,8 @@ export default function FiltrosConversas({ aoSelecionarFiltro, filtroAtivo = 'to
 
       <Menu anchorEl={anchorEl} open={open} onClose={() => handleClose()}>
         <MenuItem onClick={() => handleClose('todos')}>Todos</MenuItem>
-        <MenuItem onClick={() => handleClose('urgente')}>Urgente</MenuItem>
-        <MenuItem onClick={() => handleClose('pendentes')}>Pendentes</MenuItem>
+        <MenuItem onClick={() => handleClose('resolvido')}>Resolvidos</MenuItem>
+        <MenuItem onClick={() => handleClose('pendente')}>Pendentes</MenuItem>
       </Menu>
 
       {/* --- O MARCADOR AGORA VIVE AQUI DENTRO --- */}

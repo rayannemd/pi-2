@@ -1,7 +1,7 @@
 import "./TelaLogin.css";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { config, z } from "zod";
+import { z } from "zod";
 import Logo from "../../components/Logo/Logo.jsx";
 
 const loginSchema = z.object({
@@ -40,7 +40,7 @@ export default function TelaLogin() {
       name: "Usuário Teste",
       email: "teste@gmail.com",
       password: "123456",
-      cpf_cnpj: "11111111111",
+      cpfCnpj: "11111111111",
       type: "CUSTOMER",
     };
 
@@ -49,7 +49,7 @@ export default function TelaLogin() {
       name: "Usuário Admin",
       email: "admin@gmail.com",
       password: "654321",
-      cpf_cnpj: "22222222222",
+      cpfCnpj: "22222222222",
       type: "ADMIN",
     };
 

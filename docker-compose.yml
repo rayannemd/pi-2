@@ -7,7 +7,7 @@ services:
     image: mysql:8.0
     container_name: mysql_chatbot_pi2
     restart: always
-    command: --default-authentication-plugin=mysql_native_password
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
     environment:
       MYSQL_DATABASE: chatbot
       MYSQL_ROOT_PASSWORD: root
@@ -29,7 +29,7 @@ services:
     ports:
       - "8080:8080"
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/chatbot?useSSL=false
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/chatbot?useSSL=false&characterEncoding=UTF-8&useUnicode=true
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
     networks:
