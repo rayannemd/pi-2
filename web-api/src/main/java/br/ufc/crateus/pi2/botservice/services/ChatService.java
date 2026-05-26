@@ -24,9 +24,6 @@ public class ChatService
     @Autowired
     private final UserRepository userRepository;
 
-    @Autowired
-    private final UserRepository userRepository;
-
     public ChatService(
         ChatRepository chatRepository, 
         UserRepository userRepository)  

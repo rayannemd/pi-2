@@ -40,9 +40,6 @@ public class ChatController
     @Autowired
     private MessageService messageService;
 
-    @Autowired
-    private MessageService messageService;
-
     @GetMapping
     public ResponseEntity<List<Chat>> getAllChats() 
     {
