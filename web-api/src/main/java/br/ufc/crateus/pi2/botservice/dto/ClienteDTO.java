@@ -7,8 +7,8 @@ import lombok.Value;
 
 @Value
 @JsonInclude(JsonInclude.Include.NON_NULL) // remove os elementos =null na serialização
-public class Devedor {
-    String nome;
-    String cpf;
-    String cnpj;
+public class ClienteDTO {
+    private String nome;
+    private String cpf;
+    private String cnpj;
 }
