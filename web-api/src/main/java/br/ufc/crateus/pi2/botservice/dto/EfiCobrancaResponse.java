@@ -5,13 +5,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
-public class CobrancaResponse {
-    private Calendario calendario;
+public class EfiCobrancaResponse {
+    private EfiCalendario calendario;
     
     @JsonProperty("devedor")
-    private ClienteDTO clienteDTO;
+    private EfiClienteDTO clienteDTO;
 
-    private Valor valor;
+    private EfiValor valor;
 
     private String chave;
 

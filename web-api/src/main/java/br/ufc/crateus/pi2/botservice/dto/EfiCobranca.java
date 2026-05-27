@@ -6,14 +6,14 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Value;
 
 @Value
-public class Cobranca {
-    private Calendario calendario;
+public class EfiCobranca {
+    private EfiCalendario calendario;
 
     @JsonInclude(JsonInclude.Include.NON_NULL)
     @JsonProperty("devedor")
-    private ClienteDTO clienteDTO;
+    private EfiClienteDTO clienteDTO;
 
-    private Valor valor;
+    private EfiValor valor;
 
     private String chave;
 
