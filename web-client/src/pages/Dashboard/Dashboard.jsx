@@ -8,75 +8,81 @@ import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
 import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
-import { BarChart } from "@mui/x-charts/BarChart";
-
 // Importação do Gráfico do MUI
 import { PieChart } from '@mui/x-charts/PieChart';
 
 export default function Dashboard() {
 
-  // Estados dos Cards Superiores
+  // esse useState indica que os dados de "dadosCard" devem começar com os dados que estão na lista []
+  // e setDados indica a fubnção que vai atualizar esses dados algum momento. 
   const [dadosCards, setDadosCards] = useState([
-    
-        { title: "Total de Chats", icon: ChatBubbleIcon, data: "..." },
     { title: "Atendimento por ChatBot", icon: SmartToyIcon, data: "..." },
-
-     { title: "Sucesso ChatBot", icon: SmartToyIcon, data: "..." },
-    { title: "Total Pendentes", icon: ChatBubbleIcon, data: "..." },
-
-  
-     { title: "Média Avaliação", icon: MovingIcon, data: "..." },
+    { title: "Sucesso ChatBot", icon: SmartToyIcon, data: "..." },
+    { title: "Média Avaliação", icon: MovingIcon, data: "..." },
+    { title: "Total atendimentos", icon: ChatBubbleIcon, data: "..." },
+    { title: "Fila de espera", icon: PeopleAltIcon, data: "..." },
+    { title: "Tempo médio", icon: AccessTimeIcon, data: "..." },
   ]);
 
-  // Estados dos novos gráficos gerais e detalhamentos
-  const [dadosMensagens, setDadosMensagens] = useState([]);
-  const [dadosChats, setDadosChats] = useState([]);
-  const [periodoSelecionado, setPeriodoSelecionado] = useState('Hoje');
+  const [dadosCanais, setDadosCanais] = useState([]); // Enviados
+  const [dadosRecebidos, setDadosRecebidos] = useState([]); // Recebidos
+  const [dadosSetores, setDadosSetores] = useState([]);
 
-  // Sistema de cores dinâmicas para o mapeamento dos componentes
+  // Função para definir a cor de cada item (Canais e Setores)
   const getCorGeral = (label) => {
     const cores = {
-      'Recebidas': '#AE3841',
-      'Enviadas': '#7D6161',
-      'Agente Humano': '#8D212A',
-      'Agente Virtual / Bot': '#c2aaac',
+      // Canais
+      'WhatsApp': '#075E54',  
+      'Instagram': '#C13584', 
+      'E-mail': '#005A9E',    
+      // Setores
+      'Suporte': '#FF8C00',   
+      'Vendas': '#4CAF50',    
+      'Financeiro': '#607D8B', 
     };
     return cores[label] || '#777777';
   };
 
   useEffect(() => {
     const buscarDadosDoBanco = async () => {
-      // Simula tempo de resposta do servidor
-      // await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 1000));
 
       const dadosVindosDoBack = {
         atendimentosBot: 150,
         sucessoBot: "95%",
         mediaAvaliacao: "4.8/5",
-        totalPendentes: 84,
+        totalGeral: 200,
         fila: 5,
-        totalChats: 15616,
-        totalRecebidas: 464,
-        totalEnviadas: 256,
-        chatsConcluidosHumano: 140,
-        chatsConcluidosBot: 60
+        tempoMedio: "10 min",
+        envios: [
+          { label: 'WhatsApp', value: 200  },
+          { label: 'Instagram', value: 45 },
+          { label: 'E-mail', value: 11 }
+        ],
+        recebimentos: [
+          { label: 'WhatsApp', value: 312 },
+          { label: 'Instagram', value: 98 },
+          { label: 'E-mail', value: 54 }
+        ],
+        setores: [
+          { label: 'Suporte', value: 100 },
+          { label: 'Vendas', value: 80 },
+          { label: 'Financeiro', value: 20 }
+        ]
       };
 
-      // Atualiza os Cards superiores
       setDadosCards((prev) =>
         prev.map((card) => {
-        
+          if (card.title === "Atendimento por ChatBot") return { ...card, data: dadosVindosDoBack.atendimentosBot };
           if (card.title === "Sucesso ChatBot") return { ...card, data: dadosVindosDoBack.sucessoBot };
-          if (card.title === "Atendimento por ChatBot") return { ...card, data: dadosVindosDoBack.chatsConcluidosBot};
           if (card.title === "Média Avaliação") return { ...card, data: dadosVindosDoBack.mediaAvaliacao };
-          if (card.title === "Total Pendentes") return { ...card, data: dadosVindosDoBack.totalPendentes };
-
-          if (card.title === "Total de Chats") return { ...card, data: dadosVindosDoBack.totalChats };
+          if (card.title === "Total atendimentos") return { ...card, data: dadosVindosDoBack.totalGeral };
+          if (card.title === "Fila de espera") return { ...card, data: dadosVindosDoBack.fila };
+          if (card.title === "Tempo médio") return { ...card, data: dadosVindosDoBack.tempoMedio };
           return card;
         })
       );
 
-      // Função que padroniza os IDs, cores e calcula as fatias porcentuais (pct)
       const prepararDados = (lista) => {
         const total = lista.reduce((a, b) => a + b.value, 0);
         return lista.map((item, idx) => ({
@@ -84,48 +90,25 @@ export default function Dashboard() {
           value: item.value,
           label: item.label,
           color: getCorGeral(item.label),
-          pct: total > 0 ? ((item.value / total) * 100).toFixed(1) : "0"
+          pct: total > 0 ? ((item.value / total) * 100).toFixed(1) : 0
         })).sort((a, b) => b.value - a.value);
       };
 
-      // Alimenta os estados do componente com as estruturas prontas
-      setDadosMensagens(prepararDados([
-        { label: 'Recebidas', value: dadosVindosDoBack.totalRecebidas },
-        { label: 'Enviadas', value: dadosVindosDoBack.totalEnviadas }
-      ]));
-
-      setDadosChats(prepararDados([
-        { label: 'Agente Humano', value: dadosVindosDoBack.chatsConcluidosHumano },
-        { label: 'Agente Virtual / Bot', value: dadosVindosDoBack.chatsConcluidosBot }
-      ]));
+      setDadosCanais(prepararDados(dadosVindosDoBack.envios));
+      setDadosRecebidos(prepararDados(dadosVindosDoBack.recebimentos));
+      setDadosSetores(prepararDados(dadosVindosDoBack.setores));
     };
 
     buscarDadosDoBanco();
   }, []);
 
-  const periodos = ["Hoje", "7 dias", "15 dias", "30 dias"];
-
   return (
     <>
       <NavBar />
       <div className="background--box">
-
+        
         {/* CARDS KPI */}
         <div className="cards--container">
-          <div className="dashboard--filtros">
-            <span className="filtros--titulo">Filtrar por Período:</span>
-            <div className="filtros--botoes">
-              {periodos.map((periodo) => (
-                <button
-                  key={periodo}
-                  className={`btn--data ${periodoSelecionado === periodo ? 'active' : ''}`}
-                  onClick={() => setPeriodoSelecionado(periodo)}
-                >
-                  {periodo}
-                </button>
-              ))}
-            </div>
-          </div>
           {dadosCards.map((card, index) => (
             <div key={index} className="card--wrapper">
               <div className="dashboard--card">
@@ -139,84 +122,108 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* GRÁFICOS GERAIS */}
-        <div className="linha--dash">
-          <div className="content--container">
-            
-            {/* Bloco 1: Mensagens Totais */}
-            <div className="grande--box">
-              <h3 className="box--title">Mensagens Totais</h3>
-              <PieChart
-                series={[{ data: dadosMensagens, innerRadius: 40 }]}
-                width={400} height={200}
-              />
-              <div className="box--totalizador">
-                <span>Total: </span>
-                <strong>
-                 {dadosMensagens.reduce((acumulador, item) => acumulador + item.value, 0)} Mensagens
-      
-                </strong>
-              </div>
-            </div>
-
-            {/* Bloco 2: Conclusões de Chats */}
-            <div className="grande--box">
-              <h3 className="box--title">Chats Resolvidos</h3>
-              <PieChart
-                series={[{ data: dadosChats, innerRadius: 40 }]}
-                width={400} height={200}
-              />
-              <div className="box--totalizador">
-                <span>Total Resolvidos: </span>
-                <strong>
-                  {dadosChats.reduce((acumulador, item) => acumulador + item.value, 0)} chats
-                </strong>
-              </div>
-            </div>
-
-          </div>
-
-          {/* RESUMOS E BLOCO ALOCAR */}
-          <div className="coluna-direita">
-            <div className="resumo--container">
-              <div className="resumo--grupo">
-                <div className="pequena--box">
-                  <span className="resumo--label">Predominante: {dadosMensagens[0]?.label || "..."}</span>
-                  <span className="resumo--valor">{dadosMensagens[0]?.pct || "0"}%</span>
-                </div>
-                <div className="pequena--box">
-                  <span className="resumo--label">Menor Volume: {dadosMensagens[1]?.label || "..."}</span>
-                  <span className="resumo--valor">{dadosMensagens[1]?.pct || "0"}%</span>
-                </div>
-              </div>
-              <div className="resumo--grupo">
-                <div className="pequena--box">
-                  <span className="resumo--label">Taxa de Conclusão: {dadosChats[0]?.label || "..."}</span>
-                  <span className="resumo--valor">{dadosChats[0]?.pct || "0"}%</span>
-                </div>
-                <div className="pequena--box">
-                  <span className="resumo--label">Taxa de Conclusão: {dadosChats[1]?.label || "..."}</span>
-                  <span className="resumo--valor">{dadosChats[1]?.pct || "0"}%</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="alocar">
-              <h3 className="box--title">Avaliações</h3>
-              <div className="alocar--conteudo">
-            <BarChart
-              xAxis={[{ data: ['1 Estrelas', '2 Estrelas' , '3 Estrelas' , '4 Estrelas' , '5 Estrelas' ] }]}
-                yAxis={[{ min: 0, max: 5 }]}
-              series={[{ data: [4, 3, 5, 4, 7] }]}
-              height={300}
-            />
-              </div>
-            </div>
-          </div> 
+        <div className="graficos-estatisticos">
+          <p>GRÁFICOS ESTATÍSTICOS</p>
         </div>
 
-  
+        {/* GRÁFICOS GERAIS */}
+        <div className="content--container">
+          <div className="grande--box">
+            <h3 className="box--title">Atendimento por canal</h3>
+            <PieChart
+              series={[{ data: dadosCanais, innerRadius: 40 }]}
+              width={400} height={200}
+            />
+          </div>
+          <div className="grande--box">
+            <h3 className="box--title">Atendimento por setor</h3>
+            <PieChart
+              series={[{ data: dadosSetores, innerRadius: 40 }]}
+              width={400} height={200}
+            />
+          </div>
+        </div>
 
+        {/* RESUMOS */}
+        <div className="resumo--container">
+          <div className="resumo--grupo">
+            <div className="pequena--box">
+              <span className="resumo--label">Líder: {dadosCanais[0]?.label}</span>
+              <span className="resumo--valor">{dadosCanais[0]?.pct}%</span>
+            </div>
+            <div className="pequena--box">
+              <span className="resumo--label">Menor: {dadosCanais[dadosCanais.length-1]?.label}</span>
+              <span className="resumo--valor">{dadosCanais[dadosCanais.length-1]?.pct}%</span>
+            </div>
+          </div>
+          <div className="resumo--grupo">
+            <div className="pequena--box">
+              <span className="resumo--label">Setor Ativo: {dadosSetores[0]?.label}</span>
+              <span className="resumo--valor">{dadosSetores[0]?.pct}%</span>
+            </div>
+            <div className="pequena--box">
+              <span className="resumo--label">Setor Inativo: {dadosSetores[dadosSetores.length-1]?.label}</span>
+              <span className="resumo--valor">{dadosSetores[dadosSetores.length-1]?.pct}%</span>
+            </div>
+          </div>
+        </div>
+            
+        <div className="secaoMensagens--box">
+          <p>QUANTIDADE DE MENSAGENS ENVIADAS E RECEBIDAS</p>
+        </div>
+
+        {/* DETALHAMENTO DE MENSAGENS */}
+        <div className="content--container">
+          <div className="grande--box" style={{ height: 'auto', minHeight: '600px' }}>
+            <div className="duas--colunas--container">
+              
+              <div className="coluna--dados">
+                <h4 className="coluna--titulo-principal">Mensagens Enviadas:</h4>
+                <div className="lista--canais">
+                  {dadosCanais.map((canal) => (
+                    <div key={canal.id} className="item--canal">
+                      <span style={{ color: canal.color, fontWeight: 'bold' }}>{canal.label}</span>
+                      <span className="valor--stats">{canal.value}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="grafico--proporcao">
+                  <PieChart
+                    series={[{ data: dadosCanais, innerRadius: 35 }]}
+                    width={280} height={180}
+                    slotProps={{ legend: { hidden: true } }}
+                    sx={{ marginBottom: '-15px' }}
+                  />
+                  <p className="legenda--grafico">Proporção de Envios</p>
+                </div>
+              </div>
+
+              <div className="divisor--vertical"></div>
+
+              <div className="coluna--dados">
+                <h4 className="coluna--titulo-principal">Mensagens Recebidas:</h4>
+                <div className="lista--canais">
+                  {dadosRecebidos.map((canal) => (
+                    <div key={canal.id} className="item--canal">
+                      <span style={{ color: canal.color, fontWeight: 'bold' }}>{canal.label}</span>
+                      <span className="valor--stats">{canal.value}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="grafico--proporcao">
+                  <PieChart
+                    series={[{ data: dadosRecebidos, innerRadius: 35 }]}
+                    width={280} height={180}
+                    slotProps={{ legend: { hidden: true } }}
+                    sx={{ marginBottom: '-15px' }}
+                  />
+                  <p className="legenda--grafico">Proporção de Recebimentos</p>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
       </div>
     </>
   );
