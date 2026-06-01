@@ -18,6 +18,29 @@ export default function Chat() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
+  // Carrega mensagens anteriores quando o chatId estiver pronto
+  useEffect(() => {
+    if (!chatId) return;
+
+    fetch(`${API_URL}/api/chats/${chatId}/messages`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Erro ao buscar mensagens");
+        return res.json();
+      })
+      .then(data => {
+        const historicoFormatado = data.map(msg => ({
+          userId: msg.issuer === "USER" ? "me" : "agent",
+          content: msg.content,
+        }));
+        setMessages(historicoFormatado);
+      })
+      .catch(err => console.error("❌ Erro ao carregar histórico:", err));
+  }, [chatId]);
+
   //Cria ou retorna um chat existente quando o usuário abre a tela
   useEffect(() => {
     const storedChatId = localStorage.getItem("chatId");
