@@ -29,7 +29,7 @@ public class AgentHandledResponseDto
         var r = new AgentHandledResponseDto();
             r.type = type;
             r.payload = payload;
-            
+
         return r;
     }
 }

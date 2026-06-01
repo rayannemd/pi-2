@@ -10,7 +10,7 @@ import br.ufc.crateus.pi2.botservice.models.Message;
 import br.ufc.crateus.pi2.botservice.repositories.MessageRepository;
 
 @Service
-public class MessageService 
+public class MessageService
 {
     @Autowired
     private MessageRepository messageRepository;
@@ -26,7 +26,7 @@ public class MessageService
         message.setContent(dto.getContent());
         message.setChat(dto.getChat());
         message.setIssuer(dto.getIssuer());
-        
+
         return messageRepository.save(message);
     }
 }

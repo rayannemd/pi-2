@@ -26,7 +26,7 @@ public class ChatService
 
     public ChatService(
         ChatRepository chatRepository, 
-        UserRepository userRepository) 
+        UserRepository userRepository)  
     {
         this.chatRepository = chatRepository;
         this.userRepository = userRepository;   
@@ -46,10 +46,10 @@ public class ChatService
     {
         User user = userRepository.findById(userId)
             .orElseThrow(() -> new UserNotFoundException());
-        
+
         Chat newChat = command.toChat();
         newChat.setUser(user);
-        
+
         chatRepository.save(newChat);
         return newChat;
     }
