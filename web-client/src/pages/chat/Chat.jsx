@@ -130,7 +130,7 @@ export default function Chat() {
         }
         return;
       }
-      case "payment_request": {
+      case "pagamento_plano": {
         const charge = data?.payload;
         if (!charge) return;
         setMessages((prev) => [

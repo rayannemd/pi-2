@@ -79,7 +79,7 @@ public class AgentExternalService
                 return AgentHandledResponseDto.payload(type, services);
             }
 
-            case "payment_request" -> {
+            case "pagamento_plano" -> {
                 ChargeDto charge = chargeService.createForChat(chat.getId());
                 messageService.save(new ChatMessageDTO(
                         "Gerei sua cobrança Pix. Use o QR Code ou o copia-e-cola para pagar.",
