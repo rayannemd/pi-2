@@ -43,9 +43,6 @@ async def summary_to_model(state: MyState):
     return {"summary":summary.content}
 
 async def router(state: MyState):
-<<<<<<< HEAD
-    classification_prompt = f"Resumo da conversa: {state['summary']} \n Mensagem do usuário: {state['message']} \n Se o usuário informar que deseja consultar seu plano de internet atual, classifique como 'consulta_plano'. Se o usuário pedir para pagar, gerar uma cobrança, emitir um Pix, quitar a fatura ou variantes, classifique como 'pagamento_plano'.\nCaso não seja necessário acessar nenhuma informação no banco de dados, classifique como 'chat'. Seja rígido e aceite apenas o que tiver ligação com serviço de internet.\n"
-=======
     classification_prompt = f"""
     Resumo da conversa: {state['summary']}
 
@@ -56,7 +53,6 @@ async def router(state: MyState):
     Caso não se encaixe em nenhuma das opções acima, classifique como 'chat'.
     
     """
->>>>>>> 72b6e5a74a6723d4bc56b66d7668416bb37b23a1
     model_classifier = model.with_structured_output(PromptType)
     classification = await model_classifier.ainvoke([{"role": "system", "content": classification_prompt}])
     return {"classification": classification}
