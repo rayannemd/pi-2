@@ -3,6 +3,8 @@ import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 import { QRCodeCanvas } from "qrcode.react";
 import BarraLateral from "../../components/BarraConfigClient/BarraConfig";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import "./Chat.css";
 
 export default function Chat() {
@@ -13,21 +15,63 @@ export default function Chat() {
   const stompRef = useRef(null);
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
-  const WS_URL = import.meta.env.VITE_WS_URL || `${API_URL}/ws-chat`;
+  const userId = localStorage.getItem('userId');
 
+  //Faz o scroll automático
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages]);
 
+  // Carrega mensagens anteriores quando o chatId estiver pronto
+  useEffect(() => {
+    if (!chatId) return;
+
+    fetch(`${API_URL}/api/chats/${chatId}/messages`, {
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    })
+      .then(res => {
+        if (!res.ok) throw new Error("Erro ao buscar mensagens");
+        return res.json();
+      })
+      .then(data => {
+        const historicoFormatado = data.map(msg => ({
+          userId: msg.issuer === "USER" ? "me" : "agent",
+          content: msg.content,
+        }));
+        setMessages(historicoFormatado);
+      })
+      .catch(err => console.error("❌ Erro ao carregar histórico:", err));
+  }, [chatId]);
+
+  //Cria ou retorna um chat existente quando o usuário abre a tela
   useEffect(() => {
     const storedChatId = localStorage.getItem("chatId");
 
-    if (storedChatId) {
-      setChatId(storedChatId);
-      return;
+    if(storedChatId){
+      //Verifica se o chat existe no banco de dados
+      fetch(`${API_URL}/api/chats/${storedChatId}`, {
+        headers: {authorization: `Bearer ${localStorage.getItem("token")}`}
+      }).then(res => {
+        if (res.ok) { //Se o chat existir no banco retorna ele
+          setChatId(storedChatId);
+        }else{ //Se o chat com esse ID não existir mais, limpa o localStorage e cria outro
+          localStorage.removeItem("chatId");
+          criarNovoChat();
+        }
+      });
+    }else{
+      criarNovoChat();
     }
+  }, []);
 
-    fetch(`${API_URL}/api/chats`, {
+  // Função para criar um novo chat
+  function criarNovoChat(){
+    console.log("Criando novo chat...");
+    console.log(userId);
+
+    fetch(`${API_URL}/api/users/${userId}/chats`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -35,57 +79,21 @@ export default function Chat() {
       },
       body: JSON.stringify({ title: "", summary: "", type: "NORMAL" }),
     })
-      .then(async (res) => {
-        if (!res.ok) throw new Error(`Erro ao criar chat: HTTP ${res.status}`);
+      .then((res) => {
+        if (!res.ok) throw new Error("Erro ao criar chat");
         return res.json();
       })
-      .then((chat) => {
-        if (!chat?.id) throw new Error("Backend nao retornou id do chat");
-        localStorage.setItem("chatId", chat.id);
+      .then((chat) => {''
+        localStorage.setItem("chatId", chat.id)
         setChatId(chat.id);
+        console.log("✅ Chat criado com sucesso. Id do chat: ", chat.id);
       })
-      .catch((err) => console.error("Erro ao criar chat:", err));
-  }, []);
+      .catch((err) => {
+        console.error("❌ Erro ao criar chat:", err);
+      });
+  }
 
-  /* ===============================
-     WEBSOCKET — notificação de pagamento
-  =============================== */
-  useEffect(() => {
-    if (!chatId) return;
-
-    const client = new Client({
-      webSocketFactory: () => new SockJS(WS_URL),
-      reconnectDelay: 5000,
-      onConnect: () => {
-        client.subscribe(`/topic/chats/${chatId}`, (frame) => {
-          try {
-            const payload = JSON.parse(frame.body);
-            const content = payload?.content;
-            if (!content) return;
-
-            setMessages((prev) => [
-              ...prev,
-              { userId: "agent", content },
-            ]);
-          } catch (err) {
-            console.error("Erro ao processar mensagem do socket:", err);
-          }
-        });
-      },
-    });
-
-    client.activate();
-    stompRef.current = client;
-
-    return () => {
-      client.deactivate();
-      stompRef.current = null;
-    };
-  }, [chatId, WS_URL]);
-
-  /* ===============================
-     ENVIO DE MENSAGEM
-  =============================== */
+  //Envio de mensagens
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!input.trim() || !chatId) return;
@@ -95,6 +103,7 @@ export default function Chat() {
     setInput("");
 
     try {
+      //Envia a mensagem do cliente pro backend e espera a resposta do chat
       const response = await fetch(
         `${API_URL}/api/chats/${chatId}/messages`,
         {
@@ -110,7 +119,18 @@ export default function Chat() {
       if (!response.ok) throw new Error("Erro ao enviar mensagem");
 
       const data = await response.json();
-      handleAgentResponse(data);
+      const agentAnswer = data?.chatResponse?.answer;
+
+      if (!agentAnswer) return;
+
+      //Recebe a mensagem do agente e adiciona no chat
+      setMessages((prev) => [
+        ...prev,
+        {
+          userId: "agent",
+          content: agentAnswer,
+        },
+      ]);
     } catch (err) {
       console.error("Erro no envio:", err);
     }

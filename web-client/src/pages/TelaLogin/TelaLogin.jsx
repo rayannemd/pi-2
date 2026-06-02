@@ -1,7 +1,7 @@
 import "./TelaLogin.css";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { config, z } from "zod";
+import { z } from "zod";
 import Logo from "../../components/Logo/Logo.jsx";
 
 const loginSchema = z.object({
@@ -111,6 +111,7 @@ export default function TelaLogin() {
             console.log("Resposta do backend:", data);
 
             localStorage.setItem("token", data.token);
+            localStorage.setItem("userId", data.id)
 
             if(data.userType == "CUSTOMER"){
               navigate("/home")

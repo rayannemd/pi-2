@@ -1,7 +1,7 @@
 export const mensagensMock = [
   {
     id: 2,
-    conversaId: 1,
+    conversaId: 2,
     texto: "Olá",
     remetente: "cliente",
     hora: "12:50"
@@ -10,7 +10,7 @@ export const mensagensMock = [
     id: 1,
     conversaId: 2,
     texto: "Oi Maria, em que posso ajudar?",
-    remetente: "adm",
+    remetente: "admin",
     hora: "12:51"
   }
 ];

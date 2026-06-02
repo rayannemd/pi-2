@@ -36,6 +36,7 @@ public class Chat extends BaseEntity
 
     private String title;
 
+    @Column(columnDefinition = "TEXT")
     private String summary;
 
     @Enumerated(EnumType.STRING)

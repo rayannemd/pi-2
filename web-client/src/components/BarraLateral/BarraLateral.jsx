@@ -5,6 +5,7 @@ import ListaConversa from "../ListaConversa/ListaConversa.jsx";
 import HomeIcon from '@mui/icons-material/Home';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { useNavigate } from 'react-router-dom';
+ 
 
 import { 
   Avatar, 
@@ -21,8 +22,9 @@ import {
 import FiltrosConversas from "../FiltrosConversas/FiltrosConversas.jsx";
 import { Navigate } from 'react-router-dom';
 
+
 // Adicionamos 'listaDeConversas' vinda do Pai (ConversasInit)
-export default function BarraLateral({filtroAtivo, conversas, aoSelecionarChat, aoSelecionarFiltro }) {
+export default function BarraLateral({filtroAtivo, conversas, mudarChatSelecionado, mudarFiltroSelecionado }) {
 
   //console.log("BarraLateral recebeu conversas:", conversas);
 //console.log("Filtro ativo:", filtroAtivo);
@@ -37,7 +39,7 @@ const irPara = (rota) => { navigate(rota); handleClose(); }
 
   const theme = useTheme();
 
-  console.log("Conversas recebidas na BarraLateral:", conversas);
+  // console.log("Conversas recebidas na BarraLateral:", conversas);
 
   return (
     <Drawer 
@@ -76,7 +78,7 @@ const irPara = (rota) => { navigate(rota); handleClose(); }
 
         <Box>
           <FiltrosConversas 
-            aoSelecionarFiltro={aoSelecionarFiltro}
+            aoSelecionarFiltro={mudarFiltroSelecionado}
             filtroAtivo={filtroAtivo} 
           />
         </Box>
@@ -88,7 +90,7 @@ const irPara = (rota) => { navigate(rota); handleClose(); }
       <Box sx={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
         {/* Passamos a listaDeConversas que veio do Pai para o Neto */}
         <ListaConversa 
-          aoClicarNoChat={aoSelecionarChat}
+          aoClicarNoChat={mudarChatSelecionado}
           conversas={conversas}
         />
       </Box>

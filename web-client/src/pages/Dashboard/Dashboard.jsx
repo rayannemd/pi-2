@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./Dashboard.css";
+
 import NavBar from "../../components/Navbar/NavBar.jsx";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import MovingIcon from "@mui/icons-material/Moving";
@@ -11,6 +12,9 @@ import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { PieChart } from '@mui/x-charts/PieChart';
 
 export default function Dashboard() {
+
+  // esse useState indica que os dados de "dadosCard" devem começar com os dados que estão na lista []
+  // e setDados indica a fubnção que vai atualizar esses dados algum momento. 
   const [dadosCards, setDadosCards] = useState([
     { title: "Atendimento por ChatBot", icon: SmartToyIcon, data: "..." },
     { title: "Sucesso ChatBot", icon: SmartToyIcon, data: "..." },
@@ -51,7 +55,7 @@ export default function Dashboard() {
         fila: 5,
         tempoMedio: "10 min",
         envios: [
-          { label: 'WhatsApp', value: 1000 },
+          { label: 'WhatsApp', value: 200  },
           { label: 'Instagram', value: 45 },
           { label: 'E-mail', value: 11 }
         ],

@@ -2,6 +2,10 @@ package br.ufc.crateus.pi2.botservice.controllers;
 
 import java.util.List;
 
+import org.springframework.http.HttpStatus;
+
+import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
