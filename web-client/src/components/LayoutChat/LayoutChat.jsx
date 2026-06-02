@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Avatar, TextField, IconButton, Menu, MenuItem } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { mensagensMock } from '../../Mock/mensagensMock';
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 
 export default function LayoutChat({ conversaAtual, resolverConversa, setExibirMensagem }) {
@@ -19,19 +20,24 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
   const [mensagensDoBackEnd, setMensagensDoBackEnd] = useState([]);
   
 
-
-
-
-  // Carregar mensagens do mock da conversa selecionada
-  // pega o id das conversas e exibe apenas o necessário na conversa, sem vazar de outros id (outra conversa)
+  //O mesmo useEffect da tela do client, apenas algumas alterações
   useEffect(() => {
     if (!conversaAtual) return;
 
-    const msgsDaConversa = mensagensMock.filter(
-      msg => msg.conversaId === conversaAtual.id
-    );
-
-    setMensagensDoBackEnd(msgsDaConversa);
+    fetch(`${API_URL}/api/chats/${conversaAtual.id}/messages`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    })
+      .then(res => res.json())
+      .then(data => {
+        const mensagensFormatadas = data.map(msg => ({
+          id: msg.id,
+          texto: msg.content,
+          remetente: msg.issuer === "USER" ? "cliente" : "adm",
+          hora: new Date(msg.createDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+        }));
+        setMensagensDoBackEnd(mensagensFormatadas);
+      })
+      .catch(err => console.error("Erro ao buscar mensagens:", err));
   }, [conversaAtual]);
 
 
