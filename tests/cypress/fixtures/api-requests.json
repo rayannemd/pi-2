@@ -1,0 +1,124 @@
+{
+  "auth": {
+    "login": {
+      "method": "POST",
+      "url": "/api/auth/login",
+      "body": {
+        "email": "nathantest@test.test",
+        "password": "123456"
+      }
+    },
+    "createUser": {
+      "method": "POST",
+      "url": "/api/auth",
+      "body": {
+        "name": "Usuário Teste",
+        "email": "usuario@test.test",
+        "password": "123456",
+        "cpf_cnpj": "12345678900",
+        "type": "CUSTOMER"
+      }
+    }
+  },
+  "users": {
+    "getAll": {
+      "method": "GET",
+      "url": "/api/users"
+    },
+    "getById": {
+      "method": "GET",
+      "url": "/api/users/{id}"
+    },
+    "getUserServices": {
+      "method": "GET",
+      "url": "/api/users/{id}/services"
+    },
+    "addService": {
+      "method": "POST",
+      "url": "/api/users/{id}/services",
+      "body": "Serviço De Teste"
+    },
+    "update": {
+      "method": "PUT",
+      "url": "/api/users/{id}",
+      "body": {
+        "name": "Usuário Atualizado",
+        "email": "usuario@test.test",
+        "type": "CUSTOMER"
+      }
+    },
+    "delete": {
+      "method": "DELETE",
+      "url": "/api/users/{id}"
+    }
+  },
+  "services": {
+    "getAll": {
+      "method": "GET",
+      "url": "/api/services"
+    },
+    "getById": {
+      "method": "GET",
+      "url": "/api/services/{id}"
+    },
+    "create": {
+      "method": "POST",
+      "url": "/api/services",
+      "body": {
+        "name": "Serviço De Teste",
+        "description": "Apenas mais um teste"
+      }
+    },
+    "update": {
+      "method": "PUT",
+      "url": "/api/services/{id}",
+      "body": {
+        "name": "Serviço Atualizado",
+        "description": "Descrição atualizada"
+      }
+    },
+    "delete": {
+      "method": "DELETE",
+      "url": "/api/services/{id}"
+    }
+  },
+  "chats": {
+    "getAll": {
+      "method": "GET",
+      "url": "/api/chats"
+    },
+    "getById": {
+      "method": "GET",
+      "url": "/api/chats/{id}"
+    },
+    "create": {
+      "method": "POST",
+      "url": "/api/chats",
+      "body": {
+        "title": "Chat de Teste",
+        "summary": "Resumo do chat de teste",
+        "type": "NORMAL"
+      }
+    },
+    "sendMessage": {
+      "method": "POST",
+      "url": "/api/chats/{id}/message",
+      "body": {
+        "message": "Mensagem de teste",
+        "summary": "Resumo da mensagem"
+      }
+    },
+    "update": {
+      "method": "PUT",
+      "url": "/api/chats/{id}",
+      "body": {
+        "title": "Chat Atualizado",
+        "summary": "Resumo atualizado"
+      }
+    },
+    "delete": {
+      "method": "DELETE",
+      "url": "/api/chats/{id}"
+    }
+  }
+}

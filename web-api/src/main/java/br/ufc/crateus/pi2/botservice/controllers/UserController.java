@@ -3,6 +3,8 @@ package br.ufc.crateus.pi2.botservice.controllers;
 import java.util.List;
 import java.util.Set;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,11 +17,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.ufc.crateus.pi2.botservice.models.Chat;
 import br.ufc.crateus.pi2.botservice.models.Service;
 import br.ufc.crateus.pi2.botservice.models.User;
+import br.ufc.crateus.pi2.botservice.services.ChatService;
 import br.ufc.crateus.pi2.botservice.services.UserService;
+import br.ufc.crateus.pi2.botservice.services.commands.CreateChatCommand;
 import br.ufc.crateus.pi2.botservice.services.commands.UpdateUserCommand;
-
+@CrossOrigin(origins = "http://localhost:5173")
 
 @RestController
 @RequestMapping("api/users")
@@ -27,12 +32,15 @@ public class UserController
 {
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private ChatService chatService;
 
     @GetMapping
     public ResponseEntity<List<User>> getAllUsers() 
     {
-        List<User> users = userService.getAll();
-        return ResponseEntity.ok(users);
+        return ResponseEntity.ok(
+            userService.getAll());
     }
 
     @GetMapping("/{id}")
@@ -52,18 +60,17 @@ public class UserController
         return userService.getUserServices(id);
     }
 
-    @PostMapping("/{id}/services")
-    public HttpStatus addService(@PathVariable Long id, @RequestBody String serviceName) 
+    @GetMapping("/{id}/chats")
+    public List<Chat> getUserChats(@PathVariable Long id) 
     {
-        try 
-        {
-            userService.addService(id, serviceName);
-            return HttpStatus.OK;
-        } 
-        catch (IllegalArgumentException e) 
-        {
-            return HttpStatus.NOT_FOUND;
-        }
+        return userService.getUserChats(id);
+    }
+
+    @PostMapping("/{id}/chats")
+    public ResponseEntity<Chat> createChat(@PathVariable Long id, @RequestBody CreateChatCommand command)
+    {
+        var chat = chatService.add(id, command);
+        return new ResponseEntity<>(chat, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
@@ -78,9 +85,9 @@ public class UserController
     }
 
     @DeleteMapping("/{id}")
-    public HttpStatus deleteUser(@PathVariable Long id) 
+    public ResponseEntity<User> deleteUser(@PathVariable Long id)
     {
         userService.delete(id);
-        return HttpStatus.NO_CONTENT;
+        return ResponseEntity.noContent().build();
     }
 }

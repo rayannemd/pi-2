@@ -1,7 +1,7 @@
-//Dto usado pelo websocket
+package br.ufc.crateus.pi2.botservice.controllers.dtos;
 
-package br.ufc.crateus.pi2.botservice.dto;
-
+import br.ufc.crateus.pi2.botservice.models.Chat;
+import br.ufc.crateus.pi2.botservice.models.enums.EMessageIssuer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,8 +13,7 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ChatMessageDTO {
 
-    private Long chatId;
-    private Long senderId;
-    private String senderName;
     private String content;
+    private EMessageIssuer issuer;
+    private Chat chat;
 }
