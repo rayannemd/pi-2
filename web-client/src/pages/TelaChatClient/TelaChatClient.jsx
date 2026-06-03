@@ -37,27 +37,26 @@ export default function TelaChatClient() {
     conversa => filtro === 'todos' || conversa.categoria === filtro
   );
 
-function resolverConversa(id) {
-  //  setExbirMensagem(true);
-  setConversas(prev =>
-    prev.map(conversa => {
-      if (conversa.id === id) {
-        const conversaAtualizada = { ...conversa, categoria: "resolvido" };
-        setConversaSelecionada(conversaAtualizada);
-        return conversaAtualizada;
-      }
+  function resolverConversa(id) {
+    //  setExbirMensagem(true);
+    setConversas(prev =>
+      prev.map(conversa => {
+        if (conversa.id === id) {
+          const conversaAtualizada = { ...conversa, categoria: "resolvido" };
+          setConversaSelecionada(conversaAtualizada);
+          return conversaAtualizada;
+        }
      
 
       return conversa;
-    })
-  );
-}
+    }));
+  }
 
 
-const handleFecharMensagem = (event, reason) => {
-  if (reason === 'clickaway') return; // Impede fechar se clicar fora sem querer
-  setExibirMensagem(false);
-};
+  const handleFecharMensagem = (event, reason) => {
+    if (reason === 'clickaway') return; // Impede fechar se clicar fora sem querer
+    setExibirMensagem(false);
+  };
 
 
 
