@@ -10,13 +10,15 @@ import br.ufc.crateus.pi2.botservice.controllers.exceptions.ChatNotFoundExceptio
 import br.ufc.crateus.pi2.botservice.models.Chat;
 import br.ufc.crateus.pi2.botservice.models.enums.EMessageIssuer;
 import br.ufc.crateus.pi2.botservice.repositories.ChatRepository;
+import br.ufc.crateus.pi2.botservice.services.ChargeService;
 import br.ufc.crateus.pi2.botservice.services.MessageService;
 import br.ufc.crateus.pi2.botservice.services.commands.SendMessageCommand;
 import br.ufc.crateus.pi2.botservice.services.dtos.AgentHandledResponseDto;
 import br.ufc.crateus.pi2.botservice.services.dtos.AgentResponseDto;
+import br.ufc.crateus.pi2.botservice.services.dtos.ChargeDto;
 
 @Service
-public class AgentExternalService 
+public class AgentExternalService
 {
     private static final String BASE_URL = "http://agente:5000";
 
@@ -28,6 +30,9 @@ public class AgentExternalService
 
     @Autowired
     private MessageService messageService;
+
+    @Autowired
+    private ChargeService chargeService;
 
     public AgentHandledResponseDto sendMessage(Long chatId, SendMessageCommand command)
     {
@@ -60,20 +65,31 @@ public class AgentExternalService
     {
         var type = String.valueOf(response.getClassification().get("type"));
 
-        switch (type) 
+        switch (type)
         {
-            case "chat":
+            case "chat" -> {
                 chat.setSummary(response.getSummary());
                 messageService.save(new ChatMessageDTO(response.getAnswer(), EMessageIssuer.AGENT, chat));
                 return AgentHandledResponseDto.chat(response);
-            
-            case "consulta_plano":
+            }
+
+            case "consulta_plano" -> {
                 var user = chat.getUser();
                 var services = user.getServices();
                 return AgentHandledResponseDto.payload(type, services);
-                
-            default:
+            }
+
+            case "pagamento_plano" -> {
+                ChargeDto charge = chargeService.createForChat(chat.getId());
+                messageService.save(new ChatMessageDTO(
+                        "Gerei sua cobrança Pix. Use o QR Code ou o copia-e-cola para pagar.",
+                        EMessageIssuer.AGENT, chat));
+                return AgentHandledResponseDto.payload(type, charge);
+            }
+
+            default -> {
                 return null;
+            }
         }
     }
 }

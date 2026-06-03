@@ -1,4 +1,7 @@
 import { useEffect, useRef, useState } from "react";
+import SockJS from "sockjs-client";
+import { Client } from "@stomp/stompjs";
+import { QRCodeCanvas } from "qrcode.react";
 import BarraLateral from "../../components/BarraConfigClient/BarraConfig";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -9,13 +12,14 @@ export default function Chat() {
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
   const messagesEndRef = useRef(null);
+  const stompRef = useRef(null);
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
   const userId = localStorage.getItem('userId');
 
   //Faz o scroll automático
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages]);
 
   // Carrega mensagens anteriores quando o chatId estiver pronto
@@ -73,11 +77,7 @@ export default function Chat() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("token")}`,
       },
-      body: JSON.stringify({
-        title: "",
-        summary: "",
-        type: "NORMAL",
-      }),
+      body: JSON.stringify({ title: "", summary: "", type: "NORMAL" }),
     })
       .then((res) => {
         if (!res.ok) throw new Error("Erro ao criar chat");
@@ -98,11 +98,7 @@ export default function Chat() {
     e.preventDefault();
     if (!input.trim() || !chatId) return;
 
-    const userMessage = {
-      userId: "me",
-      content: input,
-    };
-
+    const userMessage = { userId: "me", content: input };
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
 
@@ -136,30 +132,79 @@ export default function Chat() {
         },
       ]);
     } catch (err) {
-      console.error("❌ Erro no envio:", err);
+      console.error("Erro no envio:", err);
     }
   };
 
+  const handleAgentResponse = (data) => {
+    if (!data) return;
+
+    switch (data.type) {
+      case "chat": {
+        const answer = data?.chatResponse?.answer;
+        if (answer) {
+          setMessages((prev) => [
+            ...prev,
+            { userId: "agent", content: answer },
+          ]);
+        }
+        return;
+      }
+      case "pagamento_plano": {
+        const charge = data?.payload;
+        if (!charge) return;
+        setMessages((prev) => [
+          ...prev,
+          {
+            userId: "agent",
+            kind: "charge",
+            charge,
+          },
+        ]);
+        return;
+      }
+      case "consulta_plano": {
+        // exibir lista de planos
+        setMessages((prev) => [
+          ...prev,
+          {
+            userId: "agent",
+            content: "Aqui estão os seus planos contratados.",
+          },
+        ]);
+        return;
+      }
+      default:
+        return;
+    }
+  };
+
+  /* ===============================
+     RENDER
+  =============================== */
   return (
     <div className="app-layout">
       <BarraLateral />
 
       <section className="chat-container">
         <section className="chat__messages">
-          {messages.map((msg, index) => (
-            <div
-              key={index}
-              className={
-                msg.userId === "me"
-                  ? "message--self"
-                  : "message--other"
-              }
-            >
-              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          {messages.map((msg, index) => {
+            if (msg.kind === "charge") {
+              return (
+                <ChargeBubble key={index} charge={msg.charge} />
+              );
+            }
+            return (
+              <div
+                key={index}
+                className={
+                  msg.userId === "me" ? "message--self" : "message--other"
+                }
+              >
                 {msg.content}
-              </ReactMarkdown>
-            </div>
-          ))}
+              </div>
+            );
+          })}
           <div ref={messagesEndRef} />
         </section>
 
@@ -177,6 +222,50 @@ export default function Chat() {
           </button>
         </form>
       </section>
+    </div>
+  );
+}
+
+function ChargeBubble({ charge }) {
+  const [copied, setCopied] = useState(false);
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(charge.copyPaste || "");
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2500);
+    } catch (err) {
+      console.error("Falha ao copiar:", err);
+    }
+  };
+
+  const amount = typeof charge.amount === "number"
+    ? charge.amount.toFixed(2)
+    : charge.amount;
+
+  return (
+    <div className="message--other charge-bubble">
+      <div className="charge-bubble__title">Cobrança Pix gerada</div>
+      <div className="charge-bubble__amount">R$ {amount}</div>
+
+      {charge.copyPaste && (
+        <div className="charge-bubble__qr">
+          <QRCodeCanvas value={charge.copyPaste} size={160} />
+        </div>
+      )}
+
+      <button
+        type="button"
+        className="charge-bubble__copy"
+        onClick={copy}
+        disabled={!charge.copyPaste}
+      >
+        {copied ? "Copiado!" : "Copiar código Pix"}
+      </button>
+
+      <div className="charge-bubble__status">
+        Status: {charge.status || "PENDING"}
+      </div>
     </div>
   );
 }

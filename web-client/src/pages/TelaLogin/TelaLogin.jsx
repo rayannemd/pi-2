@@ -26,7 +26,7 @@ export default function TelaLogin() {
 
     if (!result.success) {
       const formatted = {};
-      result.error.errors.forEach((err) => {
+      result.error.issues.forEach((err) => {
         formatted[err.path[0]] = err.message;
       });
       setErros(formatted);
@@ -40,7 +40,7 @@ export default function TelaLogin() {
       name: "Usuário Teste",
       email: "teste@gmail.com",
       password: "123456",
-      cpfCnpj: "11111111111",
+      cpfCnpj: "12345678909",
       type: "CUSTOMER",
     };
 
@@ -49,7 +49,7 @@ export default function TelaLogin() {
       name: "Usuário Admin",
       email: "admin@gmail.com",
       password: "654321",
-      cpfCnpj: "22222222222",
+      cpfCnpj: "98765432100",
       type: "ADMIN",
     };
 
