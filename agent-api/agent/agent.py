@@ -80,7 +80,7 @@ graph.add_node("output", output)
 graph.add_edge(START, "summary")
 graph.add_edge("summary", "router")
 
-graph.add_conditional_edges("router", lambda state: 'chat' if state['classification']['type'] == 'chat' else 'output',{'chat': 'answer', 'output': 'output'})
+graph.add_conditional_edges("router", lambda state: state['classification']['type'] if state['classification']['type'] == 'chat' else 'output',{'chat': 'answer', 'output': 'output'})
 
 graph.add_edge("output", END)
 

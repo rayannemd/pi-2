@@ -3,8 +3,6 @@ services:
     build: ./agent-api
     ports:
       - "5000:5000"
-    environment:
-      GROQ_API_KEY: ${GROQ_API_KEY}
   mysql:
     image: mysql:8.0
     container_name: mysql_chatbot_pi2
@@ -19,44 +17,8 @@ services:
       - mysql_data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-u", "root", "-p$$MYSQL_ROOT_PASSWORD"]
-      timeout: 5s
+      timeout: 5s  
       retries: 5
-
-  vault:
-    image: hashicorp/vault:1.18
-    container_name: vault_chatbot_pi2
-    cap_add:
-      - IPC_LOCK
-    environment:
-      VAULT_DEV_ROOT_TOKEN_ID: ${VAULT_TOKEN:-root-token-dev}
-      VAULT_DEV_LISTEN_ADDRESS: 0.0.0.0:8200
-      VAULT_ADDR: http://0.0.0.0:8200
-    ports:
-      - "8200:8200"
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://127.0.0.1:8200/v1/sys/health"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
-
-  vault-seed:
-    image: hashicorp/vault:1.18
-    container_name: vault_seed_chatbot_pi2
-    depends_on:
-      vault:
-        condition: service_healthy
-    environment:
-      VAULT_ADDR: http://vault:8200
-      VAULT_TOKEN: ${VAULT_TOKEN:-root-token-dev}
-      EFI_CLIENT_ID: ${EFI_CLIENT_ID}
-      EFI_CLIENT_SECRET: ${EFI_CLIENT_SECRET}
-      EFI_CERT_PASSWORD: ${EFI_CERT_PASSWORD:-}
-      EFI_PIX_KEY: ${EFI_PIX_KEY}
-    volumes:
-      - ./vault/seed.sh:/seed.sh:ro
-      - ./vault/efi.p12:/efi.p12:ro
-    entrypoint: ["/bin/sh", "/seed.sh"]
-    restart: "no"
 
   backend:
     build: ./web-api
@@ -64,19 +26,12 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
-      vault:
-        condition: service_healthy
-      vault-seed:
-        condition: service_completed_successfully
     ports:
       - "8080:8080"
     environment:
       SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/chatbot?useSSL=false&characterEncoding=UTF-8&useUnicode=true
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
-      VAULT_URI: http://vault:8200
-      VAULT_TOKEN: ${VAULT_TOKEN:-root-token-dev}
-      EFI_WEBHOOK_URL: ${EFI_WEBHOOK_URL:-}
     networks:
       - default
   frontend:
@@ -87,7 +42,7 @@ services:
         VITE_WS_URL: http://localhost:8080/ws-chat
     ports:
       - "5173:5173"
-
+ 
 
 volumes:
   mysql_data:
