@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useWebSocket } from "../../services/useWebSocket"
 import { Box, Typography, Avatar, TextField, IconButton, Menu, MenuItem } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -18,7 +19,15 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
 
   const [mensagem, setMensagem] = useState('');
   const [mensagensDoBackEnd, setMensagensDoBackEnd] = useState([]);
-  
+
+  const { enviarViaWebSocket } = useWebSocket(conversaAtual?.id, (novaMensagem) => {
+    setMensagensDoBackEnd(prev => [...prev, {
+      id: Math.random(),
+      texto: novaMensagem.content,
+      remetente: novaMensagem.issuer === "USER" ? "cliente" : "adm",
+      hora: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    }]);
+  });  
 
   //O mesmo useEffect da tela do client para carregar as mensagens antigas do chat, apenas algumas alterações
   useEffect(() => {
@@ -52,22 +61,10 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
       remetente: 'adm',
       hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
-    setMensagensDoBackEnd(prev => [...prev, novaMsg]);
     setMensagem('');
 
     // Salva no banco usando o mesmo endpoint do cliente
-    try {
-      await fetch(`${API_URL}/api/chats/${conversaAtual.id}/messages`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-        body: JSON.stringify({ message: novaMsg.texto }),
-      });
-    } catch (err) {
-      console.error("Erro ao salvar mensagem do admin:", err);
-    }
+    enviarViaWebSocket(conversaAtual.id, novaMsg.texto, "AGENT");
   };
 
   // Mensagem de "nenhuma conversa selecionada"
@@ -118,7 +115,7 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
 
       {/* MENSAGENS (bloco que fica as mensagens lá) */}
       <Box sx={{ flex: 1, overflowY: 'auto', p: 3, display: 'flex', flexDirection: 'column', gap: 2 , 
-        overflowY: 'auto', scrollbarWidth: 'none',}}>
+        scrollbarWidth: 'none',}}>
         {/* PAra cada mensagem do back, ele retorna esse box, que é a caixa de dialogo  */}
         {/* Sendo o remetendo esverdeada, e o cliente branca */}
         {mensagensDoBackEnd.map(msg => (
