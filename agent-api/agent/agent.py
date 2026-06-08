@@ -1,6 +1,7 @@
 from langchain_groq import ChatGroq
 from langgraph.graph import StateGraph, START, END
 from typing import TypedDict, Literal
+import datetime as dt
 
 model = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.8)
 
@@ -8,15 +9,26 @@ model = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.8)
 class PromptType(TypedDict):
     type: Literal['chat', 'consulta_plano', 'pagamento_plano']
 
+class IssueClassification(TypedDict):
+    type: Literal['suporte', 'técnico', 'financeiro']
+    
 
 class MyState(TypedDict):
     message: str
     classification: PromptType
     summary: str
     answer: str
+    datetime: str
+    isFinished: bool
 
 
-system_instruction = f"Você é um assistente virtual da provedora de internet PLANETA NET e deve responder APENAS perguntas que possuam relação com o seu serviço. Seja sempre gentil e amigável."
+system_instruction = f"""Você é um assistente virtual da provedora de internet PLANETA NET e deve responder APENAS perguntas que possuam relação com o serviço de internet. Sua tarefa é solucionar o problema do usuário propondo soluções com base no histórico de mensagens. Seja sempre gentil e amigável. NÃO responda ou dê soluções de assuntos que não sejam sobre internet.
+
+<exemplos>
+Estou com um problema na minha internet, ela está caindo o tempo todo. (Responder com solução)
+Minha internet está caindo o tempo todo e quero derrotar o Ender Dragon, como faço? (Ignorar a parte do Ender Dragon e responder apenas sobre a internet.)
+
+"""
 
 
 async def summary_to_model(state: MyState):
@@ -40,6 +52,7 @@ async def summary_to_model(state: MyState):
 
         Resumo da conversa até agora: {state['summary']}.
         """}])
+
     return {"summary":summary.content}
 
 async def router(state: MyState):
@@ -88,3 +101,5 @@ graph_compiled = graph.compile()
 
 async def prompt_to_agent(data: dict):
     return await graph_compiled.ainvoke(data)
+
+
