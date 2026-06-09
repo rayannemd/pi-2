@@ -1,25 +1,24 @@
 from langchain_groq import ChatGroq
 from langgraph.graph import StateGraph, START, END
 from typing import TypedDict, Literal
-import datetime as dt
 
 model = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.8)
 
 
 class PromptType(TypedDict):
-    type: Literal['chat', 'consulta_plano', 'pagamento_plano']
+    type: Literal['chat', 'consulta_plano', 'pagamento_plano', 'finalizado']
 
 class IssueClassification(TypedDict):
-    type: Literal['suporte', 'técnico', 'financeiro']
-    
+    issue: Literal['suporte', 'técnico', 'financeiro', 'none']
+
 
 class MyState(TypedDict):
     message: str
     classification: PromptType
+    issue_classification: IssueClassification
     summary: str
     answer: str
-    datetime: str
-    isFinished: bool
+    isTimedOut: bool
 
 
 system_instruction = f"""Você é um assistente virtual da provedora de internet PLANETA NET e deve responder APENAS perguntas que possuam relação com o serviço de internet. Sua tarefa é solucionar o problema do usuário propondo soluções com base no histórico de mensagens. Seja sempre gentil e amigável. NÃO responda ou dê soluções de assuntos que não sejam sobre internet.
@@ -29,6 +28,38 @@ Estou com um problema na minha internet, ela está caindo o tempo todo. (Respond
 Minha internet está caindo o tempo todo e quero derrotar o Ender Dragon, como faço? (Ignorar a parte do Ender Dragon e responder apenas sobre a internet.)
 
 """
+
+async def finished_router(state: MyState):
+    return state['isTimedOut']
+
+async def issue_classification(state: MyState):
+    issue_classification_prompt = f"""
+        Resumo da conversa até o momento: {state['summary']}
+
+        Se o resumo da conversa apresentar problemas relacionados à parte financeira dos serviços da provedora de internet, como problemas com pagamento do plano ou cobrança indevida, classifique como 'financeiro'.
+
+        Se o resumo da conversa apresentar problemas relacionados à parte técnica dos serviços da provedora de internet, como problemas de equipamento, lentidão ou instabilidade de sinal, classifique como 'técnico'.
+
+        Se o resumo da conversa apresentar problemas relacionados à parte de suporte dos serviços da provedora de internet, como atendimento ineficiente ou prazos longos para a visita técnica, classifique como 'suporte'.
+
+        Caso contrário, classifique como 'none'.
+    """
+
+    classifier_model = model.with_structured_output(IssueClassification)
+
+    analysis = await classifier_model.ainvoke([{"role": "user", "content": issue_classification_prompt}])
+
+    if state['isTimedOut'] == True:
+        return {"issue_classification": analysis}
+    else:
+        prompt = f"""
+            Resumo da conversa até o momento: {state['summary']} 
+
+            Problema encontrado: {state['issue_classification']}
+
+            Com base no resumo e no problema encontrado, defina de forma resumida qual o problema específico enfrentado pelo cliente e qual a solução proposta 
+
+        """
 
 
 async def summary_to_model(state: MyState):
@@ -62,12 +93,13 @@ async def router(state: MyState):
     Mensagem do usuário: {state['message']}
 
     Se o usuário informar que deseja consultar seu plano de internet atual, classifique como 'consulta_plano'.
-    Se o usuário NÃO informar nenhuma dificuldade, mas deseja realizar o pagamento do seu plano de internet, classifique como 'pagamento_plano'. 
+    Se o usuário NÃO informar nenhuma dificuldade, mas deseja realizar o pagamento do seu plano de internet, classifique como 'pagamento_plano'.
+    Se o usuário informar que o problema foi resolvido e no resumo da conversa realmente existir um problema citado anteriormente, classifique como 'finalizado'.
     Caso não se encaixe em nenhuma das opções acima, classifique como 'chat'.
     
     """
     model_classifier = model.with_structured_output(PromptType)
-    classification = await model_classifier.ainvoke([{"role": "system", "content": classification_prompt}])
+    classification = await model_classifier.ainvoke([{"role": "user", "content": classification_prompt}])
     return {"classification": classification}
 
 async def output(state: MyState):
@@ -85,12 +117,20 @@ async def answer(state: MyState):
 
 graph = StateGraph(state_schema=MyState)
 
+
+graph.add_node("finished_router", finished_router)
+graph.add_node("issue_classification",)
+
 graph.add_node("router", router)
 graph.add_node("summary", summary_to_model)
+
 graph.add_node("answer", answer)
 graph.add_node("output", output)
 
-graph.add_edge(START, "summary")
+graph.add_edge(START, "finished_router")
+graph.add_conditional_edges(START, finished_router, {True: "finished_router", False: "summary"})
+
+
 graph.add_edge("summary", "router")
 
 graph.add_conditional_edges("router", lambda state: state['classification']['type'] if state['classification']['type'] == 'chat' else 'output',{'chat': 'answer', 'output': 'output'})
