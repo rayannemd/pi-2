@@ -1,6 +1,8 @@
 from langchain_groq import ChatGroq
 from langgraph.graph import StateGraph, START, END
 from typing import TypedDict, Literal
+from google import genai
+from vector_database import add_data_to_vector_database
 
 model = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.8)
 
@@ -10,6 +12,11 @@ class PromptType(TypedDict):
 
 class IssueClassification(TypedDict):
     issue: Literal['suporte', 'técnico', 'financeiro', 'none']
+
+class IssueDetails(TypedDict):
+    type: Literal['suporte', 'técnico', 'financeiro']
+    issue: str
+    solution: str
 
 
 class MyState(TypedDict):
@@ -49,7 +56,7 @@ async def issue_classification(state: MyState):
 
     analysis = await classifier_model.ainvoke([{"role": "user", "content": issue_classification_prompt}])
 
-    if state['isTimedOut'] == True:
+    if state['isTimedOut']:
         return {"issue_classification": analysis}
     else:
         prompt = f"""
@@ -57,10 +64,13 @@ async def issue_classification(state: MyState):
 
             Problema encontrado: {state['issue_classification']}
 
-            Com base no resumo e no problema encontrado, defina de forma resumida qual o problema específico enfrentado pelo cliente e qual a solução proposta 
-
+            Com base no resumo e no problema encontrado, defina de forma resumida qual o problema específico enfrentado pelo cliente e qual a solução que resolveu o problema.
         """
+        classifier_model = model.with_structured_output(IssueDetails)
 
+        response = await classifier_model.ainvoke([{"role":"user", "content": prompt}])
+        add_data_to_vector_database(response['issue'], response['solution'])
+        return {""}
 
 async def summary_to_model(state: MyState):
     if(state.get("summary", "") == ""):
@@ -119,23 +129,18 @@ graph = StateGraph(state_schema=MyState)
 
 
 graph.add_node("finished_router", finished_router)
-graph.add_node("issue_classification",)
-
+graph.add_node("issue_classification", issue_classification)
 graph.add_node("router", router)
 graph.add_node("summary", summary_to_model)
-
 graph.add_node("answer", answer)
 graph.add_node("output", output)
 
-graph.add_edge(START, "finished_router")
-graph.add_conditional_edges(START, finished_router, {True: "finished_router", False: "summary"})
-
-
+graph.add_conditional_edges(START, finished_router, {True: "issue_classification", False: "summary"})
+graph.add_edge("issue_classification", END)
 graph.add_edge("summary", "router")
-
 graph.add_conditional_edges("router", lambda state: state['classification']['type'] if state['classification']['type'] == 'chat' else 'output',{'chat': 'answer', 'output': 'output'})
-
 graph.add_edge("output", END)
+graph.add_edge("answer", END)
 
 graph_compiled = graph.compile()
 
