@@ -3,7 +3,7 @@ import chromadb.utils.embedding_functions as embedding_functions
 import hashlib
 from google import genai
 
-client = chromadb.PersistentClient(path='/database')
+client = chromadb.PersistentClient(path='/chroma_db')
 
 gemini_client = genai.Client()
 
