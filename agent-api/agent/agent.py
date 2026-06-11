@@ -2,7 +2,7 @@ from langchain_groq import ChatGroq
 from langgraph.graph import StateGraph, START, END
 from typing import TypedDict, Literal
 from google import genai
-from vector_database import add_data_to_vector_database
+from vector_database import add_data_to_vector_database, search_in_documents
 
 model = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.8)
 
@@ -26,6 +26,8 @@ class MyState(TypedDict):
     summary: str
     answer: str
     isTimedOut: bool
+
+    test: str
 
 
 system_instruction = f"""Você é um assistente virtual da provedora de internet PLANETA NET e deve responder APENAS perguntas que possuam relação com o serviço de internet. Sua tarefa é solucionar o problema do usuário propondo soluções com base no histórico de mensagens. Seja sempre gentil e amigável. NÃO responda ou dê soluções de assuntos que não sejam sobre internet.
@@ -58,19 +60,21 @@ async def issue_classification(state: MyState):
 
     if state['isTimedOut']:
         return {"issue_classification": analysis}
+    
+    # Se não foi timeout, classificaremos como um problema resolvido.
     else:
         prompt = f"""
             Resumo da conversa até o momento: {state['summary']} 
 
-            Problema encontrado: {state['issue_classification']}
+            Tipo de problema encontrado: {analysis}
 
-            Com base no resumo e no problema encontrado, defina de forma resumida qual o problema específico enfrentado pelo cliente e qual a solução que resolveu o problema.
+            Com base no resumo e no tipo de problema encontrado, defina de forma resumida qual o problema específico enfrentado pelo cliente e qual a solução que resolveu o problema.
         """
         classifier_model = model.with_structured_output(IssueDetails)
 
         response = await classifier_model.ainvoke([{"role":"user", "content": prompt}])
-        add_data_to_vector_database(response['issue'], response['solution'])
-        return {""}
+        await add_data_to_vector_database(response['issue'], response['solution'])
+        return {"issue_classification": analysis}
 
 async def summary_to_model(state: MyState):
     if(state.get("summary", "") == ""):
@@ -112,17 +116,24 @@ async def router(state: MyState):
     classification = await model_classifier.ainvoke([{"role": "user", "content": classification_prompt}])
     return {"classification": classification}
 
+async def define_route(state: MyState):
+    return state['classification']["type"]
+
+
 async def output(state: MyState):
     return {"answer": "None"}
 
 
 async def answer(state: MyState):
+
+    test = await search_in_documents(state['message'])
+
     global system_instruction
     system_instruction += f'\nResumo da conversa: {state['summary']}. Use o resumo para saber o histórico da conversa com o usuário.'
 
 
     answer = await model.ainvoke([{"role": "system", "content": system_instruction}, {"role": "user", "content": state["message"]}])
-    return {"answer": answer.content, "summary":state['summary']}
+    return {"answer": answer.content, "summary":state['summary'], "test": test}
 
 
 graph = StateGraph(state_schema=MyState)
@@ -131,6 +142,7 @@ graph = StateGraph(state_schema=MyState)
 graph.add_node("finished_router", finished_router)
 graph.add_node("issue_classification", issue_classification)
 graph.add_node("router", router)
+graph.add_node("define_route", define_route)
 graph.add_node("summary", summary_to_model)
 graph.add_node("answer", answer)
 graph.add_node("output", output)
@@ -138,7 +150,10 @@ graph.add_node("output", output)
 graph.add_conditional_edges(START, finished_router, {True: "issue_classification", False: "summary"})
 graph.add_edge("issue_classification", END)
 graph.add_edge("summary", "router")
-graph.add_conditional_edges("router", lambda state: state['classification']['type'] if state['classification']['type'] == 'chat' else 'output',{'chat': 'answer', 'output': 'output'})
+#graph.add_conditional_edges("router", lambda state: state['classification']['type'] if state['classification']['type'] == 'chat' else 'output',{'chat': 'answer', 'output': 'output'})
+
+graph.add_conditional_edges("router", define_route, {'chat': 'answer', 'output': 'output', 'finalizado':'issue_classification'})
+
 graph.add_edge("output", END)
 graph.add_edge("answer", END)
 

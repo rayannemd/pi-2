@@ -1,5 +1,7 @@
 from fastapi import FastAPI
-from agent.agent import prompt_to_agent
+import sys
+sys.path.append("/usr/local/app/agent")
+from agent import prompt_to_agent
 app = FastAPI()
 
 @app.post("/prompt-agent")
