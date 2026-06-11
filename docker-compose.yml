@@ -4,7 +4,7 @@ services:
     ports:
       - "5000:5000"
     volumes:
-      - chromadb_data:/usr/local/app/agent/chroma_db
+      - chromadb_data:/usr/local/app/chroma_db
   mysql:
     image: mysql:8.0
     container_name: mysql_chatbot_pi2

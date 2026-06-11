@@ -81,7 +81,7 @@ async def summary_to_model(state: MyState):
         summary = await model.ainvoke([{"role": "user", "content": f"Mensagem do usuário: {state['message']}\nBaseado nessa mensagem, responda apenas com um título breve para a conversa."}])
     else:
         summary = await model.ainvoke([{"role": "user", "content": f"""
-        Crie um resumo para uma conversa entre um assistente virtual de uma provedora de internet e um cliente. Você deve criar um resumo conciso que compreenda as informações principais da conversa.
+        Crie um resumo para uma conversa entre um assistente virtual de uma provedora de internet e um cliente. Você deve criar um resumo que compreenda as informações principais da conversa. O resumo deve conter de maneira explícita os problemas do cliente e soluções propostas pelo assistente.
                                         
         Exemplo:
         Prompt atual: Tudo bem?
@@ -127,13 +127,20 @@ async def output(state: MyState):
 async def answer(state: MyState):
 
     test = await search_in_documents(state['message'])
+    answer_system_instruction = f"""
+    {system_instruction}
 
-    global system_instruction
-    system_instruction += f'\nResumo da conversa: {state['summary']}. Use o resumo para saber o histórico da conversa com o usuário.'
+    Resumo da conversa: {state['summary']}
+     
+    Soluções que funcionaram com outros usuários: {test}
+    
+    Use o resumo para saber o histórico da conversa com o usuário e as soluções que já funcionaram para outros usuários para responder de maneira eficiente. Sempre responda oferecendo APENAS UMA solução por vez. Ofereça soluções que não foram oferecidas anteriormente com base no resumo da conversa."""
 
+    answer = await model.ainvoke([{"role": "system", "content": answer_system_instruction}, {"role": "user", "content": state["message"]}])
 
-    answer = await model.ainvoke([{"role": "system", "content": system_instruction}, {"role": "user", "content": state["message"]}])
-    return {"answer": answer.content, "summary":state['summary'], "test": test}
+    summary = f"{state['summary']}\nÚltima mensagem do assistente: {answer.content}\n"
+
+    return {"answer": answer.content, "summary":summary, "test": test}
 
 
 graph = StateGraph(state_schema=MyState)

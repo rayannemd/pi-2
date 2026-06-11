@@ -3,7 +3,7 @@ import chromadb.utils.embedding_functions as embedding_functions
 import hashlib
 from google import genai
 
-client = chromadb.PersistentClient(path='/chroma_db')
+client = chromadb.PersistentClient(path='/usr/local/app/chroma_db')
 
 gemini_client = genai.Client()
 
@@ -35,7 +35,11 @@ async def search_in_documents(user_prompt: str):
 
     result = collection.query(
         query_embeddings=response.embeddings[0].values,
-        n_results = 1
+        n_results = 2
     )
     print(result)
+    if result['metadatas'][0]:
+        return result['metadatas'][0][0]['solution']
+    else:
+        return "Ainda vazio..."
     
