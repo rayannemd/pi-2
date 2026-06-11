@@ -8,7 +8,7 @@ model = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.8)
 
 
 class PromptType(TypedDict):
-    type: Literal['chat', 'consulta_plano', 'pagamento_plano', 'finalizado']
+    type: Literal['chat', 'consulta_plano', 'pagamento_plano', 'finalizado', 'problema']
 
 class IssueClassification(TypedDict):
     issue: Literal['suporte', 'técnico', 'financeiro', 'none']
@@ -68,7 +68,7 @@ async def issue_classification(state: MyState):
 
             Tipo de problema encontrado: {analysis}
 
-            Com base no resumo e no tipo de problema encontrado, defina de forma resumida qual o problema específico enfrentado pelo cliente e qual a solução que resolveu o problema.
+            Com base no resumo e no tipo de problema encontrado, defina qual o problema específico enfrentado pelo cliente e qual a solução que resolveu o problema. Evite definições ambíguas, descreva exatamente o problema e a solução que resolveu.
         """
         classifier_model = model.with_structured_output(IssueDetails)
 
@@ -108,7 +108,9 @@ async def router(state: MyState):
 
     Se o usuário informar que deseja consultar seu plano de internet atual, classifique como 'consulta_plano'.
     Se o usuário NÃO informar nenhuma dificuldade, mas deseja realizar o pagamento do seu plano de internet, classifique como 'pagamento_plano'.
+    Se o usuário informar algum problema relacionado aos serviços prestados pela provedora de internet (plano de internet, conexão, suporte técnico), classifique como 'problema'.
     Se o usuário informar que o problema foi resolvido e no resumo da conversa realmente existir um problema citado anteriormente, classifique como 'finalizado'.
+
     Caso não se encaixe em nenhuma das opções acima, classifique como 'chat'.
     
     """
@@ -126,21 +128,37 @@ async def output(state: MyState):
 
 async def answer(state: MyState):
 
-    test = await search_in_documents(state['message'])
-    answer_system_instruction = f"""
-    {system_instruction}
+    if state['classification']['type'] == 'problema':
+        test = await search_in_documents(state['message'])
+        answer_system_instruction = f"""
+        {system_instruction}
 
-    Resumo da conversa: {state['summary']}
-     
-    Soluções que funcionaram com outros usuários: {test}
+        Resumo da conversa: {state['summary']}
+        
+        Soluções que funcionaram com outros usuários: {test}
+        
+        Use o resumo para saber o histórico da conversa com o usuário e as soluções que já funcionaram para outros usuários para responder de maneira eficiente. Sempre responda oferecendo APENAS UMA solução por vez. Ofereça soluções que não foram oferecidas anteriormente com base no resumo da conversa."""
+
+        answer = await model.ainvoke([{"role": "system", "content": answer_system_instruction}, {"role": "user", "content": state["message"]}])
+        summary = f"{state['summary']}\nÚltima mensagem do assistente: {answer.content}\n"
+        return {"answer": answer.content, "summary":summary, "test": test}
+
+    else:
+        answer_system_instruction = f"""
+        {system_instruction}
+
+        Resumo da conversa: {state['summary']}
+        
+        Use o resumo para saber o histórico da conversa com o usuário para responder de maneira eficiente. Sempre responda oferecendo APENAS UMA solução por vez. Ofereça soluções que não foram oferecidas anteriormente com base no resumo da conversa."""
+
+        answer = await model.ainvoke([{"role": "system", "content": answer_system_instruction}, {"role": "user", "content": state["message"]}])
+        summary = f"{state['summary']}\nÚltima mensagem do assistente: {answer.content}\n"
+
+
+        return {"answer": answer.content, "summary":summary}
     
-    Use o resumo para saber o histórico da conversa com o usuário e as soluções que já funcionaram para outros usuários para responder de maneira eficiente. Sempre responda oferecendo APENAS UMA solução por vez. Ofereça soluções que não foram oferecidas anteriormente com base no resumo da conversa."""
 
-    answer = await model.ainvoke([{"role": "system", "content": answer_system_instruction}, {"role": "user", "content": state["message"]}])
 
-    summary = f"{state['summary']}\nÚltima mensagem do assistente: {answer.content}\n"
-
-    return {"answer": answer.content, "summary":summary, "test": test}
 
 
 graph = StateGraph(state_schema=MyState)
@@ -159,7 +177,7 @@ graph.add_edge("issue_classification", END)
 graph.add_edge("summary", "router")
 #graph.add_conditional_edges("router", lambda state: state['classification']['type'] if state['classification']['type'] == 'chat' else 'output',{'chat': 'answer', 'output': 'output'})
 
-graph.add_conditional_edges("router", define_route, {'chat': 'answer', 'output': 'output', 'finalizado':'issue_classification'})
+graph.add_conditional_edges("router", define_route, {'chat': 'answer', 'problema': 'answer', 'output': 'output', 'finalizado':'issue_classification'})
 
 graph.add_edge("output", END)
 graph.add_edge("answer", END)
