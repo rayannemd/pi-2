@@ -38,7 +38,7 @@ async def search_in_documents(user_prompt: str):
         n_results = 2
     )
     print(result)
-    if result['metadatas'][0] and result['distances'] < 0.15:
+    if result['metadatas'][0] and result['distances'][0][0] < 0.28:
         return result['metadatas'][0][0]['solution']
     else:
         return "None"

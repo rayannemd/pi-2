@@ -23,6 +23,7 @@ class MyState(TypedDict):
     message: str
     classification: PromptType
     issue_classification: IssueClassification
+    psolving_summary: str
     summary: str
     answer: str
     isTimedOut: bool
@@ -43,7 +44,7 @@ async def finished_router(state: MyState):
 
 async def issue_classification(state: MyState):
     issue_classification_prompt = f"""
-        Resumo da conversa até o momento: {state['summary']}
+        {state['psolving_summary']}
 
         Se o resumo da conversa apresentar problemas relacionados à parte financeira dos serviços da provedora de internet, como problemas com pagamento do plano ou cobrança indevida, classifique como 'financeiro'.
 
@@ -74,22 +75,22 @@ async def issue_classification(state: MyState):
 
         response = await classifier_model.ainvoke([{"role":"user", "content": prompt}])
         await add_data_to_vector_database(response['issue'], response['solution'])
-        return {"issue_classification": analysis}
+        return {"issue_classification": analysis, "test": response.content}
 
 async def summary_to_model(state: MyState):
     if(state.get("summary", "") == ""):
         summary = await model.ainvoke([{"role": "user", "content": f"Mensagem do usuário: {state['message']}\nBaseado nessa mensagem, responda apenas com um título breve para a conversa."}])
     else:
         summary = await model.ainvoke([{"role": "user", "content": f"""
-        Crie um resumo para uma conversa entre um assistente virtual de uma provedora de internet e um cliente. Você deve criar um resumo que compreenda as informações principais da conversa. O resumo deve conter de maneira explícita os problemas do cliente e soluções propostas pelo assistente.
+        Crie um resumo para uma conversa entre um assistente virtual de uma provedora de internet e um cliente. Você deve criar um resumo detalhado que compreenda as informações principais da conversa. O resumo deve conter de maneira explícita os problemas do cliente.
                                         
         Exemplo:
-        Prompt atual: Tudo bem?
+        Prompt atual: Minha internet está caindo
                                         
         Resumo da conversa até agora: O usuário cumprimentou o assistente com um "oi", o assistente respondeu que sim e estava disposto a ajudar com problemas na internet.
                                         
         Seu resumo:
-        O usuário iniciou a conversa cumprimentando o assistente com um "oi" e o assistente respondeu que estava disposto a ajudar com a internet. Em seguida, o usuário perguntou se o assistente estava bem. 
+        O usuário iniciou a conversa cumprimentando o assistente com um "oi" e o assistente respondeu que estava disposto a ajudar com a internet. Em seguida, o usuário relatou que a sua internet está caindo (sofrendo de instabilidade). 
                                         
         Agora faça para os seguintes dados:
                                         
@@ -129,6 +130,10 @@ async def output(state: MyState):
 async def answer(state: MyState):
 
     if state['classification']['type'] == 'problema':
+
+
+
+
         test = await search_in_documents(state['message'])
         answer_system_instruction = f"""
         {system_instruction}
@@ -137,10 +142,15 @@ async def answer(state: MyState):
         
         Soluções que funcionaram com outros usuários: {test}
         
-        Use o resumo para saber o histórico da conversa com o usuário e as soluções que já funcionaram para outros usuários para responder de maneira eficiente. Sempre responda oferecendo APENAS UMA solução por vez. Ofereça soluções que não foram oferecidas anteriormente com base no resumo da conversa."""
+        Use o resumo para saber o histórico da conversa com o usuário e as soluções que já funcionaram para outros usuários para responder de maneira eficiente. Sempre responda oferecendo APENAS UMA solução por vez. Ofereça UMA solução que não tenha sido oferecida anteriormente com base no resumo da conversa."""
 
         answer = await model.ainvoke([{"role": "system", "content": answer_system_instruction}, {"role": "user", "content": state["message"]}])
-        summary = f"{state['summary']}\nÚltima mensagem do assistente: {answer.content}\n"
+
+        p_solving = f"Problema do usuário: {state['message']}\nSolução do assistente: {answer.content}"
+
+        summary = f"{state['summary']}\nSolução proposta pelo assistente: {answer.content}\n"
+
+
         return {"answer": answer.content, "summary":summary, "test": test}
 
     else:
@@ -149,7 +159,7 @@ async def answer(state: MyState):
 
         Resumo da conversa: {state['summary']}
         
-        Use o resumo para saber o histórico da conversa com o usuário para responder de maneira eficiente. Sempre responda oferecendo APENAS UMA solução por vez. Ofereça soluções que não foram oferecidas anteriormente com base no resumo da conversa."""
+        Use o resumo para saber o histórico da conversa com o usuário para responder de maneira eficiente."""
 
         answer = await model.ainvoke([{"role": "system", "content": answer_system_instruction}, {"role": "user", "content": state["message"]}])
         summary = f"{state['summary']}\nÚltima mensagem do assistente: {answer.content}\n"
