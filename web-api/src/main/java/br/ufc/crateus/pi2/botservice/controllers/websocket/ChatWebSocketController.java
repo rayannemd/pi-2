@@ -1,5 +1,6 @@
 package br.ufc.crateus.pi2.botservice.controllers.websocket;
 
+import java.util.Date;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
@@ -46,6 +47,7 @@ public class ChatWebSocketController {
         if (dto.getIssuer() == EMessageIssuer.USER) {
 
             // Atualiza a lista de chats
+            chat.setUpdateDate(new Date());
             chatRepository.save(chat);
             messagingTemplate.convertAndSend("/topic/chats/atualizacao", chatId);
 
@@ -58,13 +60,18 @@ public class ChatWebSocketController {
                 return;
             }
 
-            // Mensagem normal — chama o agente
+            // Mensagem normal - chama o agente
             messagingTemplate.convertAndSend("/topic/chat/" + chatId, dto);
 
             SendMessageCommand command = new SendMessageCommand();
             command.setMessage(dto.getContent());
 
             AgentHandledResponseDto response = agentExternalService.sendMessage(chatId, command);
+
+            // Atualiza a conversa após o agente responder
+            chat.setUpdateDate(new Date());
+            chatRepository.save(chat);
+            messagingTemplate.convertAndSend("/topic/chats/atualizacao", chatId);
 
             if (response != null) {
                 // Verifica se o agente pediu avaliação
@@ -88,6 +95,7 @@ public class ChatWebSocketController {
             messagingTemplate.convertAndSend("/topic/chat/" + chatId, dto);
 
             // Também atualiza a lista de chats quando o adm manda msg
+            chat.setUpdateDate(new Date());
             chatRepository.save(chat);
             messagingTemplate.convertAndSend("/topic/chats/atualizacao", chatId);
         }
