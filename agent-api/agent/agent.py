@@ -2,6 +2,7 @@ from langchain_groq import ChatGroq
 from langgraph.graph import StateGraph, START, END
 from typing import TypedDict, Literal
 from google import genai
+import json
 from vector_database import add_data_to_vector_database, search_in_documents
 
 model = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.8)
@@ -23,7 +24,7 @@ class MyState(TypedDict):
     message: str
     classification: PromptType
     issue_classification: IssueClassification
-    psolving_summary: str
+    last_messages: list
     summary: str
     answer: str
     isTimedOut: bool
@@ -39,12 +40,18 @@ Minha internet está caindo o tempo todo e quero derrotar o Ender Dragon, como f
 
 """
 
+async def user_input(state: MyState):
+    if not state.get('last_messages'):
+        return {'last_messages': [{"role": "user", "content": state['message']}]}
+    else:
+        return {'last_messages': state['last_messages'] + [{"role":"user", "content": state['message']}]}
+
 async def finished_router(state: MyState):
     return state['isTimedOut']
 
 async def issue_classification(state: MyState):
     issue_classification_prompt = f"""
-        {state['psolving_summary']}
+        {state['summary']}
 
         Se o resumo da conversa apresentar problemas relacionados à parte financeira dos serviços da provedora de internet, como problemas com pagamento do plano ou cobrança indevida, classifique como 'financeiro'.
 
@@ -64,18 +71,21 @@ async def issue_classification(state: MyState):
     
     # Se não foi timeout, classificaremos como um problema resolvido.
     else:
+
+        last_messages = json.dumps(state['last_messages'])
+
         prompt = f"""
-            Resumo da conversa até o momento: {state['summary']} 
+            Histórico de mensagens: {last_messages} 
 
             Tipo de problema encontrado: {analysis}
 
-            Com base no resumo e no tipo de problema encontrado, defina qual o problema específico enfrentado pelo cliente e qual a solução que resolveu o problema. Evite definições ambíguas, descreva exatamente o problema e a solução que resolveu.
+            Com base no problema do cliente e solução do assistente, defina qual o problema específico enfrentado pelo cliente e qual a solução que resolveu o problema. Evite definições ambíguas, descreva exatamente o problema e a solução que resolveu.
         """
         classifier_model = model.with_structured_output(IssueDetails)
 
         response = await classifier_model.ainvoke([{"role":"user", "content": prompt}])
         await add_data_to_vector_database(response['issue'], response['solution'])
-        return {"issue_classification": analysis, "test": response.content}
+        return {"issue_classification": analysis}
 
 async def summary_to_model(state: MyState):
     if(state.get("summary", "") == ""):
@@ -131,10 +141,8 @@ async def answer(state: MyState):
 
     if state['classification']['type'] == 'problema':
 
-
-
-
         test = await search_in_documents(state['message'])
+
         answer_system_instruction = f"""
         {system_instruction}
 
@@ -146,12 +154,9 @@ async def answer(state: MyState):
 
         answer = await model.ainvoke([{"role": "system", "content": answer_system_instruction}, {"role": "user", "content": state["message"]}])
 
-        p_solving = f"Problema do usuário: {state['message']}\nSolução do assistente: {answer.content}"
-
         summary = f"{state['summary']}\nSolução proposta pelo assistente: {answer.content}\n"
 
-
-        return {"answer": answer.content, "summary":summary, "test": test}
+        return {"answer": answer.content, "summary":summary, "test": test, "last_messages": state['last_messages'] + [{"role":"assistant", "content": answer.content}]}
 
     else:
         answer_system_instruction = f"""
@@ -162,10 +167,10 @@ async def answer(state: MyState):
         Use o resumo para saber o histórico da conversa com o usuário para responder de maneira eficiente."""
 
         answer = await model.ainvoke([{"role": "system", "content": answer_system_instruction}, {"role": "user", "content": state["message"]}])
+
         summary = f"{state['summary']}\nÚltima mensagem do assistente: {answer.content}\n"
 
-
-        return {"answer": answer.content, "summary":summary}
+        return {"answer": answer.content, "summary":summary, "last_messages": state['last_messages'] + [{"role":"assistant", "content": answer.content}]}
     
 
 
@@ -173,7 +178,7 @@ async def answer(state: MyState):
 
 graph = StateGraph(state_schema=MyState)
 
-
+graph.add_node("user_input", user_input)
 graph.add_node("finished_router", finished_router)
 graph.add_node("issue_classification", issue_classification)
 graph.add_node("router", router)
@@ -182,7 +187,8 @@ graph.add_node("summary", summary_to_model)
 graph.add_node("answer", answer)
 graph.add_node("output", output)
 
-graph.add_conditional_edges(START, finished_router, {True: "issue_classification", False: "summary"})
+graph.add_edge(START, "user_input")
+graph.add_conditional_edges("user_input", finished_router, {True: "issue_classification", False: "summary"})
 graph.add_edge("issue_classification", END)
 graph.add_edge("summary", "router")
 #graph.add_conditional_edges("router", lambda state: state['classification']['type'] if state['classification']['type'] == 'chat' else 'output',{'chat': 'answer', 'output': 'output'})
