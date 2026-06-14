@@ -155,7 +155,8 @@ async def answer(state: MyState):
             """
         else:
             prompt = f"""
-                Resumo da conversa: {state['summary']}
+                Histórico de mensagnes:
+                {json.dumps(state['last_messages'])}
 
                 Proponha uma solução para o seguinte problema do usuário:
                 {state['message']}
@@ -211,5 +212,3 @@ graph_compiled = graph.compile()
 
 async def prompt_to_agent(data: dict):
     return await graph_compiled.ainvoke(data)
-
-
