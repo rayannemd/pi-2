@@ -32,7 +32,7 @@ class MyState(TypedDict):
     test: str
 
 
-system_instruction = f"""Você é um assistente virtual da provedora de internet PLANETA NET e deve responder APENAS perguntas que possuam relação com o serviço de internet. Sua tarefa é solucionar o problema do usuário propondo soluções com base no histórico de mensagens. Seja sempre gentil e amigável. NÃO responda ou dê soluções de assuntos que não sejam sobre internet.
+system_instruction = f"""Você é um assistente virtual da provedora de internet PLANETA NET e deve responder APENAS perguntas que possuam relação com o serviço de internet. Sua tarefa é solucionar o problema do usuário propondo soluções com base no histórico de mensagens e oferecendo soluções que já funcionaram com outros clientes. Seja sempre gentil e amigável. NÃO responda ou dê soluções de assuntos que não sejam sobre internet. Sempre responda oferecendo APENAS UMA solução por vez. Ofereça UMA solução que não tenha sido oferecida anteriormente com base no resumo da conversa.
 
 <exemplos>
 Estou com um problema na minha internet, ela está caindo o tempo todo. (Responder com solução)
@@ -145,18 +145,27 @@ async def answer(state: MyState):
 
         answer_system_instruction = f"""
         {system_instruction}
+        """
+        if test is not "None":
+            prompt = f"""
+                Soluções que funcionaram com outros usuários: {test}
 
-        Resumo da conversa: {state['summary']}
-        
-        Soluções que funcionaram com outros usuários: {test}
-        
-        Use o resumo para saber o histórico da conversa com o usuário e as soluções que já funcionaram para outros usuários para responder de maneira eficiente. Sempre responda oferecendo APENAS UMA solução por vez. Ofereça UMA solução que não tenha sido oferecida anteriormente com base no resumo da conversa."""
+                Com base nisso, proponha uma solução para o problema do usuário com base no histórico de conversa:
+                {json.dumps(state['last_messages'])}
+            """
+        else:
+            prompt = f"""
+                Resumo da conversa: {state['summary']}
 
-        answer = await model.ainvoke([{"role": "system", "content": answer_system_instruction}, {"role": "user", "content": state["message"]}])
+                Proponha uma solução para o seguinte problema do usuário:
+                {state['message']}
+            """
+
+        answer = await model.ainvoke([{"role": "system", "content": answer_system_instruction}, {"role": "user", "content": prompt}])
 
         summary = f"{state['summary']}\nSolução proposta pelo assistente: {answer.content}\n"
 
-        return {"answer": answer.content, "summary":summary, "test": test, "last_messages": state['last_messages'] + [{"role":"assistant", "content": answer.content}]}
+        return {"answer": answer.content, "summary":summary, "test": test, "last_messages": state['last_messages'] + [{"role":"assistant", "content": answer.content}], "test": test}
 
     else:
         answer_system_instruction = f"""
