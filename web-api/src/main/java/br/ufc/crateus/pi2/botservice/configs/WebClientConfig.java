@@ -9,8 +9,8 @@ import io.netty.resolver.DefaultAddressResolverGroup;
 import reactor.netty.http.client.HttpClient;
 
 @Configuration
-public class WebClientConfig
-{
+public class WebClientConfig 
+{   
     @Bean
     public WebClient webClient()
     {
