@@ -12,7 +12,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.ufc.crateus.pi2.botservice.dto.MetricasChatSession;
 import br.ufc.crateus.pi2.botservice.services.MetricasChatSessionService;
+
 @CrossOrigin(origins = "http://localhost:5173")
+
 @RestController
 @RequestMapping("/dashboard")
 public class MetricasChatSessionController {

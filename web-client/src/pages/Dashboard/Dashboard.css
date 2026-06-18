@@ -9,7 +9,6 @@
     #d0aaae 99.37%
   );
   justify-content: center;
-  
 }
 
 .container {
@@ -30,32 +29,26 @@
   background: linear-gradient(137.27deg, #d9d9d9 24.01%, #c2aaac 66.69%, #d0aaae 90.75%);
   width: 100%;
   min-height: 100vh;
-  padding: 5px 0px; 
+  padding: 5px 20px; 
   box-sizing: border-box;
 }
 
 .cards--container {
   display: flex;
   flex-direction: row;     
-  justify-content: space-between;   
-  box-sizing: border-box;
-  padding: 0 40px;
+  justify-content: center;   
   align-items: flex-start;
-  gap: 20px;                
+  gap: 15px;                
   width: 100%;
-   /* max-width: 150px; */
-height: 100%;
- margin: 5x 5px;   
-
+  max-width: 1200px;
+  margin: 40px auto 0 auto;  
 }
 .card--wrapper {
   display: flex;
   flex-direction: column;    /* Garante o empilhamento vertical das duas caixas */
   gap: 8px;                  /* Espaço entre a vermelha e a branca */
   width: 165px;              /* Largura fixa para manter a simetria */
-  flex-shrink: 0;    
-  flex: 1;  
-    /* Impede que o navegador amasse as caixas */
+  flex-shrink: 0;            /* Impede que o navegador amasse as caixas */
 }
 
 .dashboard--card {
@@ -71,10 +64,9 @@ height: 100%;
   padding: 5x;
   box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
   box-sizing: border-box;
-  
 }
 .card--footer {
-  background-color: #4d4c4c;
+  background-color: #7D6161;
   height: 35px;
   width: 100%;
   border-radius: 8px;
@@ -106,6 +98,9 @@ height: 100%;
   text-align: right;
 }
 
+.dashboard--card:hover {
+  transform: translateY(-5px); /* Efeito de flutuar ao passar o mouse */
+}
 
 .card--header {
   display: flex;
@@ -129,14 +124,13 @@ height: 100%;
 /* Container que segura as duas caixas grandes */
 .content--container {
   display: flex;
-  flex-direction: column;     
-  justify-content: flex-start;   /* Centralizado horizontalmente */
+  flex-direction: row;      /* Lado a lado */
+  justify-content: center;   /* Centralizado horizontalmente */
   gap: 20px;                 /* Espaço entre as duas caixas */
   width: 100%;
-  max-width: 650px;         /* Ajustado para alinhar com os cards de cima */
-  /* margin: 30px 20px; */
-  margin: 23px 1px;
-  /* /* padding-bottom: 40px;       */
+  max-width: 1100px;         /* Ajustado para alinhar com os cards de cima */
+  margin: 30px auto 0 auto;  /* Margem de 30px para separar dos cards */
+  padding-bottom: 40px;      /* Respiro no final da página */
 }
 
 /* Estilo das caixas grandes */
@@ -182,29 +176,12 @@ width: 90%;            /* Ocupa 90% da tela em dispositivos pequenos */
 }
 .resumo--container {
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  /* gap: 5px; */
-  height: 305px;
-    /* margin: 0; */
-  
-    /* margin-top: -140px; */
- width: 100%;
-  max-width: none;
-
-  flex: 1;               
-/* margin: 0; */
-  background-color: #E6DDDD; 
-  border-radius: 15px;
-  padding: 20px;
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e0e0e0;
-  box-sizing: border-box;
-  /* margin: 0px 15px; */
-
- 
-  
-margin-top: 10px
+  flex-direction: row;
+  justify-content: center;
+  gap: 80px;
+  max-width: 1100px; /* Mesma largura das caixas de cima */
+  margin: 15px auto 40px auto;
+  width: 100%;
   
 }
 
@@ -279,7 +256,7 @@ margin-top: 10px
 .secaoMensagens--box {
  color: #AE3841;
 font-size: 1.5rem;
-background-color: #000000;
+background-color: #E6DDDD;
 width: 90%;            /* Ocupa 90% da tela em dispositivos pequenos */
   max-width: 1100px;     /* Não deixa passar de 1200px em telas grandes */
   margin: 20px auto;
@@ -292,14 +269,6 @@ width: 90%;            /* Ocupa 90% da tela em dispositivos pequenos */
   text-align: center;
   font-weight: bold;
   border: 1px solid #AE3841 ;
-}
-.coluna--titulo-principal{
-  color: rgb(255, 255, 255);
-  background-color:#c2aaac ;
-  border-radius: 10px;
-  text-align: center;
- 
-
 }
 
 .lista--canais {
@@ -356,148 +325,4 @@ width: 90%;            /* Ocupa 90% da tela em dispositivos pequenos */
   margin-top: 15px;
   text-transform: uppercase;
   bottom: 10px;
-}
-
-
-.linha--dash {
- display: flex;
-  flex-direction: row;       /* Força o gráfico e os cards a ficarem lado a lado */
-  justify-content: flex-start;
-  align-items: stretch;       
-  gap: 80px;                 /* Espaço de segurança entre o gráfico e os seus cards */
-  width: 100%;
-  box-sizing: border-box;
-  padding: 0 40px;
-}
-
-.grande--box--msg{
-    background-color: #E6DDDD;
-  flex: 1;                
-
-
-  height: auto;  
-  border-radius: 15px;
-  padding: 20px;
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e0e0e0; /* Opcional: bordinha leve */
-  display: flex;           /* 👈 Obrigatório para o alinhamento funcionar */
-  flex-direction: column;  /* 👈 Mantém o título em cima e gráfico embaixo */
-  align-items: center;     /* Centraliza horizontalmente */
-  justify-content: flex-start;
-  padding-bottom: 30px;
-  max-width: 200vh;
-  width: 1500px;
-  margin-left: 30px;
-
-}
-
-.dashboard--filtros{
-  background-color: #E6DDDD;
-  padding: 15px;
-  border-radius: 15px;
-  width: 250px;
-  height: 170px;
-}
-
-.filtros--titulo {
-  font-size: 0.85rem;
-  font-weight: bold;
-  color: #2c2828;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  
-}
-.filtros--botoes {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  flex-direction: row;
-  margin: 10px;
-  gap: 20px;
-  box-sizing: border-box;
-}
-.btn--data {
-  background-color: #E6DDDD; 
-  color: #2c2828;
-  border: 1px solid #c2aaac;
-  padding: 8px 16px;
-  border-radius: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  text-overflow: ellipsis;
-}
-.btn--data:hover {
-  background-color: #dcd0d0;
-  border-color: #AE3841; 
-}
-.btn--data.active {
-  background-color: #AE3841; 
-  color: white;
-  border-color: #8D212A;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.alocar {
-  color: #000;
-  display: flex;
-  flex-direction: column;
-  background-color: #E6DDDD; /* Padroniza o fundo cinza clássico */
-  border-radius: 15px;
-  padding: 20px;
-  box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1);
-  border: 1px solid #e0e0e0;
-  box-sizing: border-box;
-  width: 100%;
- flex:1 ;
-  margin: 0;
-
-  
- 
-  /* min-height: 180px;  */
-}
-
-.alocar h3.box--title {
-  text-align: center;
-  color: black;
-  font-size: 1.1rem;
-  margin-top: 0;
-  border-bottom: 0.5px solid black;
-  padding-bottom: 10px;
-  width: 100%;
-  flex: 1;
-}
-
-.coluna-direita {
-  display: flex;
-  flex-direction: column;    /* Força os resumos e o bloco alocar a empilharem verticalmente */
- justify-content: space-between;
-  gap: 20px;     
-  /* height: 100%;             */
-  flex: 1;                   /* Divide o espaço horizontal irmãmente com a esquerda */
- max-width: none;         /* Mantém o limite de tamanho simétrico aos gráficos */
-  width: 100%;
-  box-sizing: border-box;
-
-  /* Força o alinhamento superior exato casado com a coluna de gráficos */
- margin: 12px 0 12px 0;      
-}
-
-
-.box--totalizador {
-  margin-top: 15px;
-  font-size: 1.1rem;
-  color: #2c2828;
-  font-family: 'Inter', sans-serif;
-  text-align: center;
-  border-top: 1px dashed #c2aaac; /* Uma linha sutil separando o gráfico do texto */
-  padding-top: 10px;
-  width: 80%; /* Para não colar nas bordas laterais da caixa */
-}
-
-.box--totalizador strong {
-  color: #AE3841; /* Mantém o padrão do seu tom de vermelho para destacar o número */
-  font-weight: bold;
-  font-size: 1.2rem;
-  margin-left: 5px;
 }

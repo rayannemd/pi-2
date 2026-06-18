@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Box, Typography, Avatar, TextField, IconButton, Menu, MenuItem } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { mensagensMock } from '../../Mock/mensagensMock';
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 
 export default function LayoutChat({ conversaAtual, resolverConversa, setExibirMensagem }) {
@@ -19,34 +20,54 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
   const [mensagensDoBackEnd, setMensagensDoBackEnd] = useState([]);
   
 
-
-
-
-  // Carregar mensagens do mock da conversa selecionada
-  // pega o id das conversas e exibe apenas o necessário na conversa, sem vazar de outros id (outra conversa)
+  //O mesmo useEffect da tela do client para carregar as mensagens antigas do chat, apenas algumas alterações
   useEffect(() => {
     if (!conversaAtual) return;
 
-    const msgsDaConversa = mensagensMock.filter(
-      msg => msg.conversaId === conversaAtual.id
-    );
-
-    setMensagensDoBackEnd(msgsDaConversa);
+    fetch(`${API_URL}/api/chats/${conversaAtual.id}/messages`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    })
+      .then(res => res.json())
+      .then(data => {
+        const mensagensFormatadas = data.map(msg => ({
+          id: msg.id,
+          texto: msg.content,
+          remetente: msg.issuer === "USER" ? "cliente" : "adm",
+          hora: new Date(msg.createDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+        }));
+        setMensagensDoBackEnd(mensagensFormatadas);
+      })
+      .catch(err => console.error("Erro ao buscar mensagens:", err));
   }, [conversaAtual]);
 
 
-{/*esse bloco de codigo abaixo, refere básicamente para montagem do código no qual 
-  enviamos uma mensagem, é os dados da mensagem inseridos aqui. NN pode enviar vazio, por causa do .trim  */}
-  const enviarMensagem = () => {
+  // Código referente ao envio e salvamento de mensagens do admin no chat
+  const enviarMensagem = async () => {
     if (mensagem.trim() === "") return;
+
+    // Exibe a mensagem na tela
     const novaMsg = {
       id: Math.random(),
       texto: mensagem,
       remetente: 'adm',
       hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
-    setMensagensDoBackEnd([...mensagensDoBackEnd, novaMsg]);
+    setMensagensDoBackEnd(prev => [...prev, novaMsg]);
     setMensagem('');
+
+    // Salva no banco usando o mesmo endpoint do cliente
+    try {
+      await fetch(`${API_URL}/api/chats/${conversaAtual.id}/messages`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({ message: novaMsg.texto }),
+      });
+    } catch (err) {
+      console.error("Erro ao salvar mensagem do admin:", err);
+    }
   };
 
   // Mensagem de "nenhuma conversa selecionada"
@@ -67,7 +88,7 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', bgcolor: '#f0f2f5', flex: 1 }}> 
       
       {/* CABEÇALHO */}
-      <Box sx={{ p: 2, bgcolor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0px 2px 5px rgba(0,0,0,0.1)', zIndex: 1 }}>
+      <Box sx={{ p: 2, bgcolor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between',    boxShadow: '0px 2px 5px rgba(0,0,0,0.1)', zIndex: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Avatar sx={{ mr: 2, bgcolor: '#9d1a1a' }}>
             {conversaAtual.nome ? conversaAtual.nome[0] : "?"} {/*Aqui basicamente pega a 1º letra do nome e coloca no avatar. */}
@@ -78,9 +99,9 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
           </Box>
         </Box>
 
-{/* O trecho abaixo é sobre o MARCAR COMO RESOLVIDA que existe em todas as conversas - na teoria.
-Não funciona ainda, devemos implementar para resolver a conversa e impossibilitar de enviar msg nesse chat (inclusive o bot) */}
-{/* Incio do bloco de marcar como resolvida */}
+        {/* O trecho abaixo é sobre o MARCAR COMO RESOLVIDA que existe em todas as conversas - na teoria.
+        Não funciona ainda, devemos implementar para resolver a conversa e impossibilitar de enviar msg nesse chat (inclusive o bot) */}
+        {/* Incio do bloco de marcar como resolvida */}
         <Box>
           <IconButton onClick={handleClick}>
             <MoreVertIcon />
@@ -92,7 +113,7 @@ Não funciona ainda, devemos implementar para resolver a conversa e impossibilit
           </Menu>
         </Box>
       </Box>
-{/* fim do bloco de marcar como resolvida */}
+      {/* fim do bloco de marcar como resolvida */}
 
 
       {/* MENSAGENS (bloco que fica as mensagens lá) */}
