@@ -6,7 +6,7 @@ model = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.8)
 
 
 class PromptType(TypedDict):
-    type: Literal['chat', 'consulta_plano', 'pagamento_plano']
+    type: Literal['chat', 'consulta_plano', 'pagamento_plano', 'status_pagamento']
 
 
 class MyState(TypedDict):
@@ -49,7 +49,8 @@ async def router(state: MyState):
     Mensagem do usuário: {state['message']}
 
     Se o usuário informar que deseja consultar seu plano de internet atual, classifique como 'consulta_plano'.
-    Se o usuário NÃO informar nenhuma dificuldade, mas deseja realizar o pagamento do seu plano de internet, classifique como 'pagamento_plano'. 
+    Se o usuário NÃO informar nenhuma dificuldade, mas deseja realizar o pagamento do seu plano de internet, classifique como 'pagamento_plano'.
+    Se o usuário deseja saber ou consultar o status ou a situação de um pagamento ou cobrança já gerada (ex.: "meu pagamento já caiu?", "qual o status da cobrança?"), classifique como 'status_pagamento'.
     Caso não se encaixe em nenhuma das opções acima, classifique como 'chat'.
     
     """
