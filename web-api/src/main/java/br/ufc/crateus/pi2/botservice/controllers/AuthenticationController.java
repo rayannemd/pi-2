@@ -3,12 +3,10 @@ package br.ufc.crateus.pi2.botservice.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import jakarta.validation.Valid;
 
 import br.ufc.crateus.pi2.botservice.controllers.dtos.LoginResponseDto;
 import br.ufc.crateus.pi2.botservice.controllers.exceptions.DuplicatedResourceException;
@@ -20,7 +18,6 @@ import br.ufc.crateus.pi2.botservice.services.UserService;
 import br.ufc.crateus.pi2.botservice.services.commands.CreateUserCommand;
 import br.ufc.crateus.pi2.botservice.services.commands.LoginCommand;
 import jakarta.validation.Valid;
-@CrossOrigin(origins = "http://localhost:5173")
 
 @RestController
 @RequestMapping("/api/auth")
