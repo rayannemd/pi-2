@@ -23,7 +23,10 @@ public class MetricasChatSessionService {
 
     public MetricasChatSession filtrarPorData(LocalDate dataInicio , LocalDate dataFim){
         Date dataInicioDate = Date.from(dataInicio.atStartOfDay(ZoneId.systemDefault()).toInstant());
-        Date dataFimDate = Date.from(dataFim.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        Date dataFimDate = Date.from(dataFim.plusDays(1)
+           .atStartOfDay(ZoneId.systemDefault())
+           .toInstant()
+);
 
         Integer totalAtendimentos = chatRepository.countByCreateDateBetween(dataInicioDate, dataFimDate);
 

@@ -2,6 +2,8 @@ package br.ufc.crateus.pi2.botservice.controllers;
 
 import java.time.LocalDate;
 
+import org.springframework.web.bind.annotation.CrossOrigin;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -10,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import br.ufc.crateus.pi2.botservice.dto.MetricasChatSession;
 import br.ufc.crateus.pi2.botservice.services.MetricasChatSessionService;
+
+@CrossOrigin(origins = "http://localhost:5173")
 
 @RestController
 @RequestMapping("/dashboard")

@@ -1,5 +1,6 @@
 package br.ufc.crateus.pi2.botservice.models;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -31,6 +32,9 @@ public class Service extends BaseEntity
     private String name;
 
     private String description;
+
+    @Column(precision = 18, scale = 2)
+    private BigDecimal monthlyAmount;
 
     @ManyToMany(mappedBy = "services")
     @JsonIgnore
