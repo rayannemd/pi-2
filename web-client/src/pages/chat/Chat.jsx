@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useWebSocket } from "../../services/useWebSocket";
 import { QRCodeCanvas } from "qrcode.react";
 import BarraLateral from "../../components/BarraConfigClient/BarraConfig";
 import ReactMarkdown from "react-markdown";
@@ -32,12 +33,18 @@ export default function Chat() {
   const pushMessages = (...msgs) => setMessages((prev) => [...prev, ...msgs]);
   const pushAgentText = (content) => pushMessages({ userId: "agent", content });
 
-  //Faz o scroll automático
+  const { enviarViaWebSocket } = useWebSocket(chatId, (novaMensagem) => {
+    setMessages(prev => [...prev, {
+      userId: novaMensagem.issuer === "USER" ? "me" : "agent",
+      content: novaMensagem.content,
+    }]);
+  });
+
+  // Scroll automático
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages]);
 
-  // Carrega mensagens anteriores quando o chatId estiver pronto
   useEffect(() => {
     if (!chatId) return;
 
@@ -56,21 +63,22 @@ export default function Chat() {
       .catch(err => console.error("❌ Erro ao carregar histórico:", err));
   }, [chatId]);
 
-  //Cria ou retorna um chat existente quando o usuário abre a tela
+
+  // Verifica se o chat já existe
   useEffect(() => {
-    const storedChatId = localStorage.getItem("chatId");
+    const storedChatId = localStorage.getItem(`chatId_${userId}`);
 
     if(storedChatId){
       //Verifica se o chat existe no banco de dados
       authedFetch(`${API_URL}/api/chats/${storedChatId}`).then(res => {
         if (res.ok) { //Se o chat existir no banco retorna ele
           setChatId(storedChatId);
-        }else{ //Se o chat com esse ID não existir mais, limpa o localStorage e cria outro
-          localStorage.removeItem("chatId");
+        } else {
+          localStorage.removeItem(`chatId_${userId}`);
           criarNovoChat();
         }
       });
-    }else{
+    } else {
       criarNovoChat();
     }
   }, []);
@@ -81,25 +89,27 @@ export default function Chat() {
       method: "POST",
       body: JSON.stringify({ title: "", summary: "", type: "NORMAL" }),
     })
-      .then((res) => {
+      .then(res => {
         if (!res.ok) throw new Error("Erro ao criar chat");
         return res.json();
       })
-      .then((chat) => {
-        localStorage.setItem("chatId", chat.id);
+      .then(chat => {
+        localStorage.setItem(`chatId_${userId}`, chat.id);
         setChatId(chat.id);
+        console.log("✅ Chat criado com ID:", chat.id);
       })
-      .catch((err) => {
-        console.error("❌ Erro ao criar chat:", err);
-      });
+      .catch(err => console.error("❌ Erro ao criar chat:", err));
   }
 
-  //Envio de mensagens
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!input.trim() || !chatId) return;
 
     const userMessage = { userId: "me", content: input };
+    setInput("");
+
+    // Envia via WebSocket — o backend salva e retorna a resposta do agente
+    enviarViaWebSocket(chatId, userMessage.content, "USER");
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
 
