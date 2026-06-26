@@ -1,0 +1,7 @@
+# Scripts shell devem sempre usar LF, mesmo em checkout no Windows.
+# Evita que o vault-seed quebre dentro do container Linux (exit 2 por CRLF).
+*.sh text eol=lf
+vault/seed.sh text eol=lf
+
+# Certificado binario: nunca normalizar quebras de linha.
+*.p12 binary
