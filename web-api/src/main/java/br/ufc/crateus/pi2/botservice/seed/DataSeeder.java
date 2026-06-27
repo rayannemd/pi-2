@@ -24,6 +24,7 @@ import br.ufc.crateus.pi2.botservice.services.commands.CreateUserCommand;
 /**
  * Gera dados mockados ao subir o container, mantendo o fluxo real:
  *  - um catálogo de planos (Service) com valor de mensalidade;
+ *  - um admin demo (admin@planeta.net / 123456) para acessar o painel;
  *  - um cliente demo (cliente@planeta.net / 123456) para testes determinísticos;
  *  - mensalidades em aberto para todo cliente que ainda não possua nenhuma.
  *
@@ -38,6 +39,10 @@ public class DataSeeder implements CommandLineRunner
     private static final String DEMO_EMAIL = "cliente@planeta.net";
     private static final String DEMO_PASSWORD = "123456";
     private static final String DEMO_CPF = "52998224725";
+
+    private static final String ADMIN_EMAIL = "admin@planeta.net";
+    private static final String ADMIN_PASSWORD = "123456";
+    private static final String ADMIN_CPF = "11144477735";
 
     private final ServiceRepository serviceRepository;
     private final UserRepository userRepository;
@@ -61,8 +66,18 @@ public class DataSeeder implements CommandLineRunner
     public void run(String... args)
     {
         List<Service> plans = seedPlans();
+        seedAdmin();
         seedDemoCustomer();
         seedOpenInstallments(plans);
+    }
+
+    private void seedAdmin()
+    {
+        if (userRepository.findByEmail(ADMIN_EMAIL).isPresent() || userRepository.existsByCpfCnpj(ADMIN_CPF))
+            return;
+
+        userService.add(new CreateUserCommand(
+            "Admin Demo", ADMIN_EMAIL, ADMIN_PASSWORD, ADMIN_CPF, EUserType.ADMIN));
     }
 
     private List<Service> seedPlans()

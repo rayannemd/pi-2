@@ -18,8 +18,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -45,13 +43,12 @@ public class Chat extends BaseEntity
     @Enumerated(EnumType.STRING)
     private EChatType type;
 
-    // chatrating é o atributo de nota do chat
-    // min e max estabelecem o intervalo entre 1 e 5 para avaliar
-    // chatRating pode ser null
-    @Min(1)
-    @Max(5)
+    // chatRating é o atributo de nota do chat (1 a 5), pode ser null.
+    // A faixa 1-5 é validada na aplicação em ChatService.processarMensagem;
+    // não usamos @Min/@Max aqui porque geram um CHECK constraint que rejeita NULL.
     private Integer chatRating;
 
+    @Enumerated(EnumType.STRING)
     private EChatStatus chatStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -61,4 +58,9 @@ public class Chat extends BaseEntity
     @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore
     private List<Message> messages = new ArrayList<>();
+
+    // Conteúdo da última mensagem do chat, mantido sincronizado em MessageService.save
+    // para exibir no card da lista de conversas sem consultar a tabela de mensagens.
+    @Column(columnDefinition = "TEXT")
+    private String lastMessage;
 }

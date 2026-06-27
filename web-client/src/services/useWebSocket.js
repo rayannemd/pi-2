@@ -9,9 +9,10 @@ export function useWebSocket(chatId, onMensagemRecebida) {
   useEffect(() => {
     if (!chatId) return;
 
-    const socket = new SockJS(`${API_URL}/ws-chat`);
     const client = new Client({
-      webSocketFactory: () => socket,
+      // Cria um SockJS novo a cada conexão: reutilizar uma instância pré-criada
+      // faz o stompjs perder o onopen e nunca enviar o frame CONNECT.
+      webSocketFactory: () => new SockJS(`${API_URL}/ws-chat`),
       onConnect: () => {
         console.log("✅ WebSocket conectado, chat:", chatId);
 
@@ -33,7 +34,10 @@ export function useWebSocket(chatId, onMensagemRecebida) {
   }, [chatId]);
 
   const enviarViaWebSocket = (chatId, mensagem, remetente) => {
-    if (!clientRef.current?.connected) return;
+    if (!clientRef.current?.connected) {
+      console.warn("WebSocket ainda não conectado; mensagem não enviada.");
+      return false;
+    }
 
     clientRef.current.publish({
       destination: `/app/chat/${chatId}/send`,
@@ -43,6 +47,7 @@ export function useWebSocket(chatId, onMensagemRecebida) {
         issuer: remetente, // "USER" ou "AGENT"
       }),
     });
+    return true;
   };
 
   return { enviarViaWebSocket };

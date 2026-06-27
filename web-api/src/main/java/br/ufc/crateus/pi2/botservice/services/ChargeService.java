@@ -155,20 +155,11 @@ public class ChargeService
         return Optional.of(ChargeDto.from(charge));
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Optional<ChargeDto> getLatestChargeStatus(Long chatId)
     {
-        Optional<Charge> latest = chargeRepository.findFirstByChat_IdOrderByCreateDateDesc(chatId);
-        if (latest.isEmpty())
-            return Optional.empty();
-
-        Charge charge = latest.get();
-        if (charge.getStatus() == EChargeStatus.PENDING)
-        {
-            refreshFromEfi(charge);
-        }
-
-        return Optional.of(ChargeDto.from(charge));
+        return chargeRepository.findFirstByChat_IdOrderByCreateDateDesc(chatId)
+            .map(ChargeDto::from);
     }
 
     private boolean refreshFromEfi(Charge charge)

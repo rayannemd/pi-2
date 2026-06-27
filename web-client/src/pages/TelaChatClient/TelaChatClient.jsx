@@ -26,7 +26,7 @@ export default function TelaChatClient() {
         const conversasFormatadas = data.map(chat => ({
           id: chat.id,
           nome: chat.user?.name || "Cliente",
-          ultimaMsg: chat.summary || "Sem mensagens",
+          ultimaMsg: chat.lastMessage || "Sem mensagens",
           categoria: chat.type === "NORMAL" ? "pendente" : "resolvido",
           horario: new Date(chat.updateDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
           foto: "",
@@ -47,9 +47,9 @@ export default function TelaChatClient() {
 
   // WebSocket para atualizar a lista quando chegar mensagem nova
   useEffect(() => {
-    const socket = new SockJS(`${WS_URL}/ws-chat`);
     const client = new Client({
-      webSocketFactory: () => socket,
+      // Socket novo a cada conexão (ver useWebSocket.js).
+      webSocketFactory: () => new SockJS(`${WS_URL}/ws-chat`),
       onConnect: () => {
         console.log("✅ Admin conectado ao WebSocket");
 
