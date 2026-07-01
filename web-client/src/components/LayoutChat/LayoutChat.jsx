@@ -21,13 +21,17 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
   const [mensagensDoBackEnd, setMensagensDoBackEnd] = useState([]);
 
   const { enviarViaWebSocket } = useWebSocket(conversaAtual?.id, (novaMensagem) => {
+    // A própria mensagem do admin (AGENT) já é exibida de forma otimista no envio;
+    // aqui tratamos só o que chega do cliente, evitando duplicar a bolha do admin.
+    if (novaMensagem.issuer !== "USER") return;
+
     setMensagensDoBackEnd(prev => [...prev, {
       id: Math.random(),
       texto: novaMensagem.content,
-      remetente: novaMensagem.issuer === "USER" ? "cliente" : "adm",
+      remetente: "cliente",
       hora: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
     }]);
-  });  
+  });
 
   //O mesmo useEffect da tela do client para carregar as mensagens antigas do chat, apenas algumas alterações
   useEffect(() => {
@@ -54,17 +58,20 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
   const enviarMensagem = async () => {
     if (mensagem.trim() === "") return;
 
-    // Exibe a mensagem na tela
     const novaMsg = {
       id: Math.random(),
       texto: mensagem,
       remetente: 'adm',
       hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
-    setMensagem('');
 
-    // Salva no banco usando o mesmo endpoint do cliente
-    enviarViaWebSocket(conversaAtual.id, novaMsg.texto, "AGENT");
+    // Envia via WebSocket (issuer AGENT): backend salva e repassa ao cliente em tempo real
+    const enviada = enviarViaWebSocket(conversaAtual.id, novaMsg.texto, "AGENT");
+    if (!enviada) return; // WS ainda não conectou: mantém o texto para reenviar
+
+    // Exibe a mensagem na tela imediatamente (render otimista)
+    setMensagensDoBackEnd(prev => [...prev, novaMsg]);
+    setMensagem('');
   };
 
   // Mensagem de "nenhuma conversa selecionada"

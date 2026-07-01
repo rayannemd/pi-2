@@ -38,7 +38,7 @@ public class ChatScheduler {
 
     @Scheduled(fixedRate = 60000)
     public void checkInactivity(){
-        List<Chat> chats = chatRepository.buscarChatsPendentesComUltimaMensagemDoAgenteApos(calcHora());
+        List<Chat> chats = chatRepository.findByChatStatusAndUpdateDateBefore(EChatStatus.PENDENTE, calcHora());
 
         // aqui eu precisaria chamar a api do agente ou enviar uma mensagem padrão de inatividade(o que eu acredito ser mais difícil)
         for (Chat chat : chats) {
@@ -51,7 +51,7 @@ public class ChatScheduler {
 
     @Scheduled(fixedRate = 60000)
     public void cancelChatByInactivity(){
-        List<Chat> chats = chatRepository.buscarChatsAvisadosParaCancelar(calcHora());
+        List<Chat> chats = chatRepository.findByChatStatusAndUpdateDateBefore(EChatStatus.AVISADO, calcHora());
 
         for (Chat chat : chats) {
             ChatMessageDTO chatMessage = new ChatMessageDTO("Nossa conversa está sendo cancelada por inatividade.", EMessageIssuer.AGENT, chat);

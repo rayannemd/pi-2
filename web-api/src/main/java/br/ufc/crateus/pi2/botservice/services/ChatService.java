@@ -26,15 +26,16 @@ public class ChatService
     private final UserRepository userRepository;
 
     public ChatService(
-        ChatRepository chatRepository, 
-        UserRepository userRepository)  
+        ChatRepository chatRepository,
+        UserRepository userRepository)
     {
         this.chatRepository = chatRepository;
-        this.userRepository = userRepository;   
+        this.userRepository = userRepository;
     }
 
-    public List<Chat> getAll() 
+    public List<Chat> getAll()
     {
+        // lastMessage já vem persistido no chat (sincronizado em MessageService.save).
         return (List<Chat>) chatRepository.findAll();
     }
 

@@ -64,23 +64,26 @@ export default function Chat() {
   }, [chatId]);
 
 
-  // Verifica se o chat já existe
+  // Retoma o chat do próprio usuário a partir do banco (endpoint já existente
+  // GET /api/users/{id}/chats). Isso garante que, ao atualizar a página ou voltar
+  // com o mesmo usuário, o chat e suas mensagens são recarregados — sem depender
+  // do localStorage (que não sobrevive a outro navegador/aba anônima/cache limpo).
   useEffect(() => {
-    const storedChatId = localStorage.getItem(`chatId_${userId}`);
+    if (!userId) return;
 
-    if(storedChatId){
-      //Verifica se o chat existe no banco de dados
-      authedFetch(`${API_URL}/api/chats/${storedChatId}`).then(res => {
-        if (res.ok) { //Se o chat existir no banco retorna ele
-          setChatId(storedChatId);
+    authedFetch(`${API_URL}/api/users/${userId}/chats`)
+      .then(res => (res.ok ? res.json() : []))
+      .then(chats => {
+        if (Array.isArray(chats) && chats.length > 0) {
+          // Retoma o chat mais recente do usuário
+          const maisRecente = chats.reduce((a, b) => (b.id > a.id ? b : a));
+          localStorage.setItem(`chatId_${userId}`, maisRecente.id);
+          setChatId(maisRecente.id);
         } else {
-          localStorage.removeItem(`chatId_${userId}`);
           criarNovoChat();
         }
-      });
-    } else {
-      criarNovoChat();
-    }
+      })
+      .catch(() => criarNovoChat());
   }, []);
 
   // Função para criar um novo chat
@@ -108,8 +111,9 @@ export default function Chat() {
     const userMessage = { userId: "me", content: input };
     setInput("");
 
-    // Envia via WebSocket — o backend salva e retorna a resposta do agente
-    enviarViaWebSocket(chatId, userMessage.content, "USER");
+    // O cliente envia somente via REST (que aciona o agente e trata a resposta).
+    // O WebSocket é usado apenas para RECEBER as mensagens do admin em tempo real;
+    // enviar também por WS causaria chamada dupla ao agente e mensagens duplicadas.
     setMessages((prev) => [...prev, userMessage]);
     setInput("");
 
