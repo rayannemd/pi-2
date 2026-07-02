@@ -29,6 +29,7 @@ import br.ufc.crateus.pi2.botservice.services.MessageService;
 import br.ufc.crateus.pi2.botservice.services.TokenService;
 import br.ufc.crateus.pi2.botservice.services.commands.CreateChargeFromInstallmentsCommand;
 import br.ufc.crateus.pi2.botservice.services.commands.CreateChatCommand;
+import br.ufc.crateus.pi2.botservice.services.commands.RateChatCommand;
 import br.ufc.crateus.pi2.botservice.services.commands.SendMessageCommand;
 import br.ufc.crateus.pi2.botservice.services.commands.UpdateChatCommand;
 import br.ufc.crateus.pi2.botservice.services.dtos.AgentHandledResponseDto;
@@ -98,26 +99,16 @@ public class ChatController
     }
     
     @PostMapping("/{id}/messages")
-    public ResponseEntity<AgentHandledResponseDto> sendMessageToAgent(@PathVariable Long id, @RequestBody SendMessageCommand command)
+    public ResponseEntity<AgentHandledResponseDto> sendMessageToAgent(
+        @PathVariable Long id,
+        @RequestBody SendMessageCommand command)
     {
-        Chat chat = chatService.getById(id).orElseThrow(ChatNotFoundException::new);
+        chatService.getById(id).orElseThrow(ChatNotFoundException::new);
 
-        if(chat.getChatStatus() == EChatStatus.ESPERANDO_AVALIACAO){
-            chatService.processarMensagem(id, command.getMessage());
-            return ResponseEntity.ok().build();
-        }
-        
         AgentHandledResponseDto response = agentExternalService.sendMessage(id, command);
 
-        if(response == null)
+        if (response == null)
             return ResponseEntity.notFound().build();
-
-        if (response.getChatResponse() != null &&
-            response.getChatResponse().getMessage() != null &&
-            response.getChatResponse().getMessage().toLowerCase().contains("avalie")) {
-
-            chatService.mudarParaEsperandoAvaliacao(id);
-        }
 
         return ResponseEntity.ok(response);
     }
@@ -169,5 +160,14 @@ public class ChatController
     {
         chatService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PutMapping("/{id}/rating")
+    public ResponseEntity<Void> rateChat(
+            @PathVariable Long id,
+            @RequestBody RateChatCommand command) {
+
+        chatService.rateChat(id, command);
+        return ResponseEntity.ok().build();
     }
 }

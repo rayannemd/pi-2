@@ -1,22 +1,22 @@
 package br.ufc.crateus.pi2.botservice.controllers.websocket;
 
 import java.util.Date;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
+import br.ufc.crateus.pi2.botservice.controllers.dtos.ChatMessageDTO;
+import br.ufc.crateus.pi2.botservice.models.Chat;
+import br.ufc.crateus.pi2.botservice.models.enums.EMessageIssuer;
+import br.ufc.crateus.pi2.botservice.repositories.ChatRepository;
+import br.ufc.crateus.pi2.botservice.services.ChatService;
+import br.ufc.crateus.pi2.botservice.services.MessageService;
 import br.ufc.crateus.pi2.botservice.services.commands.SendMessageCommand;
 import br.ufc.crateus.pi2.botservice.services.dtos.AgentHandledResponseDto;
 import br.ufc.crateus.pi2.botservice.services.external.AgentExternalService;
-import br.ufc.crateus.pi2.botservice.repositories.ChatRepository;
-import br.ufc.crateus.pi2.botservice.controllers.dtos.ChatMessageDTO;
-import br.ufc.crateus.pi2.botservice.models.enums.EMessageIssuer;
-import br.ufc.crateus.pi2.botservice.models.enums.EChatStatus;
-import br.ufc.crateus.pi2.botservice.models.Chat;
-import br.ufc.crateus.pi2.botservice.services.ChatService;
-import br.ufc.crateus.pi2.botservice.services.MessageService;
 
 @Controller
 public class ChatWebSocketController {
@@ -39,7 +39,8 @@ public class ChatWebSocketController {
     @MessageMapping("/chat/{chatId}/send")
     public void enviarMensagem(@DestinationVariable Long chatId, ChatMessageDTO dto) {
         var chatOpt = chatService.getById(chatId);
-        if (chatOpt.isEmpty()) return;
+        if (chatOpt.isEmpty())
+            return;
 
         Chat chat = chatOpt.get();
         dto.setChat(chat);
@@ -50,15 +51,6 @@ public class ChatWebSocketController {
             chat.setUpdateDate(new Date());
             chatRepository.save(chat);
             messagingTemplate.convertAndSend("/topic/chats/atualizacao", chatId);
-
-            // Se o chat está esperando avaliação, processa a nota e não chama o agente
-            if (chat.getChatStatus() == EChatStatus.ESPERANDO_AVALIACAO) {
-                chatService.processarMensagem(chatId, dto.getContent());
-                messagingTemplate.convertAndSend("/topic/chat/" + chatId, dto);
-                chatRepository.save(chat);
-                messagingTemplate.convertAndSend("/topic/chats/atualizacao", chatId);
-                return;
-            }
 
             // Mensagem normal - chama o agente
             messagingTemplate.convertAndSend("/topic/chat/" + chatId, dto);
@@ -74,13 +66,6 @@ public class ChatWebSocketController {
             messagingTemplate.convertAndSend("/topic/chats/atualizacao", chatId);
 
             if (response != null) {
-                // Verifica se o agente pediu avaliação
-                if (response.getChatResponse() != null &&
-                    response.getChatResponse().getMessage() != null &&
-                    response.getChatResponse().getMessage().toLowerCase().contains("avalie")) {
-                    chatService.mudarParaEsperandoAvaliacao(chatId);
-                }
-
                 ChatMessageDTO respostaAgente = new ChatMessageDTO();
                 respostaAgente.setContent(response.getChatResponse().getAnswer());
                 respostaAgente.setIssuer(EMessageIssuer.AGENT);
