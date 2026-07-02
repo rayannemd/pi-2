@@ -6,6 +6,12 @@ export function useWebSocket(chatId, onMensagemRecebida) {
   const clientRef = useRef(null);
   const API_URL = import.meta.env.VITE_WS_URL || "http://localhost:8080";
 
+  const onMensagemRef = useRef(onMensagemRecebida);
+
+  useEffect( () => {
+    onMensagemRef.current = onMensagemRecebida;
+  }, [onMensagemRecebida]);
+
   useEffect(() => {
     if (!chatId) return;
 
@@ -19,7 +25,7 @@ export function useWebSocket(chatId, onMensagemRecebida) {
         // Escuta mensagens de um chat específico
         client.subscribe(`/topic/chat/${chatId}`, (message) => {
           const novaMensagem = JSON.parse(message.body);
-          onMensagemRecebida(novaMensagem);
+          onMensagemRef.current(novaMensagem);
         });
       },
       onDisconnect: () => console.log("❌ WebSocket desconectado"),
@@ -32,23 +38,4 @@ export function useWebSocket(chatId, onMensagemRecebida) {
       client.deactivate();
     };
   }, [chatId]);
-
-  const enviarViaWebSocket = (chatId, mensagem, remetente) => {
-    if (!clientRef.current?.connected) {
-      console.warn("WebSocket ainda não conectado; mensagem não enviada.");
-      return false;
-    }
-
-    clientRef.current.publish({
-      destination: `/app/chat/${chatId}/send`,
-      body: JSON.stringify({
-        chatId,
-        content: mensagem,
-        issuer: remetente, // "USER" ou "AGENT"
-      }),
-    });
-    return true;
-  };
-
-  return { enviarViaWebSocket };
 }
