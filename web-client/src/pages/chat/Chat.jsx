@@ -1,21 +1,14 @@
 import { useEffect, useRef, useState } from "react";
-import { useWebSocket } from "../../services/useWebSocket";
 import { QRCodeCanvas } from "qrcode.react";
+import { useWebSocket } from "../../services/useWebSocket";
+import authedFetch from "../../services/authFetch";
 import BarraLateral from "../../components/BarraConfigClient/BarraConfig";
+import { Box, Typography, Avatar, TextField, IconButton, Menu, MenuItem } from '@mui/material';
+import SendIcon from '@mui/icons-material/Send';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import "./Chat.css";
-
-function authedFetch(url, options = {}) {
-  return fetch(url, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-      ...(options.headers || {}),
-    },
-  });
-}
 
 function formatBRL(value) {
   return Number(value ?? 0).toFixed(2);
@@ -31,12 +24,18 @@ export default function Chat() {
   const userId = localStorage.getItem("userId");
 
   const pushMessages = (...msgs) => setMessages((prev) => [...prev, ...msgs]);
-  const pushAgentText = (content) => pushMessages({ userId: "agent", content });
+  const pushAgentText = (content) => pushMessages({ userId: "agent", content, hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
 
-  const { enviarViaWebSocket } = useWebSocket(chatId, (novaMensagem) => {
+  useWebSocket(chatId, (novaMensagem) => {
+    // Ignora mensagens do próprio usuário — já foram adicionadas no render otimista
+    // Ignora as mensagens do agente - Já foram adicionadas via handleSendMessage
+    if (novaMensagem.issuer === "USER" || novaMensagem.issuer === "AGENT") return;
+
+    // Renderiza as mensagens do admin
     setMessages(prev => [...prev, {
-      userId: novaMensagem.issuer === "USER" ? "me" : "agent",
+      userId: "admin",
       content: novaMensagem.content,
+      hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     }]);
   });
 
@@ -45,6 +44,7 @@ export default function Chat() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages]);
 
+  // useEffect para carregar as mensagens antigas do chat
   useEffect(() => {
     if (!chatId) return;
 
@@ -57,12 +57,12 @@ export default function Chat() {
         const historicoFormatado = data.map(msg => ({
           userId: msg.issuer === "USER" ? "me" : "agent",
           content: msg.content,
+          hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
         }));
         setMessages(historicoFormatado);
       })
       .catch(err => console.error("❌ Erro ao carregar histórico:", err));
   }, [chatId]);
-
 
   // Retoma o chat do próprio usuário a partir do banco (endpoint já existente
   // GET /api/users/{id}/chats). Isso garante que, ao atualizar a página ou voltar
@@ -108,8 +108,12 @@ export default function Chat() {
     e.preventDefault();
     if (!input.trim() || !chatId) return;
 
-    const userMessage = { userId: "me", content: input };
-    setInput("");
+    const userMessage = { 
+      id: Math.random(),
+      userId: "me",
+      content: input,
+      hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+    };
 
     // O cliente envia somente via REST (que aciona o agente e trata a resposta).
     // O WebSocket é usado apenas para RECEBER as mensagens do admin em tempo real;
@@ -132,7 +136,10 @@ export default function Chat() {
 
       handleAgentResponse(data);
     } catch (err) {
+      const idToRemove = userMessage.id;
+      setMessages(prev => prev.filter(msg => msg.id !== idToRemove));
       console.error("Erro no envio:", err);
+      alert("Erro ao enviar mensagem! Tente novamente.");
     }
   };
 
@@ -152,7 +159,7 @@ export default function Chat() {
           return;
         }
         pushMessages(
-          { userId: "agent", content: "Estas são suas mensalidades em aberto. Selecione quais deseja pagar." },
+          { userId: "agent", content: "Estas são suas mensalidades em aberto. Selecione quais deseja pagar.", hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })},
           { userId: "agent", kind: "installments", installments },
         );
         return;
@@ -225,20 +232,33 @@ export default function Chat() {
               );
             }
             return (
-              <div
+              <Box
                 key={index}
-                className={
-                  msg.userId === "me" ? "message--self" : "message--other"
-                }
+                sx={{
+                  alignSelf: msg.userId === "me" ? 'flex-end' : 'flex-start',
+                  maxWidth: '50%',
+                  bgcolor: msg.userId === "me" ? '#dcf8c6' : 'white',
+                  p: 1.5,
+                  borderRadius: msg.userId === "me" ? '15px 15px 0px 15px' : '0px 15px 15px 15px',
+                  boxShadow: '0px 1px 3px rgba(0,0,0,0.2)',
+                  wordBreak: 'break-word'
+                }}
               >
                 {msg.userId === "me" ? (
-                  msg.content
+                  <Typography variant="body2">{msg.content}</Typography>
                 ) : (
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {msg.content}
-                  </ReactMarkdown>
+                  <Typography variant="body2" component="div">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {msg.content}
+                    </ReactMarkdown>
+                  </Typography>
                 )}
-              </div>
+                {msg.hora && (
+                  <Typography variant="caption" sx={{ display: 'block', textAlign: 'right', mt: 0.5, color: 'gray' }}>
+                    {msg.hora}
+                  </Typography>
+                )}
+              </Box>
             );
           })}
           <div ref={messagesEndRef} />
