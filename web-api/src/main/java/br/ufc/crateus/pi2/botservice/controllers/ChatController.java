@@ -121,6 +121,16 @@ public class ChatController
 
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/{id}/admin-message")
+    public ResponseEntity<Void> sendAdminMessage(@PathVariable Long id, @RequestBody SendMessageCommand command)
+    {
+        Chat chat = chatService.getById(id).orElseThrow(ChatNotFoundException::new);
+        ChatMessageDTO dto = new ChatMessageDTO(command.getMessage(), EMessageIssuer.ADMIN, chat);
+        messageService.save(dto);
+
+        return ResponseEntity.ok().build();
+    }
     
     @PostMapping("/{id}/charges")
     public ResponseEntity<ChargeDto> createCharge(
