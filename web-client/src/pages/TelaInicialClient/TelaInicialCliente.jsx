@@ -5,14 +5,13 @@ import { Link } from "react-router-dom";
 
 import userIcon from "../../assets/icons/User.svg";
 import configIcon from "../../assets/icons/Config.svg";
-import  {useNavigate} from "react-router-dom";
+import  { useNavigate, state} from "react-router-dom";
 
 export default function TelaInicialCliente() {
   const navigate = useNavigate();
 
   function handleSend(text) {
-    console.log("Enviar:", text);
-    navigate("/chat-client");
+    navigate("/chat-client", { state : { firstMessage: text}});
   }
 
   return (
