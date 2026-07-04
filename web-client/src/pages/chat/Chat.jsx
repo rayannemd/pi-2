@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from "react";
-import { useLocation } from "react-router-dom";
 import { QRCodeCanvas } from "qrcode.react";
 import { useWebSocket } from "../../services/useWebSocket";
 import authedFetch from "../../services/authFetch";
@@ -23,9 +22,6 @@ export default function Chat() {
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
   const userId = localStorage.getItem("userId");
-
-  const location = useLocation();
-  const firstMessage = location.state?.firstMessage;
 
   const pushMessages = (...msgs) => setMessages((prev) => [...prev, ...msgs]);
   const pushAgentText = (content) => pushMessages({ userId: "agent", content, hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) });
@@ -51,7 +47,6 @@ export default function Chat() {
   // useEffect para carregar as mensagens antigas do chat
   useEffect(() => {
     if (!chatId) return;
-    if (firstMessage) return;
 
     authedFetch(`${API_URL}/api/chats/${chatId}/messages`)
       .then(res => {
@@ -85,30 +80,15 @@ export default function Chat() {
           localStorage.setItem(`chatId_${userId}`, maisRecente.id);
           setChatId(maisRecente.id);
         } else {
-          criarNovoChat();
+          console.error("Nenhum chat encontrado!");
+          Navigate("/home");
         }
       })
-      .catch(() => criarNovoChat());
+      .catch(() => {
+        console.error("Erro ao buscar chats do usuário!");
+        Navigate("/home");
+      });
   }, []);
-
-  // Função para criar um novo chat
-  function criarNovoChat(){
-    authedFetch(`${API_URL}/api/users/${userId}/chats`, {
-      method: "POST",
-      body: JSON.stringify({ title: "", summary: "", type: "NORMAL" }),
-    })
-      .then(res => {
-        if (!res.ok) throw new Error("Erro ao criar chat");
-        return res.json();
-      })
-      .then(chat => {
-        localStorage.setItem(`chatId_${userId}`, chat.id);
-        setChatId(chat.id);
-        console.log("✅ Chat criado com ID:", chat.id);
-        sendMessage(firstMessage, chat.id);
-      })
-      .catch(err => console.error("❌ Erro ao criar chat:", err));
-  }
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -117,8 +97,9 @@ export default function Chat() {
     setInput("");
     await sendMessage(msg);
   }
-  const sendMessage = async (msg, id = chatId) => {
-    if (!msg.trim() || !id) return;
+
+  const sendMessage = async (msg) => {
+    if (!msg.trim() || !chatId) return;
 
     const userMessage = { 
       id: Math.random(),
@@ -134,7 +115,7 @@ export default function Chat() {
 
     try {
       const response = await authedFetch(
-        `${API_URL}/api/chats/${id}/messages`,
+        `${API_URL}/api/chats/${chatId}/messages`,
         {
           method: "POST",
           body: JSON.stringify({ message: userMessage.content }),
@@ -143,9 +124,13 @@ export default function Chat() {
 
       if (!response.ok) throw new Error("Erro ao enviar mensagem");
 
-      const data = await response.json();
+      // Verifica se a resposta tem conteúdo antes de parsear
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) return;
 
+      const data = await response.json();
       handleAgentResponse(data);
+
     } catch (err) {
       const idToRemove = userMessage.id;
       setMessages(prev => prev.filter(msg => msg.id !== idToRemove));

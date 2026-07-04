@@ -109,7 +109,7 @@ const irPara = (rota) => { navigate(rota); handleClose(); }
     {/* Botão Início */}
     <Box 
       sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer', color: 'white', '&:hover': { opacity: 0.8 } }}
-      onClick={() => navigate("/home")}
+      onClick={() => navigate("/login")}
     >
       <HomeIcon sx={{ mr: 0.5 }} />
       <Typography variant="body2">Início</Typography>

@@ -5,5 +5,6 @@ public enum EChatStatus {
     NAO_RESOLVIDO , 
     ESPERANDO_AVALIACAO , 
     PENDENTE , 
-    AVISADO
+    AVISADO , 
+    INTERVIDO
 }

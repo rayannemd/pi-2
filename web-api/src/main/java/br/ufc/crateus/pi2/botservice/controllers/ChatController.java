@@ -102,6 +102,11 @@ public class ChatController
     {
         Chat chat = chatService.getById(id).orElseThrow(ChatNotFoundException::new);
 
+        if(chat.getChatStatus() == EChatStatus.INTERVIDO){
+            messageService.save(new ChatMessageDTO(command.getMessage(), EMessageIssuer.USER, chat));
+            return ResponseEntity.ok().build();   
+        }
+
         if(chat.getChatStatus() == EChatStatus.ESPERANDO_AVALIACAO){
             chatService.processarMensagem(id, command.getMessage());
             return ResponseEntity.ok().build();
@@ -128,6 +133,10 @@ public class ChatController
         Chat chat = chatService.getById(id).orElseThrow(ChatNotFoundException::new);
         ChatMessageDTO dto = new ChatMessageDTO(command.getMessage(), EMessageIssuer.ADMIN, chat);
         messageService.save(dto);
+
+        if(chat.getChatStatus() != EChatStatus.INTERVIDO){
+            chatService.updateChatStatus(id, EChatStatus.INTERVIDO);
+        }
 
         return ResponseEntity.ok().build();
     }
