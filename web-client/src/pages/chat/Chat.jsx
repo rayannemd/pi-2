@@ -13,6 +13,7 @@ import SendIcon from "@mui/icons-material/Send";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import "../../styles/StandardScreen.css"
 import "./Chat.css";
 
 function formatBRL(value) {
