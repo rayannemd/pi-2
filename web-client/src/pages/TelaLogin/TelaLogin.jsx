@@ -1,4 +1,5 @@
 import "./TelaLogin.css";
+import "../../styles/StandardScreen.css"
 import authedFetch from "../../services/authFetch";
 import { useNavigate } from "react-router-dom";
 import { useState, state } from "react";
