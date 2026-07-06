@@ -5,9 +5,8 @@ import NavBar from "../../components/Navbar/NavBar.jsx";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import MovingIcon from "@mui/icons-material/Moving";
 import ChatBubbleIcon from "@mui/icons-material/ChatBubble";
-import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
-import AccessTimeIcon from "@mui/icons-material/AccessTime";
 
+import { BarChart } from "@mui/x-charts/BarChart";
 // Importação do Gráfico do MUI
 import { PieChart } from '@mui/x-charts/PieChart';
 
@@ -16,19 +15,21 @@ export default function Dashboard() {
   // esse useState indica que os dados de "dadosCard" devem começar com os dados que estão na lista []
   // e setDados indica a fubnção que vai atualizar esses dados algum momento. 
   const [dadosCards, setDadosCards] = useState([
+    { title: "Total de Chats", icon: ChatBubbleIcon, data: "..." },
     { title: "Atendimento por ChatBot", icon: SmartToyIcon, data: "..." },
     { title: "Sucesso ChatBot", icon: SmartToyIcon, data: "..." },
+    { title: "Total Pendentes", icon: ChatBubbleIcon, data: "..." },
     { title: "Média Avaliação", icon: MovingIcon, data: "..." },
-    { title: "Total atendimentos", icon: ChatBubbleIcon, data: "..." },
-    { title: "Fila de espera", icon: PeopleAltIcon, data: "..." },
-    { title: "Tempo médio", icon: AccessTimeIcon, data: "..." },
   ]);
 
-  const [dadosCanais, setDadosCanais] = useState([]); // Enviados
-  const [dadosRecebidos, setDadosRecebidos] = useState([]); // Recebidos
-  const [dadosSetores, setDadosSetores] = useState([]);
+  // Estados inicializados estritamente como arrays vazios para evitar quebras
+  const [dadosMensagens, setDadosMensagens] = useState([]);
+  const [dadosChats, setDadosChats] = useState([]); 
+  const [diasSelecionado, setDiaSelecionado] = useState(7);
+  
+  const periodoDias = [1, 7, 15, 30];
 
-  // Função para definir a cor de cada item (Canais e Setores)
+// Função para definir a cor de cada item (Canais e Setores)
   const getCorGeral = (label) => {
     const cores = {
       // Canais
@@ -99,8 +100,40 @@ export default function Dashboard() {
       setDadosSetores(prepararDados(dadosVindosDoBack.setores));
     };
 
-    buscarDadosDoBanco();
-  }, []);
+    const url = "http://localhost:8080";
+
+    fetch(`${url}/dashboard?qtdDias=${diasSelecionado}`)
+      .then((resposta) => {
+        if (!resposta.ok) throw new Error('Não foi possível carregar os dados.');
+        return resposta.json();
+      })
+      .then((dadosVindosDoBack) => {
+        if (!dadosVindosDoBack) return;
+        
+        setDadosCards((prev) =>
+          prev.map((card) => {
+            if (card.title === "Sucesso ChatBot") return { ...card, data: dadosVindosDoBack.porcentagemSucesso ? `${dadosVindosDoBack.porcentagemSucesso}%` : "0%" };
+            if (card.title === "Atendimento por ChatBot") return { ...card, data: dadosVindosDoBack.totalAtendimentos ?? 0 };
+            if (card.title === "Média Avaliação") return { ...card, data: dadosVindosDoBack.mediaAvaliacao ?? 0 };
+            if (card.title === "Total Pendentes") return { ...card, data: 0 };
+            if (card.title === "Total de Chats") return { ...card, data: dadosVindosDoBack.totalAtendimentos ?? 0 };
+            return card;
+          })
+        );
+
+        setDadosMensagens(prepararDados([
+          { label: 'Recebidas', value: dadosVindosDoBack.totalMensagensRecebidas },
+          { label: 'Enviadas', value: dadosVindosDoBack.totalMensagensEnviadas }
+        ]));
+
+        setDadosChats(prepararDados([
+          { label: 'Agente Virtual / Bot', value: dadosVindosDoBack.totalAtendimentos },
+          // console.log(dadosVindosDoBack)
+        ]));
+      })
+      .catch((erro) => console.error("Erro na requisição:", erro));
+
+  }, [diasSelecionado]);
 
   return (
     <>
@@ -109,6 +142,20 @@ export default function Dashboard() {
         
         {/* CARDS KPI */}
         <div className="cards--container">
+          <div className="dashboard--filtros">
+            <span className="filtros--titulo">Filtrar por Período:</span>
+            <div className="filtros--botoes">
+              {periodoDias.map((qtd) => (
+                <button
+                  key={qtd}
+                  className={`btn--data ${diasSelecionado === qtd ? 'active' : ''}`}
+                  onClick={() => setDiaSelecionado(qtd)}
+                >
+                  {qtd === 1 ? "Hoje" : `${qtd} dias`}
+                </button>
+              ))}
+            </div>
+          </div>
           {dadosCards.map((card, index) => (
             <div key={index} className="card--wrapper">
               <div className="dashboard--card">
@@ -127,33 +174,41 @@ export default function Dashboard() {
         </div>
 
         {/* GRÁFICOS GERAIS */}
-        <div className="content--container">
-          <div className="grande--box">
-            <h3 className="box--title">Atendimento por canal</h3>
-            <PieChart
-              series={[{ data: dadosCanais, innerRadius: 40 }]}
-              width={400} height={200}
-            />
-          </div>
-          <div className="grande--box">
-            <h3 className="box--title">Atendimento por setor</h3>
-            <PieChart
-              series={[{ data: dadosSetores, innerRadius: 40 }]}
-              width={400} height={200}
-            />
-          </div>
-        </div>
-
-        {/* RESUMOS */}
-        <div className="resumo--container">
-          <div className="resumo--grupo">
-            <div className="pequena--box">
-              <span className="resumo--label">Líder: {dadosCanais[0]?.label}</span>
-              <span className="resumo--valor">{dadosCanais[0]?.pct}%</span>
+        <div className="linha--dash">
+          <div className="content--container">
+            
+            {/* Bloco 1: Mensagens Totais */}
+            <div className="grande--box">
+              <h3 className="box--title">Mensagens Totais</h3>
+              {dadosMensagens.length > 0 ? (
+                <PieChart
+                  series={[{ data: dadosMensagens, innerRadius: 40 }]}
+                  width={400} height={200}
+                />
+              ) : <p>Carregando gráfico...</p>}
+              <div className="box--totalizador">
+                <span>Total: </span>
+                <strong>
+                 {dadosMensagens.reduce((acumulador, item) => acumulador + item.value, 0)} Mensagens
+                </strong>
+              </div>
             </div>
-            <div className="pequena--box">
-              <span className="resumo--label">Menor: {dadosCanais[dadosCanais.length-1]?.label}</span>
-              <span className="resumo--valor">{dadosCanais[dadosCanais.length-1]?.pct}%</span>
+
+            {/* Bloco 2: Conclusões de Chats */}
+            <div className="grande--box">
+              <h3 className="box--title">Chats Resolvidos</h3>
+              {dadosChats.length > 0 ? (
+                <PieChart
+                  series={[{ data: dadosChats, innerRadius: 40 }]}
+                  width={400} height={200}
+                />
+              ) : <p>Carregando gráfico...</p>}
+              <div className="box--totalizador">
+                <span>Total Resolvidos: </span>
+                <strong>
+                  {dadosChats.reduce((acumulador, item) => acumulador + item.value, 0)} chats
+                </strong>
+              </div>
             </div>
           </div>
           <div className="resumo--grupo">
@@ -197,34 +252,32 @@ export default function Dashboard() {
                   <p className="legenda--grafico">Proporção de Envios</p>
                 </div>
               </div>
-
-              <div className="divisor--vertical"></div>
-
-              <div className="coluna--dados">
-                <h4 className="coluna--titulo-principal">Mensagens Recebidas:</h4>
-                <div className="lista--canais">
-                  {dadosRecebidos.map((canal) => (
-                    <div key={canal.id} className="item--canal">
-                      <span style={{ color: canal.color, fontWeight: 'bold' }}>{canal.label}</span>
-                      <span className="valor--stats">{canal.value}</span>
-                    </div>
-                  ))}
+              <div className="resumo--grupo">
+                <div className="pequena--box">
+                  <span className="resumo--label">Predominante: {dadosChats[0]?.label || "..."}</span>
+                  <span className="resumo--valor">{dadosChats[0]?.pct || "0"}%</span>
                 </div>
-                <div className="grafico--proporcao">
-                  <PieChart
-                    series={[{ data: dadosRecebidos, innerRadius: 35 }]}
-                    width={280} height={180}
-                    slotProps={{ legend: { hidden: true } }}
-                    sx={{ marginBottom: '-15px' }}
-                  />
-                  <p className="legenda--grafico">Proporção de Recebimentos</p>
+                <div className="pequena--box">
+                  <span className="resumo--label">Alternativo: {dadosChats[1]?.label || "..."}</span>
+                  <span className="resumo--valor">{dadosChats[1]?.pct || "0"}%</span>
                 </div>
               </div>
 
+            <div className="alocar">
+              <h3 className="box--title">Avaliações</h3>
+              <div className="alocar--conteudo">
+                <BarChart
+                  xAxis={[{ data: ['1 Estrela', '2 Estrelas' , '3 Estrelas' , '4 Estrelas' , '5 Estrelas' ] }]}
+                  yAxis={[{ min: 0, max: 5 }]}
+                  series={[{ data: [0, 0, 0, 0, 0] }]}
+                  height={300}
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
     </>
   );
 }

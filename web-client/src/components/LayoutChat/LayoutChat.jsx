@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useWebSocket } from "../../services/useWebSocket"
 import { Box, Typography, Avatar, TextField, IconButton, Menu, MenuItem } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { mensagensMock } from '../../Mock/mensagensMock';
+
+const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 
 export default function LayoutChat({ conversaAtual, resolverConversa, setExibirMensagem }) {
@@ -17,35 +19,58 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
 
   const [mensagem, setMensagem] = useState('');
   const [mensagensDoBackEnd, setMensagensDoBackEnd] = useState([]);
-  
 
+  const { enviarViaWebSocket } = useWebSocket(conversaAtual?.id, (novaMensagem) => {
+    // A própria mensagem do admin (AGENT) já é exibida de forma otimista no envio;
+    // aqui tratamos só o que chega do cliente, evitando duplicar a bolha do admin.
+    if (novaMensagem.issuer !== "USER") return;
 
+    setMensagensDoBackEnd(prev => [...prev, {
+      id: Math.random(),
+      texto: novaMensagem.content,
+      remetente: "cliente",
+      hora: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+    }]);
+  });
 
-
-  // Carregar mensagens do mock da conversa selecionada
-  // pega o id das conversas e exibe apenas o necessário na conversa, sem vazar de outros id (outra conversa)
+  //O mesmo useEffect da tela do client para carregar as mensagens antigas do chat, apenas algumas alterações
   useEffect(() => {
     if (!conversaAtual) return;
 
-    const msgsDaConversa = mensagensMock.filter(
-      msg => msg.conversaId === conversaAtual.id
-    );
-
-    setMensagensDoBackEnd(msgsDaConversa);
+    fetch(`${API_URL}/api/chats/${conversaAtual.id}/messages`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    })
+      .then(res => res.json())
+      .then(data => {
+        const mensagensFormatadas = data.map(msg => ({
+          id: msg.id,
+          texto: msg.content,
+          remetente: msg.issuer === "USER" ? "cliente" : "adm",
+          hora: new Date(msg.createDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+        }));
+        setMensagensDoBackEnd(mensagensFormatadas);
+      })
+      .catch(err => console.error("Erro ao buscar mensagens:", err));
   }, [conversaAtual]);
 
 
-{/*esse bloco de codigo abaixo, refere básicamente para montagem do código no qual 
-  enviamos uma mensagem, é os dados da mensagem inseridos aqui. NN pode enviar vazio, por causa do .trim  */}
-  const enviarMensagem = () => {
+  // Código referente ao envio e salvamento de mensagens do admin no chat
+  const enviarMensagem = async () => {
     if (mensagem.trim() === "") return;
+
     const novaMsg = {
       id: Math.random(),
       texto: mensagem,
       remetente: 'adm',
       hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
-    setMensagensDoBackEnd([...mensagensDoBackEnd, novaMsg]);
+
+    // Envia via WebSocket (issuer AGENT): backend salva e repassa ao cliente em tempo real
+    const enviada = enviarViaWebSocket(conversaAtual.id, novaMsg.texto, "AGENT");
+    if (!enviada) return; // WS ainda não conectou: mantém o texto para reenviar
+
+    // Exibe a mensagem na tela imediatamente (render otimista)
+    setMensagensDoBackEnd(prev => [...prev, novaMsg]);
     setMensagem('');
   };
 
@@ -67,7 +92,7 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', bgcolor: '#f0f2f5', flex: 1 }}> 
       
       {/* CABEÇALHO */}
-      <Box sx={{ p: 2, bgcolor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between', boxShadow: '0px 2px 5px rgba(0,0,0,0.1)', zIndex: 1 }}>
+      <Box sx={{ p: 2, bgcolor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between',    boxShadow: '0px 2px 5px rgba(0,0,0,0.1)', zIndex: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Avatar sx={{ mr: 2, bgcolor: '#9d1a1a' }}>
             {conversaAtual.nome ? conversaAtual.nome[0] : "?"} {/*Aqui basicamente pega a 1º letra do nome e coloca no avatar. */}
@@ -78,9 +103,9 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
           </Box>
         </Box>
 
-{/* O trecho abaixo é sobre o MARCAR COMO RESOLVIDA que existe em todas as conversas - na teoria.
-Não funciona ainda, devemos implementar para resolver a conversa e impossibilitar de enviar msg nesse chat (inclusive o bot) */}
-{/* Incio do bloco de marcar como resolvida */}
+        {/* O trecho abaixo é sobre o MARCAR COMO RESOLVIDA que existe em todas as conversas - na teoria.
+        Não funciona ainda, devemos implementar para resolver a conversa e impossibilitar de enviar msg nesse chat (inclusive o bot) */}
+        {/* Incio do bloco de marcar como resolvida */}
         <Box>
           <IconButton onClick={handleClick}>
             <MoreVertIcon />
@@ -92,12 +117,12 @@ Não funciona ainda, devemos implementar para resolver a conversa e impossibilit
           </Menu>
         </Box>
       </Box>
-{/* fim do bloco de marcar como resolvida */}
+      {/* fim do bloco de marcar como resolvida */}
 
 
       {/* MENSAGENS (bloco que fica as mensagens lá) */}
       <Box sx={{ flex: 1, overflowY: 'auto', p: 3, display: 'flex', flexDirection: 'column', gap: 2 , 
-        overflowY: 'auto', scrollbarWidth: 'none',}}>
+        scrollbarWidth: 'none',}}>
         {/* PAra cada mensagem do back, ele retorna esse box, que é a caixa de dialogo  */}
         {/* Sendo o remetendo esverdeada, e o cliente branca */}
         {mensagensDoBackEnd.map(msg => (

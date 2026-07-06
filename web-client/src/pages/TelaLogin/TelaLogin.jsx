@@ -36,11 +36,20 @@ export default function TelaLogin() {
     setErros({});
 
     // Criei um usuário cliente fixo pra login
-    const userDataCliente = {
-      name: "Usuário Teste",
-      email: "teste@gmail.com",
+    const userDataCliente1 = {
+      name: "Usuário Teste1",
+      email: "teste1@gmail.com",
       password: "123456",
       cpfCnpj: "11111111111",
+      type: "CUSTOMER",
+    };
+
+    // Criei um usuário cliente fixo pra login
+    const userDataCliente2 = {
+      name: "Usuário Teste2",
+      email: "teste2@gmail.com",
+      password: "123321",
+      cpfCnpj: "99999999999",
       type: "CUSTOMER",
     };
 
@@ -53,24 +62,39 @@ export default function TelaLogin() {
       type: "ADMIN",
     };
 
-    // Criar o usuário cliente
+    // Criar o usuário cliente 1
     fetch("http://localhost:8080/api/auth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(userDataCliente),
+      body: JSON.stringify(userDataCliente1),
     })
       .then((response) => {
         if (!response.ok && response.status !== 400) {
           // se der erro diferente de BAD_REQUEST, mostra alerta
-          console.log("Usuário existente no banco");
+          console.log("Usuário 1 existente no banco");
         }
         if(response.ok){
-          console.log("Usuário salvo no banco de dados")
+          console.log("Usuário 1 salvo no banco de dados")
+        }
+        return response;
+      })
+    // Criar o usuário cliente 2
+    fetch("http://localhost:8080/api/auth", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(userDataCliente2),
+    })
+      .then((response) => {
+        if (!response.ok && response.status !== 400) {
+          // se der erro diferente de BAD_REQUEST, mostra alerta
+          console.log("Usuário 2 existente no banco");
+        }
+        if(response.ok){
+          console.log("Usuário 2 salvo no banco de dados")
         }
         return response;
       })
       .finally(() => {
-
         // Criar usuário admin
         fetch("http://localhost:8080/api/auth", {
           method: "POST",
