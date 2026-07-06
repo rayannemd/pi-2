@@ -1,21 +1,19 @@
 import { useEffect, useRef, useState } from "react";
-import { useWebSocket } from "../../services/useWebSocket";
+import { Link } from "react-router-dom";
 import { QRCodeCanvas } from "qrcode.react";
+import { useWebSocket } from "../../services/useWebSocket";
+import authedFetch from "../../services/authFetch";
+import SearchBox from "../../components/SearchBox/SearchBox.jsx";
+import Logo from "../../components/Logo/Logo.jsx";
 import BarraLateral from "../../components/BarraConfigClient/BarraConfig";
+import userIcon from "../../assets/icons/User.svg";
+import configIcon from "../../assets/icons/Config.svg";
+import { Box, Typography, Avatar, TextField, IconButton, Menu, MenuItem } from "@mui/material";
+import SendIcon from "@mui/icons-material/Send";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import "./Chat.css";
-
-function authedFetch(url, options = {}) {
-  return fetch(url, {
-    ...options,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${localStorage.getItem("token")}`,
-      ...(options.headers || {}),
-    },
-  });
-}
 
 function formatBRL(value) {
   return Number(value ?? 0).toFixed(2);
@@ -27,89 +25,139 @@ export default function Chat() {
   const [messages, setMessages] = useState([]);
   const messagesEndRef = useRef(null);
 
+  const [layoutInicial, setLayoutInicial] = useState(true);
+  const [loadingChat, setLoadingChat] = useState(true);
+
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
   const userId = localStorage.getItem("userId");
 
   const pushMessages = (...msgs) => setMessages((prev) => [...prev, ...msgs]);
-  const pushAgentText = (content) => pushMessages({ userId: "agent", content });
+  const pushAgentText = (content) =>
+    pushMessages({
+      userId: "agent",
+      content,
+      hora: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    });
 
-  const { enviarViaWebSocket } = useWebSocket(chatId, (novaMensagem) => {
-    setMessages(prev => [...prev, {
-      userId: novaMensagem.issuer === "USER" ? "me" : "agent",
-      content: novaMensagem.content,
-    }]);
+  useWebSocket(chatId, (novaMensagem) => {
+    // Ignora mensagens do próprio usuário — já foram adicionadas no render otimista
+    // Ignora as mensagens do agente - Já foram adicionadas via handleSendMessage
+    if (novaMensagem.issuer === "USER" || novaMensagem.issuer === "AGENT")
+      return;
+
+    // Renderiza as mensagens do admin
+    setMessages((prev) => [
+      ...prev,
+      {
+        userId: "admin",
+        content: novaMensagem.content,
+        hora: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      },
+    ]);
   });
 
   // Scroll automático
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
   }, [messages]);
 
+  // useEffect para carregar as mensagens antigas do chat
   useEffect(() => {
     if (!chatId) return;
+    if (layoutInicial) return;
 
     authedFetch(`${API_URL}/api/chats/${chatId}/messages`)
-      .then(res => {
+      .then((res) => {
         if (!res.ok) throw new Error("Erro ao buscar mensagens");
         return res.json();
       })
-      .then(data => {
-        const historicoFormatado = data.map(msg => ({
+      .then((data) => {
+        const historicoFormatado = data.map((msg) => ({
           userId: msg.issuer === "USER" ? "me" : "agent",
           content: msg.content,
+          hora: new Date(msg.createDate).toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+          }),
         }));
         setMessages(historicoFormatado);
       })
-      .catch(err => console.error("❌ Erro ao carregar histórico:", err));
+      .catch((err) => console.error("❌ Erro ao carregar histórico:", err));
   }, [chatId]);
 
-
-  // Retoma o chat do próprio usuário a partir do banco (endpoint já existente
-  // GET /api/users/{id}/chats). Isso garante que, ao atualizar a página ou voltar
-  // com o mesmo usuário, o chat e suas mensagens são recarregados — sem depender
-  // do localStorage (que não sobrevive a outro navegador/aba anônima/cache limpo).
+  // useEffect para buscar o chat mais recente do cliente
   useEffect(() => {
     if (!userId) return;
 
     authedFetch(`${API_URL}/api/users/${userId}/chats`)
-      .then(res => (res.ok ? res.json() : []))
-      .then(chats => {
+      .then((res) => (res.ok ? res.json() : []))
+      .then((chats) => {
         if (Array.isArray(chats) && chats.length > 0) {
           // Retoma o chat mais recente do usuário
           const maisRecente = chats.reduce((a, b) => (b.id > a.id ? b : a));
           localStorage.setItem(`chatId_${userId}`, maisRecente.id);
           setChatId(maisRecente.id);
-        } else {
-          criarNovoChat();
+          setLayoutInicial(false);
         }
       })
-      .catch(() => criarNovoChat());
+      .catch(() => console.error("Erro ao buscar chat"))
+      .finally(() => setLoadingChat(false));
   }, []);
 
   // Função para criar um novo chat
-  function criarNovoChat(){
-    authedFetch(`${API_URL}/api/users/${userId}/chats`, {
+  async function criarNovoChat(firstMessage) {
+    const res = await authedFetch(`${API_URL}/api/users/${userId}/chats`, {
       method: "POST",
       body: JSON.stringify({ title: "", summary: "", type: "NORMAL" }),
-    })
-      .then(res => {
-        if (!res.ok) throw new Error("Erro ao criar chat");
-        return res.json();
-      })
-      .then(chat => {
-        localStorage.setItem(`chatId_${userId}`, chat.id);
-        setChatId(chat.id);
-        console.log("✅ Chat criado com ID:", chat.id);
-      })
-      .catch(err => console.error("❌ Erro ao criar chat:", err));
+    });
+    if (!res.ok) throw new Error("Erro ao criar chat");
+
+    const chat = await res.json();
+    localStorage.setItem(`chatId_${userId}`, chat.id);
+    setChatId(chat.id);
+    console.log("✅ Chat criado com ID:", chat.id);
+    await sendMessage(firstMessage, chat.id);
+  }
+
+  async function handleSendFirstMessage(firstMessage) {
+    try{
+      await criarNovoChat(firstMessage);
+      setLayoutInicial(false);
+    } catch(err){
+      console.error("Erro ao iniciar chat:", err);
+      alert("Erro ao iniciar conversa. Tente novamente.");
+    }
   }
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
     if (!input.trim() || !chatId) return;
-
-    const userMessage = { userId: "me", content: input };
+    const msg = input;
     setInput("");
+    await sendMessage(msg);
+  };
+
+  const sendMessage = async (msg, id = chatId) => {
+    if (!msg.trim() || !id) return;
+
+    const userMessage = {
+      id: Math.random(),
+      userId: "me",
+      content: msg,
+      hora: new Date().toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    };
 
     // O cliente envia somente via REST (que aciona o agente e trata a resposta).
     // O WebSocket é usado apenas para RECEBER as mensagens do admin em tempo real;
@@ -119,20 +167,28 @@ export default function Chat() {
 
     try {
       const response = await authedFetch(
-        `${API_URL}/api/chats/${chatId}/messages`,
+        `${API_URL}/api/chats/${id}/messages`,
         {
           method: "POST",
           body: JSON.stringify({ message: userMessage.content }),
-        }
+        },
       );
 
       if (!response.ok) throw new Error("Erro ao enviar mensagem");
 
+      // Verifica se a resposta tem conteúdo antes de parsear
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) return;
+
       const data = await response.json();
 
       handleAgentResponse(data);
+      
     } catch (err) {
+      const idToRemove = userMessage.id;
+      setMessages((prev) => prev.filter((msg) => msg.id !== idToRemove));
       console.error("Erro no envio:", err);
+      alert("Erro ao enviar mensagem! Tente novamente.");
     }
   };
 
@@ -152,7 +208,15 @@ export default function Chat() {
           return;
         }
         pushMessages(
-          { userId: "agent", content: "Estas são suas mensalidades em aberto. Selecione quais deseja pagar." },
+          {
+            userId: "agent",
+            content:
+              "Estas são suas mensalidades em aberto. Selecione quais deseja pagar.",
+            hora: new Date().toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+          },
           { userId: "agent", kind: "installments", installments },
         );
         return;
@@ -163,12 +227,15 @@ export default function Chat() {
           pushAgentText("Você ainda não possui cobranças geradas neste chat.");
           return;
         }
-        const statusText = {
-          PAID: "já foi paga. Obrigado!",
-          EXPIRED: "expirou. Gere uma nova para pagar.",
-          FAILED: "falhou. Tente gerar novamente.",
-        }[charge.status] || "ainda está pendente de pagamento.";
-        pushAgentText(`Sua cobrança de R$ ${formatBRL(charge.amount)} ${statusText}`);
+        const statusText =
+          {
+            PAID: "já foi paga. Obrigado!",
+            EXPIRED: "expirou. Gere uma nova para pagar.",
+            FAILED: "falhou. Tente gerar novamente.",
+          }[charge.status] || "ainda está pendente de pagamento.";
+        pushAgentText(
+          `Sua cobrança de R$ ${formatBRL(charge.amount)} ${statusText}`,
+        );
         return;
       }
       case "consulta_plano": {
@@ -184,10 +251,13 @@ export default function Chat() {
     if (!chatId || !installmentIds?.length) return;
 
     try {
-      const response = await authedFetch(`${API_URL}/api/chats/${chatId}/charges`, {
-        method: "POST",
-        body: JSON.stringify({ installmentIds }),
-      });
+      const response = await authedFetch(
+        `${API_URL}/api/chats/${chatId}/charges`,
+        {
+          method: "POST",
+          body: JSON.stringify({ installmentIds }),
+        },
+      );
 
       if (!response.ok) throw new Error("Erro ao gerar cobrança");
 
@@ -195,14 +265,51 @@ export default function Chat() {
       pushMessages({ userId: "agent", kind: "charge", charge });
       return charge;
     } catch (err) {
-      pushAgentText("Não consegui gerar a cobrança agora. Tente novamente em instantes.");
+      pushAgentText(
+        "Não consegui gerar a cobrança agora. Tente novamente em instantes.",
+      );
       throw err;
     }
   };
 
   /* ===============================
-     RENDER
+      RENDER
   =============================== */
+  if(loadingChat) return null;
+  if(layoutInicial){
+    return (
+      <div className="tela-root">
+        <div className="tela-inner">
+          <div className="flex">
+            <Logo />
+            <h1 className="brand">
+              PLANETA NET <span className="dot-telecom">.TELECOM</span>
+            </h1>
+          </div>
+          <p className="help-text">Como posso te ajudar?</p>
+
+          <SearchBox placeholder="Pergunte alguma coisa." onSend={handleSendFirstMessage} />
+        </div>
+
+        <div className="tela-options">
+          <div className="user-icon">
+            <Link to={"/login"}>
+              <i>
+                <img src={userIcon} alt="Usuário" className="icon-img" />
+              </i>
+            </Link>
+          </div>
+
+          <div className="config-icon">
+            <i>
+              <img src={configIcon} alt="Configurações" className="icon-img" />
+            </i>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="app-layout">
       <BarraLateral />
@@ -220,25 +327,47 @@ export default function Chat() {
               );
             }
             if (msg.kind === "charge") {
-              return (
-                <ChargeBubble key={index} charge={msg.charge} />
-              );
+              return <ChargeBubble key={index} charge={msg.charge} />;
             }
             return (
-              <div
+              <Box
                 key={index}
-                className={
-                  msg.userId === "me" ? "message--self" : "message--other"
-                }
+                sx={{
+                  alignSelf: msg.userId === "me" ? "flex-end" : "flex-start",
+                  maxWidth: "50%",
+                  bgcolor: msg.userId === "me" ? "#dcf8c6" : "white",
+                  p: 1.5,
+                  borderRadius:
+                    msg.userId === "me"
+                      ? "15px 15px 0px 15px"
+                      : "0px 15px 15px 15px",
+                  boxShadow: "0px 1px 3px rgba(0,0,0,0.2)",
+                  wordBreak: "break-word",
+                }}
               >
                 {msg.userId === "me" ? (
-                  msg.content
+                  <Typography variant="body2">{msg.content}</Typography>
                 ) : (
-                  <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {msg.content}
-                  </ReactMarkdown>
+                  <Typography variant="body2" component="div">
+                    <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                      {msg.content}
+                    </ReactMarkdown>
+                  </Typography>
                 )}
-              </div>
+                {msg.hora && (
+                  <Typography
+                    variant="caption"
+                    sx={{
+                      display: "block",
+                      textAlign: "right",
+                      mt: 0.5,
+                      color: "gray",
+                    }}
+                  >
+                    {msg.hora}
+                  </Typography>
+                )}
+              </Box>
             );
           })}
           <div ref={messagesEndRef} />
@@ -325,7 +454,11 @@ function InstallmentSelection({ installments, onPay }) {
         onClick={pay}
         disabled={selected.size === 0 || loading || done}
       >
-        {done ? "Cobrança gerada" : loading ? "Gerando..." : "Pagar selecionadas"}
+        {done
+          ? "Cobrança gerada"
+          : loading
+            ? "Gerando..."
+            : "Pagar selecionadas"}
       </button>
     </div>
   );

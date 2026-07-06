@@ -3,6 +3,7 @@ package br.ufc.crateus.pi2.botservice.models;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import br.ufc.crateus.pi2.botservice.models.enums.EChatStatus;
@@ -52,7 +53,7 @@ public class Chat extends BaseEntity
     private EChatStatus chatStatus;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JsonIgnore
+    @JsonIgnoreProperties({"chats", "services", "password"})
     private User user;
 
     @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL, orphanRemoval = true)

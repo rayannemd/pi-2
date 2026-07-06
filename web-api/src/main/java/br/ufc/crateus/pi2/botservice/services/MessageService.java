@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import br.ufc.crateus.pi2.botservice.controllers.dtos.ChatMessageDTO;
 import br.ufc.crateus.pi2.botservice.models.Chat;
@@ -19,6 +20,9 @@ public class MessageService
 
     @Autowired
     private ChatRepository chatRepository;
+
+    @Autowired 
+    private SimpMessagingTemplate messagingTemplate;
 
     public List<Message> getMessagesByChatId(Long chatId)
     {
@@ -41,6 +45,12 @@ public class MessageService
         {
             chat.setLastMessage(dto.getContent());
             chatRepository.save(chat);
+
+            // Publica a mensagem enviada no websocket
+            messagingTemplate.convertAndSend("/topic/chat/" + chat.getId(), dto);
+
+            // Publica a atualização dos chats no WebSocket para atualizar a lista de chats em tempo real
+            messagingTemplate.convertAndSend("/topic/chats/atualizacao", chat.getId());
         }
 
         return saved;

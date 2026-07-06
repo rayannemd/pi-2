@@ -1,6 +1,7 @@
 import "./TelaLogin.css";
+import authedFetch from "../../services/authFetch";
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, state } from "react";
 import { z } from "zod";
 import Logo from "../../components/Logo/Logo.jsx";
 
@@ -135,20 +136,19 @@ export default function TelaLogin() {
             console.log("Resposta do backend:", data);
 
             localStorage.setItem("token", data.token);
-            localStorage.setItem("userId", data.id)
+            localStorage.setItem("userId", data.id);
 
-            if(data.userType == "CUSTOMER"){
-              navigate("/home")
-            }
-            else if(data.userType == "ADMIN"){
+            if(data.userType == "ADMIN"){
               navigate("/chat-admin")
+              return;
+            } else if(data.userType == "CUSTOMER"){
+              navigate("/chat-client")
+              return;
             }
-            else{
-              console.warn("Tipo do usuário não reconhecido! Redirecionando para tela inicial")
-              navigate("/home")
-            }
-            
+
+            console.warn("Tipo do usuário não reconhecido!")
           })
+
           .catch(() => {
             console.error({ password: "Email ou senha inválidos" });
           });
