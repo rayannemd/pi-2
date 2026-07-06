@@ -4,6 +4,7 @@ import "./SearchBox.css";
 export default function SearchBox({
   placeholder = "Pergunte alguma coisa.",
   onSend,
+  disabled = false,
 }) {
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -33,10 +34,11 @@ export default function SearchBox({
         value={searchTerm}
         onChange={handleInputChange}
         placeholder={placeholder}
+        disabled={disabled}
         aria-label="Pergunte alguma coisa"
         onKeyDown={(event) => (event.key === "Enter" ? handleSearch() : null)}
       />
-      <button className="send-button" type="submit" aria-label="Enviar">
+      <button className="send-button" type="submit" aria-label="Enviar" disabled={disabled}>
         {/* Ícone simples em SVG inline */}
         <svg
           width="18"

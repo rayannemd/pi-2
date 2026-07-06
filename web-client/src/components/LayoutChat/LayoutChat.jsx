@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useWebSocket } from "../../services/useWebSocket"
+import { useEffect, useRef, useState } from 'react';
+import { useWebSocket } from '../../services/useWebSocket';
+import authedFetch from "../../services/authFetch";
 import { Box, Typography, Avatar, TextField, IconButton, Menu, MenuItem } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
@@ -19,19 +20,37 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
 
   const [mensagem, setMensagem] = useState('');
   const [mensagensDoBackEnd, setMensagensDoBackEnd] = useState([]);
+  const messagesEndRef = useRef(null);
 
-  const { enviarViaWebSocket } = useWebSocket(conversaAtual?.id, (novaMensagem) => {
-    // A própria mensagem do admin (AGENT) já é exibida de forma otimista no envio;
-    // aqui tratamos só o que chega do cliente, evitando duplicar a bolha do admin.
-    if (novaMensagem.issuer !== "USER") return;
+  useWebSocket(conversaAtual?.id, (novaMensagem) => {
+    console.log("📨 LayoutChat recebeu mensagem:", novaMensagem);
+    // A própria mensagem do admin já é exibida de forma otimista no envio
+    if (novaMensagem.issuer === "ADMIN") return;
 
-    setMensagensDoBackEnd(prev => [...prev, {
-      id: Math.random(),
-      texto: novaMensagem.content,
-      remetente: "cliente",
-      hora: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
-    }]);
+    // Renderiza as mensagens do agente
+    if(novaMensagem.issuer === "AGENT"){
+      setMensagensDoBackEnd(prev => [...prev, {
+        id: Math.random(),
+        content: novaMensagem.content,
+        remetente: "agent",
+        hora: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      }]);
+    } else{ // Rederiza as mensagens do cliente
+      setMensagensDoBackEnd(prev => [...prev, {
+        id: Math.random(),
+        content: novaMensagem.content,
+        remetente: "cliente",
+        hora: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
+      }]);
+    }
+
+    
   });
+
+  // Scroll automático
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
+  }, [mensagensDoBackEnd]);
 
   //O mesmo useEffect da tela do client para carregar as mensagens antigas do chat, apenas algumas alterações
   useEffect(() => {
@@ -44,7 +63,7 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
       .then(data => {
         const mensagensFormatadas = data.map(msg => ({
           id: msg.id,
-          texto: msg.content,
+          content: msg.content,
           remetente: msg.issuer === "USER" ? "cliente" : "adm",
           hora: new Date(msg.createDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
         }));
@@ -58,20 +77,33 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
   const enviarMensagem = async () => {
     if (mensagem.trim() === "") return;
 
-    const novaMsg = {
+    const adminMessage = {
       id: Math.random(),
-      texto: mensagem,
+      content: mensagem,
       remetente: 'adm',
       hora: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     };
 
-    // Envia via WebSocket (issuer AGENT): backend salva e repassa ao cliente em tempo real
-    const enviada = enviarViaWebSocket(conversaAtual.id, novaMsg.texto, "AGENT");
-    if (!enviada) return; // WS ainda não conectou: mantém o texto para reenviar
-
     // Exibe a mensagem na tela imediatamente (render otimista)
-    setMensagensDoBackEnd(prev => [...prev, novaMsg]);
+    setMensagensDoBackEnd(prev => [...prev, adminMessage]);
     setMensagem('');
+
+    try{
+      const response = await authedFetch(
+        `${API_URL}/api/chats/${conversaAtual.id}/admin-message`,
+      {
+        method: "POST",
+        body: JSON.stringify({ message: adminMessage.content}),
+      });
+
+      if (!response.ok) throw new Error("Erro ao enviar mensagem");
+
+    }catch(err){ // Caso a mensagem não envie, ela é removida da tela do chat
+      const idToRemove = adminMessage.id;
+      setMensagensDoBackEnd(prev => prev.filter(msg => msg.id !== idToRemove));
+      console.error("Erro no envio:", err);
+      alert("Erro ao enviar mensagem! Tente novamente.");
+    }
   };
 
   // Mensagem de "nenhuma conversa selecionada"
@@ -139,12 +171,13 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
               wordBreak: 'break-word'
             }}
           >
-            <Typography variant="body2">{msg.texto}</Typography>
+            <Typography variant="body2">{msg.content}</Typography>
             <Typography variant="caption" sx={{ display: 'block', textAlign: 'right', mt: 0.5, color: 'gray' }}>
               {msg.hora}
             </Typography>
           </Box>
         ))}
+        <div ref={messagesEndRef} />
       </Box>
 
       {/* INPUT (barra de escrever msg)*/} 

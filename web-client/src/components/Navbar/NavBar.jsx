@@ -19,7 +19,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import MenuIcon from "@mui/icons-material/Menu"; // Adicionei para o Mobile
 
 const pages = [
-  { name: "ChatBot", path: "/home" },
+  { name: "ChatBot", path: "/login" },
   { name: "Conversas", path: "/chat-admin" },
   
 ];
@@ -49,7 +49,7 @@ export default function NavBar() {
         <Toolbar disableGutters={true}> {/* Corrigido: booleano real */}
           
           {/* LOGO / HOME ICON */}
-          <Link to={"/home"} style={{ textDecoration: 'none' }}>
+          <Link to={"/login"} style={{ textDecoration: 'none' }}>
             <IconButton size="large">
               <HomeIcon sx={{ color: "white" }} />
             </IconButton>

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Box, Snackbar, Alert } from '@mui/material';
 import SockJS from 'sockjs-client';
 import { Client } from '@stomp/stompjs';
+import authedFetch from '../../services/authFetch';
 import BarraLateral from "../../components/BarraLateral/BarraLateral.jsx"; 
 import LayoutChat from '../../components/LayoutChat/LayoutChat.jsx';
 import "./TelaChatClient.css"; 
@@ -74,16 +75,24 @@ export default function TelaChatClient() {
   );
 
   function resolverConversa(id) {
-    setConversas(prev =>
-      prev.map(conversa => {
-        if (conversa.id === id) {
-          const conversaAtualizada = { ...conversa, categoria: "resolvido" };
-          setConversaSelecionada(conversaAtualizada);
-          return conversaAtualizada;
-        }
-        return conversa;
-      })
-    );
+    authedFetch(`${API_URL}/api/chats/${id}/resolve-chat`, {
+      method: "PUT",
+    })
+    .then(res => {
+      if (!res.ok) throw new Error("Erro ao resolver conversa");
+      
+      setConversas(prev =>
+        prev.map(conversa => {
+          if (conversa.id === id) {
+            const conversaAtualizada = { ...conversa, categoria: "resolvido" };
+            setConversaSelecionada(conversaAtualizada);
+            return conversaAtualizada;
+          }
+          return conversa;
+        })
+      );
+    })
+    .catch(err => console.error("Erro ao resolver conversa:", err));
   }
 
   const handleFecharMensagem = (event, reason) => {

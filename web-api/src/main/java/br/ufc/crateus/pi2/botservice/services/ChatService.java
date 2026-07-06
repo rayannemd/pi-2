@@ -97,6 +97,13 @@ public class ChatService
         }
     }
 
+
+    public void updateChatStatus(Long id, EChatStatus status){
+       Chat chat = chatRepository.findById(id).orElseThrow(() -> new RuntimeException("Chat não encontrado."));
+       chat.setChatStatus(status);
+       chatRepository.save(chat);
+    }
+
     /*public void processarMensagem(Long id, String message){
         Chat chat = chatRepository.findById(id).orElseThrow(() -> new RuntimeException("Chat não encontrado."));
         if(chat.getChatStatus() == EChatStatus.ESPERANDO_AVALIACAO){

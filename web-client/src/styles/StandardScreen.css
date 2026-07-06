@@ -1,0 +1,113 @@
+html,
+body,
+#root {
+  height: 100%;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.flex {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3rem;
+}
+
+.tela-root {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #b93b3f 0%, #a33438 50%, #6d2326 100%);
+  color: #fff;
+  font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+/* card */
+.tela-inner {
+  width: 100%;
+  margin-left: 90px;
+  max-width: 1900px;
+  height: 100vh;
+  background: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(0, 0, 0, 0.05) 100%
+  );
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 36px 48px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
+/* texto grande da marca */
+.brand {
+  margin-bottom: 10px;
+  font-size: 38px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-align: center;
+}
+
+.dot-telecom {
+  display: block;
+  font-size: 28px;
+  font-weight: 400;
+  opacity: 0.95;
+}
+
+.help-text {
+  margin: 0;
+  font-size: 18px;
+  opacity: 0.9;
+}
+
+/* garante que o componente SearchBox centralize */
+.search-box {
+  margin-top: 6px;
+}
+
+/* responsividade */
+@media (max-width: 800px) {
+  .tela-inner {
+    width: 92%;
+    padding: 24px;
+    height: auto;
+  }
+  .brand {
+    font-size: 28px;
+  }
+  .logo {
+    width: 96px;
+    height: 96px;
+  }
+}
+
+.user-icon {
+  position: absolute;
+  bottom: 20px;
+  left: 20px;
+  color: #ffffff;
+  display: flex;
+  align-items: end;
+}
+
+.config-icon {
+  position: absolute;
+  top: 20px;
+  left: 25px;
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+}
