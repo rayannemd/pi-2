@@ -183,6 +183,13 @@ public class ChatController
             return ResponseEntity.ok(updatedChat);    
     }
 
+    @PutMapping("/{id}/resolve-chat")
+    public ResponseEntity<Void> resolverChat(@PathVariable Long id)
+    {
+        chatService.updateChatStatus(id, EChatStatus.RESOLVIDO);
+        return ResponseEntity.ok().build();
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<Chat> deleteChat(@PathVariable Long id)
     {
