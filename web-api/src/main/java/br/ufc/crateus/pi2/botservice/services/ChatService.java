@@ -14,6 +14,7 @@ import br.ufc.crateus.pi2.botservice.models.enums.EChatType;
 import br.ufc.crateus.pi2.botservice.repositories.ChatRepository;
 import br.ufc.crateus.pi2.botservice.repositories.UserRepository;
 import br.ufc.crateus.pi2.botservice.services.commands.CreateChatCommand;
+import br.ufc.crateus.pi2.botservice.services.commands.RateChatCommand;
 import br.ufc.crateus.pi2.botservice.services.commands.UpdateChatCommand;
 
 @Service
@@ -96,13 +97,14 @@ public class ChatService
         }
     }
 
+
     public void updateChatStatus(Long id, EChatStatus status){
        Chat chat = chatRepository.findById(id).orElseThrow(() -> new RuntimeException("Chat não encontrado."));
        chat.setChatStatus(status);
        chatRepository.save(chat);
     }
 
-    public void processarMensagem(Long id, String message){
+    /*public void processarMensagem(Long id, String message){
         Chat chat = chatRepository.findById(id).orElseThrow(() -> new RuntimeException("Chat não encontrado."));
         if(chat.getChatStatus() == EChatStatus.ESPERANDO_AVALIACAO){
             Integer nota = Integer.parseInt(message);
@@ -125,5 +127,25 @@ public class ChatService
 
         chat.setChatStatus(EChatStatus.ESPERANDO_AVALIACAO);
         chatRepository.save(chat);
+    }*/
+
+    public void rateChat(Long id , RateChatCommand command){
+        Chat chat = chatRepository.findById(id).orElseThrow(() -> new RuntimeException("Chat não encontrado."));
+
+        if(command.getChatRating() == null){
+            chat.setChatRating(null);
+            chatRepository.save(chat);
+            return;
+        }
+
+        if(command.getChatRating() < 1 || command.getChatRating() > 5){
+            throw new IllegalArgumentException("A nota deve ser um número entre 1 e 5");
+        }
+
+        chat.setChatRating(command.getChatRating());
+
+        chatRepository.save(chat);
     }
 }
+
+
