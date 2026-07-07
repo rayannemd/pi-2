@@ -103,6 +103,8 @@ public class ChatController
         @PathVariable Long id,
         @RequestBody SendMessageCommand command)
     {
+        System.out.println("\n\nENTROU AQUI!\n\n\n");
+
         chatService.getById(id).orElseThrow(ChatNotFoundException::new);
 
         AgentHandledResponseDto response = agentExternalService.sendMessage(id, command);

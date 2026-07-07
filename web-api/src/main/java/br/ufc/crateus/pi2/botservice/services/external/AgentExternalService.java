@@ -34,6 +34,10 @@ public class AgentExternalService
     @Autowired
     private ChargeService chargeService;
 
+
+    //public AgentHandledResponseDto sendMessage(Chat chat, SendMessageCommand command){
+    //}
+
     public AgentHandledResponseDto sendMessage(Long chatId, SendMessageCommand command)
     {
         var chat = chatRepository.findById(chatId)
@@ -41,6 +45,8 @@ public class AgentExternalService
 
         if(chat.getSummary() != null)
             command.setSummary(chat.getSummary());
+        
+        command.setTimedOut(false);
 
         messageService.save(new ChatMessageDTO(command.getMessage(), EMessageIssuer.USER, chat));
 

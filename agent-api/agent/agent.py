@@ -5,7 +5,7 @@ from google import genai
 import json
 from vector_database import add_data_to_vector_database, search_in_documents
 
-model = ChatGroq(model="llama-3.3-70b-versatile", temperature=0.8)
+model = ChatGroq(model="llama-3.3-70b-versatile", temperature=1)
 
 
 class PromptType(TypedDict):
@@ -24,10 +24,9 @@ class MyState(TypedDict):
     message: str
     classification: PromptType
     issue_classification: IssueClassification
-    last_messages: list
     summary: str
     answer: str
-    isTimedOut: bool
+    timedOut: bool
 
     test: str
 
@@ -41,19 +40,21 @@ Minha internet está caindo o tempo todo e quero derrotar o Ender Dragon, como f
 """
 
 async def user_input(state: MyState):
-    if not state.get('last_messages'):
-        return {'last_messages': [{"role": "user", "content": state['message']}]}
+    if not state.get('summary'):
+        return {'summary': f"user: {state['message']}\n"}
     else:
-        return {'last_messages': state['last_messages'] + [{"role":"user", "content": state['message']}]}
+        return {'summary': state['summary'] + f"user: {state['message']}\n"}
 
 async def finished_router(state: MyState):
-    return state['isTimedOut']
+    return state['timedOut']
 
 async def issue_classification(state: MyState):
-    issue_classification_prompt = f"""
-        {state['summary']}
+    last_messages = state['summary']
 
-        Se o resumo da conversa apresentar problemas relacionados à parte financeira dos serviços da provedora de internet, como problemas com pagamento do plano ou cobrança indevida, classifique como 'financeiro'.
+    issue_classification_prompt = f"""
+        {last_messages}
+
+        Se o histórico da conversa apresentar problemas relacionados à parte financeira dos serviços da provedora de internet, como problemas com pagamento do plano ou cobrança indevida, classifique como 'financeiro'.
 
         Se o resumo da conversa apresentar problemas relacionados à parte técnica dos serviços da provedora de internet, como problemas de equipamento, lentidão ou instabilidade de sinal, classifique como 'técnico'.
 
@@ -66,13 +67,12 @@ async def issue_classification(state: MyState):
 
     analysis = await classifier_model.ainvoke([{"role": "user", "content": issue_classification_prompt}])
 
-    if state['isTimedOut']:
+    if state['timedOut']:
         return {"issue_classification": analysis}
     
     # Se não foi timeout, classificaremos como um problema resolvido.
     else:
-
-        last_messages = json.dumps(state['last_messages'])
+        last_messages = state['summary']
 
         prompt = f"""
             Histórico de mensagens: {last_messages} 
@@ -87,33 +87,35 @@ async def issue_classification(state: MyState):
         await add_data_to_vector_database(response['issue'], response['solution'])
         return {"issue_classification": analysis}
 
-async def summary_to_model(state: MyState):
-    if(state.get("summary", "") == ""):
-        summary = await model.ainvoke([{"role": "user", "content": f"Mensagem do usuário: {state['message']}\nBaseado nessa mensagem, responda apenas com um título breve para a conversa."}])
-    else:
-        summary = await model.ainvoke([{"role": "user", "content": f"""
-        Crie um resumo para uma conversa entre um assistente virtual de uma provedora de internet e um cliente. Você deve criar um resumo detalhado que compreenda as informações principais da conversa. O resumo deve conter de maneira explícita os problemas do cliente.
+# async def summary_to_model(state: MyState):
+#     if(state.get("summary", "") == ""):
+#         summary = await model.ainvoke([{"role": "user", "content": f"Mensagem do usuário: {state['message']}\nBaseado nessa mensagem, responda apenas com um título breve para a conversa."}])
+#     else:
+#         summary = await model.ainvoke([{"role": "user", "content": f"""
+#         Crie um resumo para uma conversa entre um assistente virtual de uma provedora de internet e um cliente. Você deve criar um resumo detalhado que compreenda as informações principais da conversa. O resumo deve conter de maneira explícita os problemas do cliente.
                                         
-        Exemplo:
-        Prompt atual: Minha internet está caindo
+#         Exemplo:
+#         Prompt atual: Minha internet está caindo
                                         
-        Resumo da conversa até agora: O usuário cumprimentou o assistente com um "oi", o assistente respondeu que sim e estava disposto a ajudar com problemas na internet.
+#         Resumo da conversa até agora: O usuário cumprimentou o assistente com um "oi", o assistente respondeu que sim e estava disposto a ajudar com problemas na internet.
                                         
-        Seu resumo:
-        O usuário iniciou a conversa cumprimentando o assistente com um "oi" e o assistente respondeu que estava disposto a ajudar com a internet. Em seguida, o usuário relatou que a sua internet está caindo (sofrendo de instabilidade). 
+#         Seu resumo:
+#         O usuário iniciou a conversa cumprimentando o assistente com um "oi" e o assistente respondeu que estava disposto a ajudar com a internet. Em seguida, o usuário relatou que a sua internet está caindo (sofrendo de instabilidade). 
                                         
-        Agora faça para os seguintes dados:
+#         Agora faça para os seguintes dados:
                                         
-        Prompt atual: {state['message']}
+#         Prompt atual: {state['message']}
 
-        Resumo da conversa até agora: {state['summary']}.
-        """}])
+#         Resumo da conversa até agora: {state['summary']}.
+#         """}])
 
-    return {"summary":summary.content}
+#     return {"summary":summary.content}
 
 async def router(state: MyState):
+    last_messages = state["summary"]
+
     classification_prompt = f"""
-    Resumo da conversa: {state['summary']}
+    Histórico de mensagens: {last_messages}
 
     Mensagem do usuário: {state['message']}
 
@@ -138,6 +140,7 @@ async def output(state: MyState):
 
 
 async def answer(state: MyState):
+    last_messages = state["summary"]
 
     if state['classification']['type'] == 'problema':
 
@@ -146,17 +149,17 @@ async def answer(state: MyState):
         answer_system_instruction = f"""
         {system_instruction}
         """
-        if test is not "None":
+        if test != "None":
             prompt = f"""
                 Soluções que funcionaram com outros usuários: {test}
 
                 Com base nisso, proponha uma solução para o problema do usuário com base no histórico de conversa:
-                {json.dumps(state['last_messages'])}
+                {last_messages}
             """
         else:
             prompt = f"""
                 Histórico de mensagnes:
-                {json.dumps(state['last_messages'])}
+                {last_messages}
 
                 Proponha uma solução para o seguinte problema do usuário:
                 {state['message']}
@@ -164,24 +167,23 @@ async def answer(state: MyState):
 
         answer = await model.ainvoke([{"role": "system", "content": answer_system_instruction}, {"role": "user", "content": prompt}])
 
-        summary = f"{state['summary']}\nSolução proposta pelo assistente: {answer.content}\n"
+        #summary = f"{state['summary']}\nSolução proposta pelo assistente: {answer.content}\n"
 
-        return {"answer": answer.content, "summary":summary, "test": test, "last_messages": state['last_messages'] + [{"role":"assistant", "content": answer.content}], "test": test}
+        return {"answer": answer.content, "summary":state['summary'] + f"assistant: {answer.content}\n", "test": test}
 
     else:
         answer_system_instruction = f"""
         {system_instruction}
 
-        Resumo da conversa: {state['summary']}
+        Histórico da conversa: {state['summary']}
         
-        Use o resumo para saber o histórico da conversa com o usuário para responder de maneira eficiente."""
+        Use o histórico da conversa com o usuário para responder de maneira eficiente."""
 
         answer = await model.ainvoke([{"role": "system", "content": answer_system_instruction}, {"role": "user", "content": state["message"]}])
 
-        summary = f"{state['summary']}\nÚltima mensagem do assistente: {answer.content}\n"
+        #summary = f"{state['summary']}\nÚltima mensagem do assistente: {answer.content}\n"
 
-        return {"answer": answer.content, "summary":summary, "last_messages": state['last_messages'] + [{"role":"assistant", "content": answer.content}]}
-    
+        return {"answer": answer.content, "summary":state['summary'] + f"assistant: {answer.content}\n"}
 
 
 
@@ -193,17 +195,17 @@ graph.add_node("finished_router", finished_router)
 graph.add_node("issue_classification", issue_classification)
 graph.add_node("router", router)
 graph.add_node("define_route", define_route)
-graph.add_node("summary", summary_to_model)
+#graph.add_node("summary", summary_to_model)
 graph.add_node("answer", answer)
 graph.add_node("output", output)
 
 graph.add_edge(START, "user_input")
-graph.add_conditional_edges("user_input", finished_router, {True: "issue_classification", False: "summary"})
-graph.add_edge("issue_classification", END)
-graph.add_edge("summary", "router")
+graph.add_conditional_edges("user_input", finished_router, {True: "issue_classification", False: "router"})
+graph.add_edge("issue_classification", "answer")
+#graph.add_edge("summary", "router")
 #graph.add_conditional_edges("router", lambda state: state['classification']['type'] if state['classification']['type'] == 'chat' else 'output',{'chat': 'answer', 'output': 'output'})
 
-graph.add_conditional_edges("router", define_route, {'chat': 'answer', 'problema': 'answer', 'output': 'output', 'finalizado':'issue_classification'})
+graph.add_conditional_edges("router", define_route, {'chat': 'answer', 'problema': 'answer', 'pagamento_plano': 'output', 'consulta_plano': 'output', 'finalizado':'issue_classification'})
 
 graph.add_edge("output", END)
 graph.add_edge("answer", END)
