@@ -34,10 +34,6 @@ public class AgentExternalService
     @Autowired
     private ChargeService chargeService;
 
-
-    //public AgentHandledResponseDto sendMessage(Chat chat, SendMessageCommand command){
-    //}
-
     public AgentHandledResponseDto sendMessage(Long chatId, SendMessageCommand command)
     {
         var chat = chatRepository.findById(chatId)

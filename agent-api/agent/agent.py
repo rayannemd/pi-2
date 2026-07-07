@@ -9,7 +9,7 @@ model = ChatGroq(model="llama-3.3-70b-versatile", temperature=1)
 
 
 class PromptType(TypedDict):
-    type: Literal['chat', 'consulta_plano', 'pagamento_plano', 'finalizado', 'problema']
+    type: Literal['chat', 'consulta_plano', 'pagamento_plano', 'status_pagamento', 'finalizado', 'problema']
 
 class IssueClassification(TypedDict):
     issue: Literal['suporte', 'técnico', 'financeiro', 'none']
@@ -120,6 +120,8 @@ async def router(state: MyState):
     Mensagem do usuário: {state['message']}
 
     Se o usuário informar que deseja consultar seu plano de internet atual, classifique como 'consulta_plano'.
+
+    Se o usuário deseja saber ou consultar o status ou a situação de um pagamento ou cobrança já gerada (ex.: "meu pagamento já caiu?", "qual o status da cobrança?"), classifique como 'status_pagamento'.
     Se o usuário NÃO informar nenhuma dificuldade, mas deseja realizar o pagamento do seu plano de internet, classifique como 'pagamento_plano'.
     Se o usuário informar algum problema relacionado aos serviços prestados pela provedora de internet (plano de internet, conexão, suporte técnico), classifique como 'problema'.
     Se o usuário informar que o problema foi resolvido e no resumo da conversa realmente existir um problema citado anteriormente, classifique como 'finalizado'.
