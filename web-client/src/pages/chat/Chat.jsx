@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { QRCodeCanvas } from "qrcode.react";
 import { useWebSocket } from "../../services/useWebSocket";
+import ModalAvaliacao from '../../components/ModalAvaliacao/ModalAvaliacao.jsx';
 import authedFetch from "../../services/authFetch";
 import SearchBox from "../../components/SearchBox/SearchBox.jsx";
 import Logo from "../../components/Logo/Logo.jsx";
@@ -28,6 +29,8 @@ export default function Chat() {
 
   const [layoutInicial, setLayoutInicial] = useState(true);
   const [loadingChat, setLoadingChat] = useState(true);
+
+  const [modalAberto, setModalAberto] = useState(false);
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
   const userId = localStorage.getItem("userId");
@@ -61,7 +64,11 @@ export default function Chat() {
         }),
       },
     ]);
-  });
+  },
+  () => {
+    setModalAberto(true);
+  }
+);
 
   // Scroll automático
   useEffect(() => {
@@ -388,6 +395,12 @@ export default function Chat() {
           </button>
         </form>
       </section>
+      <ModalAvaliacao
+        openModal={modalAberto}
+        chatId={chatId}
+        API_URL={API_URL}
+        closeModal={() => setModalAberto(false)}
+      />
     </div>
   );
 }
