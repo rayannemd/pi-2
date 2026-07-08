@@ -25,13 +25,20 @@ public class MetricasChatSessionService {
         Date dataInicioDate = Date.from(dataInicio.atStartOfDay(ZoneId.systemDefault()).toInstant());
         Date dataFimDate = Date.from(dataFim.plusDays(1)
            .atStartOfDay(ZoneId.systemDefault())
-           .toInstant()
-);
+           .toInstant());
 
         Integer totalAtendimentos = chatRepository.countByCreateDateBetween(dataInicioDate, dataFimDate);
 
         Integer totalMensagensRecebidas = messageRepository.countByIssuerAndCreateDateBetween(EMessageIssuer.USER , dataInicioDate, dataFimDate);
         Integer totalMensagensEnviadas = messageRepository.countByIssuerAndCreateDateBetween(EMessageIssuer.AGENT , dataInicioDate, dataFimDate);
+
+        Integer totalChatsNota1 = chatRepository.countByChatRatingEqualsAndCreateDateBetween(1, dataInicioDate, dataFimDate);
+        Integer totalChatsNota2 = chatRepository.countByChatRatingEqualsAndCreateDateBetween(2, dataInicioDate, dataFimDate);
+        Integer totalChatsNota3 = chatRepository.countByChatRatingEqualsAndCreateDateBetween(3, dataInicioDate, dataFimDate);
+        Integer totalChatsNota4 = chatRepository.countByChatRatingEqualsAndCreateDateBetween(4, dataInicioDate, dataFimDate);
+        Integer totalChatsNota5 = chatRepository.countByChatRatingEqualsAndCreateDateBetween(5, dataInicioDate, dataFimDate);
+
+        Double mediaNotasChat;mediaNotasChat = chatRepository.getAverageChatRating(dataInicioDate, dataFimDate);
 
         MetricasChatSession metricas = new MetricasChatSession();
 
@@ -40,6 +47,13 @@ public class MetricasChatSessionService {
         metricas.setTotalMensagensEnviadas(totalMensagensEnviadas);
         metricas.setTotalMensagensRecebidas(totalMensagensRecebidas);
 
+        metricas.setMediaAvaliacao(mediaNotasChat);
+
+        metricas.setTotalChatsNota1(totalChatsNota1);
+        metricas.setTotalChatsNota2(totalChatsNota2);
+        metricas.setTotalChatsNota3(totalChatsNota3);
+        metricas.setTotalChatsNota4(totalChatsNota4);
+        metricas.setTotalChatsNota5(totalChatsNota5);
 
         return metricas;
     }
