@@ -28,7 +28,7 @@ export default function TelaChatClient() {
           id: chat.id,
           nome: chat.user?.name || "Cliente",
           ultimaMsg: chat.lastMessage || "Sem mensagens",
-          categoria: chat.type === "NORMAL" ? "pendente" : "resolvido",
+          categoria: chat.chatStatus === "PENDENTE" ? "pendente" : "resolvido",
           horario: new Date(chat.updateDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
           foto: "",
           updateDate: chat.updateDate
@@ -75,7 +75,7 @@ export default function TelaChatClient() {
   );
 
   function resolverConversa(id) {
-    authedFetch(`${API_URL}/api/chats/${id}/resolve-chat`, {
+    authedFetch(`${API_URL}/api/chats/${id}/concluir`, {
       method: "PUT",
     })
     .then(res => {

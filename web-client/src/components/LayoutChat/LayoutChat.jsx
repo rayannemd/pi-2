@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useWebSocket } from '../../services/useWebSocket';
+import ModalAvaliacao from '../ModalAvaliacao/ModalAvaliacao';
 import authedFetch from "../../services/authFetch";
 import { Box, Typography, Avatar, TextField, IconButton, Menu, MenuItem } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
@@ -11,12 +12,7 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 export default function LayoutChat({ conversaAtual, resolverConversa, setExibirMensagem }) {
 
   // console.log("Conversa selecionada:", conversaAtual); teste para ver conversa selec.
-
-  const [ancora, setAncora] = useState(null);
-  const open = Boolean(ancora);
-
-  const handleClick = (event) => setAncora(event.currentTarget);
-  const handleClose = () => setAncora(null);
+  const [modalAberto, setModalAberto] = useState(false);
 
   const [mensagem, setMensagem] = useState('');
   const [mensagensDoBackEnd, setMensagensDoBackEnd] = useState([]);
@@ -45,7 +41,11 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
     }
 
     
-  });
+  },
+  () => {
+    setModalAberto(true);
+  }
+);
 
   // Scroll automático
   useEffect(() => {
@@ -138,16 +138,14 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
         {/* O trecho abaixo é sobre o MARCAR COMO RESOLVIDA que existe em todas as conversas - na teoria.
         Não funciona ainda, devemos implementar para resolver a conversa e impossibilitar de enviar msg nesse chat (inclusive o bot) */}
         {/* Incio do bloco de marcar como resolvida */}
-        <Box>
-          <IconButton onClick={handleClick}>
-            <MoreVertIcon />
-          </IconButton>
-          <Menu anchorEl={ancora} open={open} onClose={handleClose}>
-            <MenuItem onClick={() => {resolverConversa(conversaAtual.id); setExibirMensagem(true)}} sx={{ color: 'green', fontWeight: 'bold' }}>
+        <Box onClick={() => {resolverConversa(conversaAtual.id); setExibirMensagem(true)}} sx={{ color: 'green', fontWeight: 'bold', cursor: 'pointer' }}>
               Marcar como Resolvida
-            </MenuItem>
-          </Menu>
         </Box>
+        <botaoConcluir
+          
+        />
+
+
       </Box>
       {/* fim do bloco de marcar como resolvida */}
 
@@ -196,6 +194,13 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
           <SendIcon />
         </IconButton>
       </Box>
+
+      <ModalAvaliacao
+        openModal={modalAberto}
+        chatId={conversaAtual?.id}
+        API_URL={API_URL}
+        closeModal={() => setModalAberto(false)}
+      />
     </Box>
   );
 }
