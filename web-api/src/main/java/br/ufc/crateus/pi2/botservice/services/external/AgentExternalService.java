@@ -41,6 +41,8 @@ public class AgentExternalService
 
         if(chat.getSummary() != null)
             command.setSummary(chat.getSummary());
+        
+        command.setTimedOut(false);
 
         messageService.save(new ChatMessageDTO(command.getMessage(), EMessageIssuer.USER, chat));
 

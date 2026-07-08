@@ -5,6 +5,8 @@ services:
       - "5000:5000"
     environment:
       GROQ_API_KEY: ${GROQ_API_KEY}
+    volumes:
+      - chroma_data:/usr/local/app/chroma_db
   mysql:
     image: mysql:8.0
     container_name: mysql_chatbot_pi2
@@ -53,8 +55,8 @@ services:
       EFI_CERT_PASSWORD: ${EFI_CERT_PASSWORD:-}
       EFI_PIX_KEY: ${EFI_PIX_KEY}
     volumes:
-      - ./vault/seed.sh:/seed.sh:ro
-      - ./vault/efi.p12:/efi.p12:ro
+      - ./vault/seed.sh:/seed.sh:ro,Z
+      - ./vault/efi.p12:/efi.p12:ro,Z
     entrypoint: ["/bin/sh", "/seed.sh"]
     restart: "no"
 
@@ -91,3 +93,4 @@ services:
 
 volumes:
   mysql_data:
+  chroma_data:

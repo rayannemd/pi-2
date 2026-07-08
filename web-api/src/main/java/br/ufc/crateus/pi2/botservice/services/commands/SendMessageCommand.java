@@ -12,6 +12,6 @@ import lombok.Setter;
 public class SendMessageCommand 
 {
     private String message;
-
     private String summary;
+    private Boolean timedOut;
 }
