@@ -27,6 +27,10 @@ function formatBRL(value) {
 
 
 export default function Chat() {
+
+//  const [conversaSelecionada, setConversaSelecionada] = useState(null);
+//   const [conversas, setConversas] = useState([]);
+
   const [chatId, setChatId] = useState(null);
   const [input, setInput] = useState("");
   const [messages, setMessages] = useState([]);
@@ -51,29 +55,25 @@ export default function Chat() {
       }),
     });
 
-     async function resolverConversa() {
-        if (!chatId) return;
+    async function resolverConversa(id = chatId) {
+          try {
+            const res = await authedFetch(
+              `${API_URL}/api/chats/${id}/concluir`,
+              {
+                method: "PUT",
+              }
+            );
 
-        try {
-          const response = await authedFetch(
-            `${API_URL}/api/chats/${chatId}/concluir`,
-            {
-              method: "PUT",
+            if (!res.ok) {
+              throw new Error("Erro ao concluir conversa");
             }
-          );
 
-          if (!response.ok) {
-            throw new Error("Erro ao concluir conversa");
+            setModalAberto(true);
+
+          } catch (err) {
+            console.error(err);
           }
-
-          setModalAberto(true);
-
-        } catch (error) {
-          console.error("Erro ao concluir conversa:", error);
-          alert("Erro ao concluir conversa");
-        }
-      }
-    
+  }
 
 
   useWebSocket(chatId, (novaMensagem) => {
@@ -357,7 +357,7 @@ export default function Chat() {
     <Box sx={{ p: 2, bgcolor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between',    boxShadow: '0px 2px 5px rgba(0,0,0,0.1)', zIndex: 1 }}>
 
        <Box
-            onClick={resolverConversa}
+            onClick={() => resolverConversa(chatId)}
             sx={{
               color: "green",
               fontWeight: "bold",
@@ -439,7 +439,7 @@ export default function Chat() {
     <ModalAvaliacao
       chatId={chatId}
       API_URL={API_URL}
-      closeModal={() => setModalAberto(false)}
+      // closeModal={() => setModalAberto(false)}
     />
   </Box>
 )}

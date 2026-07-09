@@ -205,7 +205,7 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
     <ModalAvaliacao
       chatId={conversaAtual?.id}
       API_URL={API_URL}
-      closeModal={() => setModalAberto(false)}
+      // closeModal={() => setModalAberto(false)}
     />
   </Box>
 )}

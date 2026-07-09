@@ -5,7 +5,7 @@ import authedFetch from "../../services/authFetch";
 export default function ModalAvaliacao({
   chatId,
   API_URL,
-  closeModal,
+  // closeModal,
 }) {
   const [nota, setNota] = useState(0);
 
@@ -17,7 +17,7 @@ export default function ModalAvaliacao({
       body: JSON.stringify({ chatRating: notaSelecionada }),
     });
 
-    closeModal();
+    // closeModal();
   };
 
   return (
