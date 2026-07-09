@@ -141,42 +141,79 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
         <Box onClick={() => {resolverConversa(conversaAtual.id); setExibirMensagem(true)}} sx={{ color: 'green', fontWeight: 'bold', cursor: 'pointer' }}>
               Marcar como Resolvida
         </Box>
-        <botaoConcluir
-          
-        />
-
 
       </Box>
       {/* fim do bloco de marcar como resolvida */}
 
 
-      {/* MENSAGENS (bloco que fica as mensagens lá) */}
-      <Box sx={{ flex: 1, overflowY: 'auto', p: 3, display: 'flex', flexDirection: 'column', gap: 2 , 
-        scrollbarWidth: 'none',}}>
-        {/* PAra cada mensagem do back, ele retorna esse box, que é a caixa de dialogo  */}
-        {/* Sendo o remetendo esverdeada, e o cliente branca */}
-        {mensagensDoBackEnd.map(msg => (
-          <Box 
-            key={msg.id}
-            sx={{ 
-              alignSelf: msg.remetente === 'cliente' ? 'flex-start' : 'flex-end', 
-              maxWidth: '50%', 
-              bgcolor: msg.remetente === 'cliente' ? 'white' : '#dcf8c6', 
-              p: 1.5, 
-              borderRadius: msg.remetente === 'cliente' ? '0px 15px 15px 15px' : '15px 15px 0px 15px', 
-              // Somente criar um sombra aoo redor, sem mudar a cor original (branca, nesse caso)
-              boxShadow: '0px 1px 3px rgba(0,0,0,0.2)',
-              wordBreak: 'break-word'
-            }}
-          >
-            <Typography variant="body2">{msg.content}</Typography>
-            <Typography variant="caption" sx={{ display: 'block', textAlign: 'right', mt: 0.5, color: 'gray' }}>
-              {msg.hora}
-            </Typography>
-          </Box>
-        ))}
-        <div ref={messagesEndRef} />
-      </Box>
+    {/* MENSAGENS */}
+<Box
+  sx={{
+    flex: 1,
+    overflowY: "auto",
+    p: 3,
+    display: "flex",
+    flexDirection: "column",
+    gap: 2,
+    scrollbarWidth: "none",
+  }}
+>
+  {mensagensDoBackEnd.map((msg) => (
+    <Box
+      key={msg.id}
+      sx={{
+        alignSelf: msg.remetente === "cliente" ? "flex-start" : "flex-end",
+        maxWidth: "50%",
+        bgcolor: msg.remetente === "cliente" ? "white" : "#dcf8c6",
+        p: 1.5,
+        borderRadius:
+          msg.remetente === "cliente"
+            ? "0px 15px 15px 15px"
+            : "15px 15px 0px 15px",
+        boxShadow: "0px 1px 3px rgba(0,0,0,0.2)",
+        wordBreak: "break-word",
+      }}
+    >
+      <Typography variant="body2">{msg.content}</Typography>
+
+      <Typography
+        variant="caption"
+        sx={{
+          display: "block",
+          textAlign: "right",
+          mt: 0.5,
+          color: "gray",
+        }}
+      >
+        {msg.hora}
+      </Typography>
+    </Box>
+  ))}
+
+  {modalAberto && (
+  <Box
+    sx={{
+      alignSelf: "flex-end",
+      maxWidth: "50%",
+      bgcolor: "#dcf8c6",
+      p: 1.5,
+      borderRadius: "15px 15px 0px 15px",
+      boxShadow: "0px 1px 3px rgba(0,0,0,0.2)",
+      wordBreak: "break-word",
+    }}
+  >
+    <ModalAvaliacao
+      chatId={conversaAtual?.id}
+      API_URL={API_URL}
+      closeModal={() => setModalAberto(false)}
+    />
+  </Box>
+)}
+
+  <div ref={messagesEndRef} />
+</Box>
+
+
 
       {/* INPUT (barra de escrever msg)*/} 
       <Box sx={{ p: 2, bgcolor: 'white', display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -195,12 +232,12 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
         </IconButton>
       </Box>
 
-      <ModalAvaliacao
+       {/* <ModalAvaliacao
         openModal={modalAberto}
         chatId={conversaAtual?.id}
         API_URL={API_URL}
         closeModal={() => setModalAberto(false)}
-      />
+       /> */}
     </Box>
   );
 }

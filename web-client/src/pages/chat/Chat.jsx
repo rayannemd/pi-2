@@ -17,9 +17,14 @@ import remarkGfm from "remark-gfm";
 import "../../styles/StandardScreen.css"
 import "./Chat.css";
 
+
+
+
 function formatBRL(value) {
   return Number(value ?? 0).toFixed(2);
 }
+
+
 
 export default function Chat() {
   const [chatId, setChatId] = useState(null);
@@ -45,6 +50,31 @@ export default function Chat() {
         minute: "2-digit",
       }),
     });
+
+     async function resolverConversa() {
+        if (!chatId) return;
+
+        try {
+          const response = await authedFetch(
+            `${API_URL}/api/chats/${chatId}/concluir`,
+            {
+              method: "PUT",
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error("Erro ao concluir conversa");
+          }
+
+          setModalAberto(true);
+
+        } catch (error) {
+          console.error("Erro ao concluir conversa:", error);
+          alert("Erro ao concluir conversa");
+        }
+      }
+    
+
 
   useWebSocket(chatId, (novaMensagem) => {
     // Ignora mensagens do próprio usuário — já foram adicionadas no render otimista
@@ -323,6 +353,22 @@ export default function Chat() {
       <BarraLateral />
 
       <section className="chat-container">
+
+    <Box sx={{ p: 2, bgcolor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between',    boxShadow: '0px 2px 5px rgba(0,0,0,0.1)', zIndex: 1 }}>
+
+       <Box
+            onClick={resolverConversa}
+            sx={{
+              color: "green",
+              fontWeight: "bold",
+              cursor: "pointer"
+            }}
+          >
+            Marcar como Resolvida
+      </Box>
+
+      </Box>
+
         <section className="chat__messages">
           {messages.map((msg, index) => {
             if (msg.kind === "installments") {
@@ -378,6 +424,26 @@ export default function Chat() {
               </Box>
             );
           })}
+
+          {modalAberto && (
+  <Box
+    sx={{
+      alignSelf: "flex-start",
+      maxWidth: "50%",
+      bgcolor: "white",
+      p: 1.5,
+      borderRadius: "0px 15px 15px 15px",
+      boxShadow: "0px 1px 3px rgba(0,0,0,0.2)",
+    }}
+  >
+    <ModalAvaliacao
+      chatId={chatId}
+      API_URL={API_URL}
+      closeModal={() => setModalAberto(false)}
+    />
+  </Box>
+)}
+
           <div ref={messagesEndRef} />
         </section>
 
@@ -395,12 +461,12 @@ export default function Chat() {
           </button>
         </form>
       </section>
-      <ModalAvaliacao
+      {/* <ModalAvaliacao
         openModal={modalAberto}
         chatId={chatId}
         API_URL={API_URL}
         closeModal={() => setModalAberto(false)}
-      />
+      /> */}
     </div>
   );
 }
