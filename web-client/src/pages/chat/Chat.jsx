@@ -40,6 +40,7 @@ export default function Chat() {
   const [loadingChat, setLoadingChat] = useState(true);
 
   const [modalAberto, setModalAberto] = useState(false);
+  const [chatConcluido, setChatConcluido] = useState(false);
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
   const userId = localStorage.getItem("userId");
@@ -69,6 +70,8 @@ export default function Chat() {
             }
 
             setModalAberto(true);
+
+            setChatConcluido(true);
 
           } catch (err) {
             console.error(err);
@@ -454,6 +457,7 @@ export default function Chat() {
             placeholder="Digite sua mensagem..."
             value={input}
             onChange={(e) => setInput(e.target.value)}
+            disabled={chatConcluido}
             required
           />
           <button type="submit" className="chat__button">
