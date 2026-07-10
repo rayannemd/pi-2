@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { useWebSocket } from '../../services/useWebSocket';
+import ModalAvaliacao from '../ModalAvaliacao/ModalAvaliacao';
 import authedFetch from "../../services/authFetch";
 import { Box, Typography, Avatar, TextField, IconButton, Menu, MenuItem } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
@@ -11,12 +12,7 @@ const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 export default function LayoutChat({ conversaAtual, resolverConversa, setExibirMensagem }) {
 
   // console.log("Conversa selecionada:", conversaAtual); teste para ver conversa selec.
-
-  const [ancora, setAncora] = useState(null);
-  const open = Boolean(ancora);
-
-  const handleClick = (event) => setAncora(event.currentTarget);
-  const handleClose = () => setAncora(null);
+  const [modalAberto, setModalAberto] = useState(false);
 
   const [mensagem, setMensagem] = useState('');
   const [mensagensDoBackEnd, setMensagensDoBackEnd] = useState([]);
@@ -45,7 +41,11 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
     }
 
     
-  });
+  },
+  () => {
+    setModalAberto(true);
+  }
+);
 
   // Scroll automático
   useEffect(() => {
@@ -138,47 +138,82 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
         {/* O trecho abaixo é sobre o MARCAR COMO RESOLVIDA que existe em todas as conversas - na teoria.
         Não funciona ainda, devemos implementar para resolver a conversa e impossibilitar de enviar msg nesse chat (inclusive o bot) */}
         {/* Incio do bloco de marcar como resolvida */}
-        <Box>
-          <IconButton onClick={handleClick}>
-            <MoreVertIcon />
-          </IconButton>
-          <Menu anchorEl={ancora} open={open} onClose={handleClose}>
-            <MenuItem onClick={() => {resolverConversa(conversaAtual.id); setExibirMensagem(true)}} sx={{ color: 'green', fontWeight: 'bold' }}>
+        <Box onClick={() => {resolverConversa(conversaAtual.id); setExibirMensagem(true)}} sx={{ color: 'green', fontWeight: 'bold', cursor: 'pointer' }}>
               Marcar como Resolvida
-            </MenuItem>
-          </Menu>
         </Box>
+
       </Box>
       {/* fim do bloco de marcar como resolvida */}
 
 
-      {/* MENSAGENS (bloco que fica as mensagens lá) */}
-      <Box sx={{ flex: 1, overflowY: 'auto', p: 3, display: 'flex', flexDirection: 'column', gap: 2 , 
-        scrollbarWidth: 'none',}}>
-        {/* PAra cada mensagem do back, ele retorna esse box, que é a caixa de dialogo  */}
-        {/* Sendo o remetendo esverdeada, e o cliente branca */}
-        {mensagensDoBackEnd.map(msg => (
-          <Box 
-            key={msg.id}
-            sx={{ 
-              alignSelf: msg.remetente === 'cliente' ? 'flex-start' : 'flex-end', 
-              maxWidth: '50%', 
-              bgcolor: msg.remetente === 'cliente' ? 'white' : '#dcf8c6', 
-              p: 1.5, 
-              borderRadius: msg.remetente === 'cliente' ? '0px 15px 15px 15px' : '15px 15px 0px 15px', 
-              // Somente criar um sombra aoo redor, sem mudar a cor original (branca, nesse caso)
-              boxShadow: '0px 1px 3px rgba(0,0,0,0.2)',
-              wordBreak: 'break-word'
-            }}
-          >
-            <Typography variant="body2">{msg.content}</Typography>
-            <Typography variant="caption" sx={{ display: 'block', textAlign: 'right', mt: 0.5, color: 'gray' }}>
-              {msg.hora}
-            </Typography>
-          </Box>
-        ))}
-        <div ref={messagesEndRef} />
-      </Box>
+    {/* MENSAGENS */}
+<Box
+  sx={{
+    flex: 1,
+    overflowY: "auto",
+    p: 3,
+    display: "flex",
+    flexDirection: "column",
+    gap: 2,
+    scrollbarWidth: "none",
+  }}
+>
+  {mensagensDoBackEnd.map((msg) => (
+    <Box
+      key={msg.id}
+      sx={{
+        alignSelf: msg.remetente === "cliente" ? "flex-start" : "flex-end",
+        maxWidth: "50%",
+        bgcolor: msg.remetente === "cliente" ? "white" : "#dcf8c6",
+        p: 1.5,
+        borderRadius:
+          msg.remetente === "cliente"
+            ? "0px 15px 15px 15px"
+            : "15px 15px 0px 15px",
+        boxShadow: "0px 1px 3px rgba(0,0,0,0.2)",
+        wordBreak: "break-word",
+      }}
+    >
+      <Typography variant="body2">{msg.content}</Typography>
+
+      <Typography
+        variant="caption"
+        sx={{
+          display: "block",
+          textAlign: "right",
+          mt: 0.5,
+          color: "gray",
+        }}
+      >
+        {msg.hora}
+      </Typography>
+    </Box>
+  ))}
+
+  {modalAberto && (
+  <Box
+    sx={{
+      alignSelf: "flex-end",
+      maxWidth: "50%",
+      bgcolor: "#dcf8c6",
+      p: 1.5,
+      borderRadius: "15px 15px 0px 15px",
+      boxShadow: "0px 1px 3px rgba(0,0,0,0.2)",
+      wordBreak: "break-word",
+    }}
+  >
+    <ModalAvaliacao
+      chatId={conversaAtual?.id}
+      API_URL={API_URL}
+      // closeModal={() => setModalAberto(false)}
+    />
+  </Box>
+)}
+
+  <div ref={messagesEndRef} />
+</Box>
+
+
 
       {/* INPUT (barra de escrever msg)*/} 
       <Box sx={{ p: 2, bgcolor: 'white', display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -196,6 +231,13 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
           <SendIcon />
         </IconButton>
       </Box>
+
+       {/* <ModalAvaliacao
+        openModal={modalAberto}
+        chatId={conversaAtual?.id}
+        API_URL={API_URL}
+        closeModal={() => setModalAberto(false)}
+       /> */}
     </Box>
   );
 }

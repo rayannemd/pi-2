@@ -3,6 +3,7 @@ package br.ufc.crateus.pi2.botservice.services;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,6 +26,9 @@ public class ChatService
     
     @Autowired
     private final UserRepository userRepository;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     public ChatService(
         ChatRepository chatRepository,
@@ -102,6 +106,18 @@ public class ChatService
        Chat chat = chatRepository.findById(id).orElseThrow(() -> new RuntimeException("Chat não encontrado."));
        chat.setChatStatus(status);
        chatRepository.save(chat);
+    }
+
+    public void concluirChat(Long id) {
+        Chat chat = chatRepository.findById(id).orElseThrow(() -> new RuntimeException("Chat não encontrado."));
+        updateChatStatus(id, EChatStatus.RESOLVIDO);
+
+        messagingTemplate.convertAndSend(
+            "/topic/chat/" + id + "/concluir",
+            id
+        );
+
+        // chat.getSummary();
     }
 
     /*public void processarMensagem(Long id, String message){

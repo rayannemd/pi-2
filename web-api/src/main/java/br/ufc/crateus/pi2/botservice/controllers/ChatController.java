@@ -103,7 +103,12 @@ public class ChatController
         @PathVariable Long id,
         @RequestBody SendMessageCommand command)
     {
-        chatService.getById(id).orElseThrow(ChatNotFoundException::new);
+        Chat chat = chatService.getById(id).orElseThrow(ChatNotFoundException::new);
+
+        if(chat.getChatStatus() == EChatStatus.INTERVIDO){
+            messageService.save(new ChatMessageDTO(command.getMessage(), EMessageIssuer.USER, chat));
+            return ResponseEntity.ok().build();   
+        }
 
         AgentHandledResponseDto response = agentExternalService.sendMessage(id, command);
 
@@ -169,10 +174,10 @@ public class ChatController
             return ResponseEntity.ok(updatedChat);    
     }
 
-    @PutMapping("/{id}/resolve-chat")
-    public ResponseEntity<Void> resolverChat(@PathVariable Long id)
+    @PutMapping("/{id}/concluir")
+    public ResponseEntity<Void> concluirChat(@PathVariable Long id) 
     {
-        chatService.updateChatStatus(id, EChatStatus.RESOLVIDO);
+        chatService.concluirChat(id);
         return ResponseEntity.ok().build();
     }
 
@@ -187,6 +192,11 @@ public class ChatController
     public ResponseEntity<Void> rateChat(
             @PathVariable Long id,
             @RequestBody RateChatCommand command) {
+
+        // Lançar uma exceção para o cliente não avaliar mais de uma vez
+        //if(chat.getRating() != null){
+            // throw new BusinessException("Chat já avaliado");
+        //}
 
         chatService.rateChat(id, command);
         return ResponseEntity.ok().build();
