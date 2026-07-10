@@ -23,7 +23,9 @@ export default function Dashboard() {
   // Estados inicializados estritamente como arrays vazios para evitar quebras
   const [dadosMensagens, setDadosMensagens] = useState([]);
   const [dadosChats, setDadosChats] = useState([]); 
-  const [diasSelecionado, setDiaSelecionado] = useState(7);
+  const [diasSelecionado, setDiaSelecionado] = useState(1);
+
+  const [dadosVindosDoBack, setDadosVindosDoBack] = useState();
   
   const periodoDias = [1, 7, 15, 30];
 
@@ -58,27 +60,27 @@ export default function Dashboard() {
         if (!resposta.ok) throw new Error('Não foi possível carregar os dados.');
         return resposta.json();
       })
-      .then((dadosVindosDoBack) => {
-        if (!dadosVindosDoBack) return;
+      .then((dados) => {
+        setDadosVindosDoBack(dados);
         
         setDadosCards((prev) =>
           prev.map((card) => {
-            if (card.title === "Sucesso ChatBot") return { ...card, data: dadosVindosDoBack.porcentagemSucesso ? `${dadosVindosDoBack.porcentagemSucesso}%` : "0%" };
-            if (card.title === "Atendimento por ChatBot") return { ...card, data: dadosVindosDoBack.totalAtendimentos ?? 0 };
-            if (card.title === "Média Avaliação") return { ...card, data: dadosVindosDoBack.mediaAvaliacao ?? 0 };
+            if (card.title === "Sucesso ChatBot") return { ...card, data: dados.porcentagemSucesso ? `${dados.porcentagemSucesso}%` : "0%" };
+            if (card.title === "Atendimento por ChatBot") return { ...card, data: dados.totalAtendimentos ?? 0 };
+            if (card.title === "Média Avaliação") return { ...card, data: dados.mediaAvaliacao ?? 0 };
             if (card.title === "Total Pendentes") return { ...card, data: 0 };
-            if (card.title === "Total de Chats") return { ...card, data: dadosVindosDoBack.totalAtendimentos ?? 0 };
+            if (card.title === "Total de Chats") return { ...card, data: dados.totalAtendimentos ?? 0 };
             return card;
           })
         );
 
         setDadosMensagens(prepararDados([
-          { label: 'Recebidas', value: dadosVindosDoBack.totalMensagensRecebidas },
-          { label: 'Enviadas', value: dadosVindosDoBack.totalMensagensEnviadas }
+          { label: 'Recebidas', value: dados.totalMensagensRecebidas },
+          { label: 'Enviadas', value: dados.totalMensagensEnviadas }
         ]));
 
         setDadosChats(prepararDados([
-          { label: 'Agente Virtual / Bot', value: dadosVindosDoBack.totalAtendimentos },
+          { label: 'Agente Virtual / Bot', value: dados.totalAtendimentos },
           // console.log(dadosVindosDoBack)
         ]));
       })
@@ -191,7 +193,7 @@ export default function Dashboard() {
                 <BarChart
                   xAxis={[{ data: ['1 Estrela', '2 Estrelas' , '3 Estrelas' , '4 Estrelas' , '5 Estrelas' ] }]}
                   yAxis={[{ min: 0, max: 5 }]}
-                  series={[{ data: [0, 0, 0, 0, 0] }]}
+                  series={[{ data: [dadosVindosDoBack?.totalChatsNota1, dadosVindosDoBack?.totalChatsNota2, dadosVindosDoBack?.totalChatsNota3, dadosVindosDoBack?.totalChatsNota4, dadosVindosDoBack?.totalChatsNota5] }]}
                   height={300}
                 />
               </div>
