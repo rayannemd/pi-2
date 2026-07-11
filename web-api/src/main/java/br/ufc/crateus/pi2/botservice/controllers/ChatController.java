@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import br.ufc.crateus.pi2.botservice.controllers.dtos.ChatMessageDTO;
 import br.ufc.crateus.pi2.botservice.controllers.exceptions.ChatNotFoundException;
@@ -58,9 +57,6 @@ public class ChatController
 
     @Autowired
     private ChargeService chargeService;
-
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
 
     @GetMapping
     public ResponseEntity<List<Chat>> getAllChats()
@@ -182,7 +178,6 @@ public class ChatController
     public ResponseEntity<Void> concluirChat(@PathVariable Long id) 
     {
         chatService.concluirChat(id);
-        messagingTemplate.convertAndSend("/topic/chats/atualizacao", "Resolvido");
         return ResponseEntity.ok().build();
     }
 
@@ -198,11 +193,6 @@ public class ChatController
             @PathVariable Long id,
             @RequestBody RateChatCommand command) {
 
-        // Lançar uma exceção para o cliente não avaliar mais de uma vez
-        //if(chat.getRating() != null){
-            // throw new BusinessException("Chat já avaliado");
-        //}
- messagingTemplate.convertAndSend("/topic/chat/" + id + "/rating", command.getChatRating());
         chatService.rateChat(id, command);
         return ResponseEntity.ok().build();
     }
