@@ -9,10 +9,10 @@ import Rating from '@mui/material/Rating';
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 
-export default function LayoutChat({ conversaAtual, resolverConversa }) {
+export default function LayoutChat({ conversaAtual, resolverConversa, setExibirMensagem }) {
 
   const [chatResolvido, setChatResolvido] = useState(false);
-  const [ratingCliente, setRatingCliente] = useState(0);
+  const [ratingCliente, setRatingCliente] = useState(conversaAtual?.chatRating || 0);
 
   const [mensagem, setMensagem] = useState('');
   const [mensagensDoBackEnd, setMensagensDoBackEnd] = useState([]);
@@ -65,7 +65,7 @@ export default function LayoutChat({ conversaAtual, resolverConversa }) {
       headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
     })
       .then(res => res.json())
-      .then(data => setRatingCliente(data.rating ?? 0)) // ajustar nome do campo depois de ver o model
+      .then(data => setRatingCliente(data.chatRating ?? 0)) // ajustar nome do campo depois de ver o model
       .catch(err => console.error("Erro ao buscar avaliação:", err));
   }, [conversaAtual]);
 
@@ -150,7 +150,7 @@ export default function LayoutChat({ conversaAtual, resolverConversa }) {
           </Box>
         </Box>
 
-        <Box onClick={() => {resolverConversa(conversaAtual.id); setChatResolvido(true)}} sx={{ color: 'green', fontWeight: 'bold', cursor: 'pointer' }}>
+        <Box onClick={() => {resolverConversa(conversaAtual.id); setChatResolvido(true); setExibirMensagem(true)}} sx={{ color: 'green', fontWeight: 'bold', cursor: 'pointer' }}>
               Marcar como Resolvida
         </Box>
 
@@ -234,11 +234,12 @@ export default function LayoutChat({ conversaAtual, resolverConversa }) {
       <Box sx={{ p: 2, bgcolor: 'white', display: 'flex', alignItems: 'center', gap: 2 }}>
         <TextField
           fullWidth
-          placeholder="Digite sua mensagem..."
+          placeholder={chatResolvido ?"Essa conversa foi finalizada. Não é possível enviar mais mensagens." : "Digite sua mensagem..."}
           size="small"
           value={mensagem}
           onChange={(evento) => setMensagem(evento.target.value)}
           onKeyDown={(evento) => evento.key === 'Enter' && enviarMensagem()}
+          disabled={chatResolvido}
           sx={{ '& .MuiOutlinedInput-root': { borderRadius: '25px' } }}
         />
         <IconButton onClick={enviarMensagem} sx={{ bgcolor: '#A3313A', color: 'white', '&:hover': { bgcolor: '#8e2a32' } }}>

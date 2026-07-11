@@ -10,6 +10,7 @@ import BarraLateral from "../../components/BarraConfigClient/BarraConfig";
 import userIcon from "../../assets/icons/User.svg";
 import configIcon from "../../assets/icons/Config.svg";
 import { Box, Typography, Avatar, TextField, IconButton, Menu, MenuItem } from "@mui/material";
+import Rating from '@mui/material/Rating';
 import SendIcon from "@mui/icons-material/Send";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 import ReactMarkdown from "react-markdown";
@@ -41,6 +42,7 @@ export default function Chat() {
 
   const [modalAberto, setModalAberto] = useState(false);
   const [chatConcluido, setChatConcluido] = useState(false);
+  const [ratingCliente, setRatingCliente] = useState();
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
   const userId = localStorage.getItem("userId");
@@ -99,6 +101,9 @@ export default function Chat() {
     ]);
   },
   () => {
+    setChatConcluido(true);
+  },
+  () => {
     setModalAberto(true);
   }
 );
@@ -153,6 +158,20 @@ export default function Chat() {
       .catch(() => console.error("Erro ao buscar chat"))
       .finally(() => setLoadingChat(false));
   }, []);
+
+  useEffect(() => {
+    if (!chatId) return;
+
+    authedFetch(`${API_URL}/api/chats/${chatId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.chatStatus === "RESOLVIDO") {
+          setChatConcluido(true);
+        }
+        setRatingCliente(data.chatRating ?? 0);
+      })
+      .catch(err => console.error("Erro ao buscar status do chat:", err));
+  }, [chatId]);
 
   // Função para criar um novo chat
   async function criarNovoChat(firstMessage) {
@@ -429,23 +448,44 @@ export default function Chat() {
           })}
 
           {modalAberto && (
-  <Box
-    sx={{
-      alignSelf: "flex-start",
-      maxWidth: "50%",
-      bgcolor: "white",
-      p: 1.5,
-      borderRadius: "0px 15px 15px 15px",
-      boxShadow: "0px 1px 3px rgba(0,0,0,0.2)",
-    }}
-  >
-    <ModalAvaliacao
-      chatId={chatId}
-      API_URL={API_URL}
-      
-    />
-  </Box>
-)}
+            <Box
+              sx={{
+                alignSelf: "flex-start",
+                maxWidth: "50%",
+                bgcolor: "white",
+                p: 1.5,
+                borderRadius: "0px 15px 15px 15px",
+                boxShadow: "0px 1px 3px rgba(0,0,0,0.2)",
+              }}
+            >
+              <ModalAvaliacao
+                chatId={chatId}
+                API_URL={API_URL}
+                closeModal={() => setModalAberto(false)}
+              />
+            </Box>
+          )}
+
+          {ratingCliente > 0 && (
+            <Box
+              sx={{
+                alignSelf: "flex-end",
+                maxWidth: "80%",
+                bgcolor: "#dcf8c6",
+                color: "#000000",
+                p: 2,
+                borderRadius: "12px",
+                textAlign: "center",
+                flexDirection: "column",
+                boxShadow: "0px 1px 3px rgba(0,0,0,0.2)",
+              }}
+            >
+              <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                <Typography component="legend" variant="title" sx={{ fontWeight: 'bold', color: '#000000' }}>Avaliação  do cliente</Typography>
+                <Rating name="read-only" value={ratingCliente} readOnly size="large" />
+              </Box>
+            </Box>
+          )}
 
           <div ref={messagesEndRef} />
         </section>
