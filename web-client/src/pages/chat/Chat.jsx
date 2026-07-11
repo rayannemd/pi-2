@@ -442,7 +442,7 @@ export default function Chat() {
     <ModalAvaliacao
       chatId={chatId}
       API_URL={API_URL}
-      // closeModal={() => setModalAberto(false)}
+      
     />
   </Box>
 )}
@@ -454,7 +454,7 @@ export default function Chat() {
           <input
             type="text"
             className="chat__input"
-            placeholder="Digite sua mensagem..."
+            placeholder={chatConcluido ?"Essa conversa foi finalizada. Não é possível enviar mais mensagens." : "Digite sua mensagem..."}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={chatConcluido}
@@ -462,15 +462,11 @@ export default function Chat() {
           />
           <button type="submit" className="chat__button">
             Enviar
+            
           </button>
         </form>
       </section>
-      {/* <ModalAvaliacao
-        openModal={modalAberto}
-        chatId={chatId}
-        API_URL={API_URL}
-        closeModal={() => setModalAberto(false)}
-      /> */}
+      
     </div>
   );
 }

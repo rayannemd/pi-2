@@ -202,7 +202,7 @@ public class ChatController
         //if(chat.getRating() != null){
             // throw new BusinessException("Chat já avaliado");
         //}
-
+ messagingTemplate.convertAndSend("/topic/chat/" + id + "/rating", command.getChatRating());
         chatService.rateChat(id, command);
         return ResponseEntity.ok().build();
     }

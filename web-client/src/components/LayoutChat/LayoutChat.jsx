@@ -1,22 +1,23 @@
 import { useEffect, useRef, useState } from 'react';
 import { useWebSocket } from '../../services/useWebSocket';
-import ModalAvaliacao from '../ModalAvaliacao/ModalAvaliacao';
 import authedFetch from "../../services/authFetch";
 import { Box, Typography, Avatar, TextField, IconButton, Menu, MenuItem } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
+import Rating from '@mui/material/Rating';
 
 const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
 
 
-export default function LayoutChat({ conversaAtual, resolverConversa, setExibirMensagem }) {
+export default function LayoutChat({ conversaAtual, resolverConversa }) {
 
-  // console.log("Conversa selecionada:", conversaAtual); teste para ver conversa selec.
-  const [modalAberto, setModalAberto] = useState(false);
+  const [chatResolvido, setChatResolvido] = useState(false);
+  const [ratingCliente, setRatingCliente] = useState(0);
 
   const [mensagem, setMensagem] = useState('');
   const [mensagensDoBackEnd, setMensagensDoBackEnd] = useState([]);
   const messagesEndRef = useRef(null);
+
 
   useWebSocket(conversaAtual?.id, (novaMensagem) => {
     console.log("📨 LayoutChat recebeu mensagem:", novaMensagem);
@@ -39,11 +40,12 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
         hora: new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
       }]);
     }
-
-    
   },
   () => {
-    setModalAberto(true);
+    setChatResolvido(true);
+  },
+  (rating) => {
+    setRatingCliente(rating);
   }
 );
 
@@ -51,6 +53,21 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [mensagensDoBackEnd]);
+
+  // Sincroniza o status "resolvido" e o rating com a conversa selecionada
+  // (cobre o caso de reabrir um chat que já foi concluído/avaliado antes)
+  useEffect(() => {
+    if (!conversaAtual) return;
+
+    setChatResolvido(conversaAtual.categoria === 'resolvido');
+
+    fetch(`${API_URL}/api/chats/${conversaAtual.id}`, {
+      headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+    })
+      .then(res => res.json())
+      .then(data => setRatingCliente(data.rating ?? 0)) // ajustar nome do campo depois de ver o model
+      .catch(err => console.error("Erro ao buscar avaliação:", err));
+  }, [conversaAtual]);
 
   //O mesmo useEffect da tela do client para carregar as mensagens antigas do chat, apenas algumas alterações
   useEffect(() => {
@@ -109,8 +126,8 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
   // Mensagem de "nenhuma conversa selecionada"
   if (!conversaAtual) {
     return (
-      <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', bgcolor: '#f0f2f5' }}> {/*Cor de fundo chat vazio */}
-        <Typography variant="h6" sx={{ color: '#667781' }}> {/* cor referente ao texto quando nn há conversas selecionada.*/}
+      <Box sx={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', bgcolor: '#f0f2f5' }}>
+        <Typography variant="h6" sx={{ color: '#667781' }}>
           Selecione uma conversa para começar.
         </Typography>
       </Box>
@@ -120,30 +137,24 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
 
 
   return (
-    // box
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100vh', bgcolor: '#f0f2f5', flex: 1 }}> 
       
       {/* CABEÇALHO */}
       <Box sx={{ p: 2, bgcolor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between',    boxShadow: '0px 2px 5px rgba(0,0,0,0.1)', zIndex: 1 }}>
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <Avatar sx={{ mr: 2, bgcolor: '#9d1a1a' }}>
-            {conversaAtual.nome ? conversaAtual.nome[0] : "?"} {/*Aqui basicamente pega a 1º letra do nome e coloca no avatar. */}
+            {conversaAtual.nome ? conversaAtual.nome[0] : "?"}
           </Avatar>
           <Box>
-            <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{conversaAtual.nome} </Typography> {/*pega o  nome e coloca na barra superior da conversa. */}
-            {/* <Typography variant="caption" color="success.main">Online</Typography> */}  {/* aqui é o online que estava estático, posteriormente, podemos adicionar*/}
+            <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{conversaAtual.nome} </Typography>
           </Box>
         </Box>
 
-        {/* O trecho abaixo é sobre o MARCAR COMO RESOLVIDA que existe em todas as conversas - na teoria.
-        Não funciona ainda, devemos implementar para resolver a conversa e impossibilitar de enviar msg nesse chat (inclusive o bot) */}
-        {/* Incio do bloco de marcar como resolvida */}
-        <Box onClick={() => {resolverConversa(conversaAtual.id); setExibirMensagem(true)}} sx={{ color: 'green', fontWeight: 'bold', cursor: 'pointer' }}>
+        <Box onClick={() => {resolverConversa(conversaAtual.id); setChatResolvido(true)}} sx={{ color: 'green', fontWeight: 'bold', cursor: 'pointer' }}>
               Marcar como Resolvida
         </Box>
 
       </Box>
-      {/* fim do bloco de marcar como resolvida */}
 
 
     {/* MENSAGENS */}
@@ -190,55 +201,50 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
     </Box>
   ))}
 
-  {modalAberto && (
-  <Box
-    sx={{
-      alignSelf: "flex-end",
-      maxWidth: "50%",
-      bgcolor: "#dcf8c6",
-      p: 1.5,
-      borderRadius: "15px 15px 0px 15px",
-      boxShadow: "0px 1px 3px rgba(0,0,0,0.2)",
-      wordBreak: "break-word",
-    }}
-  >
-    <ModalAvaliacao
-      chatId={conversaAtual?.id}
-      API_URL={API_URL}
-      // closeModal={() => setModalAberto(false)}
-    />
-  </Box>
-)}
+  {chatResolvido && ratingCliente > 0 && (
+    <Box
+      sx={{
+        alignSelf: "flex-start",
+        maxWidth: "80%",
+        bgcolor: "#fefefe",
+        color: "#000000",
+        p: 2,
+        borderRadius: "12px",
+        textAlign: "center",
+        flexDirection: "column",
+        boxShadow: "0px 1px 3px rgba(0,0,0,0.2)",
+      }}
+    >
+
+      {ratingCliente > 0 && (
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+          <Typography component="legend" variant="title" sx={{ fontWeight: 'bold', color: '#000000' }}>Avaliação do cliente</Typography>
+          <Rating name="read-only" value={ratingCliente} readOnly size="large" />
+        </Box>
+      )}
+    </Box>
+  )}
 
   <div ref={messagesEndRef} />
 </Box>
 
 
 
-      {/* INPUT (barra de escrever msg)*/} 
+      {/* INPUT */} 
       <Box sx={{ p: 2, bgcolor: 'white', display: 'flex', alignItems: 'center', gap: 2 }}>
         <TextField
           fullWidth
           placeholder="Digite sua mensagem..."
           size="small"
           value={mensagem}
-          onChange={(evento) => setMensagem(evento.target.value)} /*essa parte serve para mudar o que ta escrito na barra de digitação*/
-          onKeyDown={(evento) => evento.key === 'Enter' && enviarMensagem()} //enviar msg com o enter do teclado
+          onChange={(evento) => setMensagem(evento.target.value)}
+          onKeyDown={(evento) => evento.key === 'Enter' && enviarMensagem()}
           sx={{ '& .MuiOutlinedInput-root': { borderRadius: '25px' } }}
         />
         <IconButton onClick={enviarMensagem} sx={{ bgcolor: '#A3313A', color: 'white', '&:hover': { bgcolor: '#8e2a32' } }}>
-          {/* Botão de enviar msg  */}
           <SendIcon />
         </IconButton>
       </Box>
-
-       {/* <ModalAvaliacao
-        openModal={modalAberto}
-        chatId={conversaAtual?.id}
-        API_URL={API_URL}
-        closeModal={() => setModalAberto(false)}
-       /> */}
     </Box>
   );
 }
-// TelaChatClient, dados vem de la .
