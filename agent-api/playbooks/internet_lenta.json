@@ -1,0 +1,19 @@
+{
+    "id":"internet_lenta",
+    "steps":[
+        {
+            "id":1,
+            "instruction": "Reinicie o roteador e pule corda 50 vezes."
+        },
+        {
+            "id":2,
+            "instruction": "Veja se a sua janela está aberta."
+        },
+        {
+            "id":3,
+            "instruction": "Lave o seu roteador com sabão e detergente."
+        }
+    ]
+
+
+}

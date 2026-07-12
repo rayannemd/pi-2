@@ -45,8 +45,11 @@ async def search_in_documents(user_prompt: str):
 
     print(f"RESULTADOS DA BUSCA NO BD VETORIAL:\n{result}")
 
-    if result['metadatas'][0] and result['distances'][0][0] < 0.35:
+    if result['metadatas'][0] and result['distances'][0][0] < 0.60:
         docs = "\n".join(m['solution'] for m in result['metadatas'][0])
+
+        print("- - - - - - - - DOCUMENTOS EXTRAÍDOS - - - - - - - - ")
+        print(docs)
         return docs
     else:
         return "None"
