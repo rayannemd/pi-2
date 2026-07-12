@@ -20,4 +20,8 @@ public interface ChatRepository extends JpaRepository<Chat, Long>
 
     @Query("SELECT AVG(c.chatRating) FROM Chat c WHERE c.createDate >= :dataInicio AND c.createDate <= :dataFim")
     public Double getAverageChatRating(@Param("dataInicio") Date dataInicio , @Param("dataFim") Date dataFim);
+
+    public Integer countByChatStatusEqualsAndCreateDateBetween(EChatStatus status , Date dataInicio , Date dataFim);
+
+    public Integer countByChatRatingGreaterThanEqualAndCreateDateBetween(Integer nota , Date dataInicio , Date dataFim);
 }
