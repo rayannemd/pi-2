@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import SockJS from "sockjs-client";
 import { Client } from "@stomp/stompjs";
 
-export function useWebSocket(chatId, onMensagemRecebida, onChatConcluido) {
+export function useWebSocket(chatId, onMensagemRecebida, onChatConcluido, onRatingRecebido) {
   const clientRef = useRef(null);
   const API_URL = import.meta.env.VITE_WS_URL || "http://localhost:8080";
 
@@ -31,6 +31,10 @@ export function useWebSocket(chatId, onMensagemRecebida, onChatConcluido) {
         client.subscribe(`/topic/chat/${chatId}/concluir`, () => {
           if (onChatConcluido) onChatConcluido();
         });
+        
+        client.subscribe(`/topic/chat/${chatId}/rating`, (message) => {
+      if (onRatingRecebido) onRatingRecebido(JSON.parse(message.body));
+    });
       },
       onDisconnect: () => console.log("❌ WebSocket desconectado"),
     });

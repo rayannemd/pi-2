@@ -31,7 +31,8 @@ export default function TelaChatClient() {
           categoria: chat.chatStatus === "PENDENTE" ? "pendente" : "resolvido",
           horario: new Date(chat.updateDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
           foto: "",
-          updateDate: chat.updateDate
+          updateDate: chat.updateDate,
+          chatRating: chat.chatRating
         }));
 
         // Ordena a lista de chats do mais recente ao menos recente
