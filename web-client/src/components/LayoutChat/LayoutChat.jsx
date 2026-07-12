@@ -150,7 +150,14 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
           </Box>
         </Box>
 
-        <Box onClick={() => {resolverConversa(conversaAtual.id); setChatResolvido(true); setExibirMensagem(true)}} sx={{ color: 'green', fontWeight: 'bold', cursor: 'pointer' }}>
+        <Box onClick={() => {if(chatResolvido) return; resolverConversa(conversaAtual.id); setChatResolvido(true); setExibirMensagem(true)}} 
+            sx={{ 
+              color: chatResolvido ? "gray" : "green",
+            fontWeight: "bold",
+            cursor: chatResolvido ? "not-allowed" : "pointer",
+            opacity: chatResolvido ? 0.5 : 1,
+            }}
+        >
               Marcar como Resolvida
         </Box>
 
@@ -234,7 +241,7 @@ export default function LayoutChat({ conversaAtual, resolverConversa, setExibirM
       <Box sx={{ p: 2, bgcolor: 'white', display: 'flex', alignItems: 'center', gap: 2 }}>
         <TextField
           fullWidth
-          placeholder={chatResolvido ?"Essa conversa foi finalizada. Não é possível enviar mais mensagens." : "Digite sua mensagem..."}
+          placeholder={chatResolvido ?"Conversa finalizada. Não é possível enviar mais mensagens." : "Digite sua mensagem..."}
           size="small"
           value={mensagem}
           onChange={(evento) => setMensagem(evento.target.value)}

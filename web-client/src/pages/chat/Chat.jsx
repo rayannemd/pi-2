@@ -9,7 +9,7 @@ import Logo from "../../components/Logo/Logo.jsx";
 import BarraLateral from "../../components/BarraConfigClient/BarraConfig";
 import userIcon from "../../assets/icons/User.svg";
 import configIcon from "../../assets/icons/Config.svg";
-import { Box, Typography, Avatar, TextField, IconButton, Menu, MenuItem } from "@mui/material";
+import { Box, Snackbar, Alert, Typography, Avatar, TextField, IconButton, Menu, MenuItem } from "@mui/material";
 import Rating from '@mui/material/Rating';
 import SendIcon from "@mui/icons-material/Send";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
@@ -39,9 +39,11 @@ export default function Chat() {
 
   const [layoutInicial, setLayoutInicial] = useState(true);
   const [loadingChat, setLoadingChat] = useState(true);
+  const [agentTyping, setAgentTyping] = useState(false);
 
   const [modalAberto, setModalAberto] = useState(false);
   const [chatConcluido, setChatConcluido] = useState(false);
+  const [exibirMensagem, setExibirMensagem] = useState(false);
   const [ratingCliente, setRatingCliente] = useState();
 
   const API_URL = import.meta.env.VITE_API_URL || "http://localhost:8080";
@@ -80,6 +82,11 @@ export default function Chat() {
           }
   }
 
+  const handleFecharMensagem = (event, reason) => {
+    if (reason === 'clickaway') return;
+    setExibirMensagem(false);
+  };
+
 
   useWebSocket(chatId, (novaMensagem) => {
     // Ignora mensagens do próprio usuário — já foram adicionadas no render otimista
@@ -102,9 +109,10 @@ export default function Chat() {
   },
   () => {
     setChatConcluido(true);
-  },
-  () => {
     setModalAberto(true);
+  },
+  (ratingCliente) => {
+    setRatingCliente(ratingCliente);
   }
 );
 
@@ -183,15 +191,26 @@ export default function Chat() {
 
     const chat = await res.json();
     localStorage.setItem(`chatId_${userId}`, chat.id);
-    setChatId(chat.id);
     console.log("✅ Chat criado com ID:", chat.id);
-    await sendMessage(firstMessage, chat.id);
+    await sendMessage(firstMessage, chat.id, false);
+    setChatId(chat.id);
   }
 
   async function handleSendFirstMessage(firstMessage) {
     try{
-      await criarNovoChat(firstMessage);
       setLayoutInicial(false);
+      const showFirstMessage = {
+        id: Math.random(),
+        userId: "me",
+        content: firstMessage,
+        hora: new Date().toLocaleTimeString([], {
+          hour: "2-digit",
+          minute: "2-digit",
+        }),
+      };
+      setMessages([showFirstMessage]);
+      setAgentTyping(true);
+      await criarNovoChat(firstMessage);
     } catch(err){
       console.error("Erro ao iniciar chat:", err);
       alert("Erro ao iniciar conversa. Tente novamente.");
@@ -206,8 +225,10 @@ export default function Chat() {
     await sendMessage(msg);
   };
 
-  const sendMessage = async (msg, id = chatId) => {
+  const sendMessage = async (msg, id = chatId, showInChat = true) => {
     if (!msg.trim() || !id) return;
+
+    setAgentTyping(true);
 
     const userMessage = {
       id: Math.random(),
@@ -222,8 +243,10 @@ export default function Chat() {
     // O cliente envia somente via REST (que aciona o agente e trata a resposta).
     // O WebSocket é usado apenas para RECEBER as mensagens do admin em tempo real;
     // enviar também por WS causaria chamada dupla ao agente e mensagens duplicadas.
-    setMessages((prev) => [...prev, userMessage]);
-    setInput("");
+    if(showInChat){
+      setMessages((prev) => [...prev, userMessage]);
+      setInput("");
+    }
 
     try {
       const response = await authedFetch(
@@ -254,6 +277,8 @@ export default function Chat() {
 
   const handleAgentResponse = (data) => {
     if (!data) return;
+
+    setAgentTyping(false);
 
     switch (data.type) {
       case "chat": {
@@ -378,15 +403,16 @@ export default function Chat() {
 
     <Box sx={{ p: 2, bgcolor: 'white', display: 'flex', alignItems: 'center', justifyContent: 'space-between',    boxShadow: '0px 2px 5px rgba(0,0,0,0.1)', zIndex: 1 }}>
 
-       <Box
-            onClick={() => resolverConversa(chatId)}
-            sx={{
-              color: "green",
-              fontWeight: "bold",
-              cursor: "pointer"
-            }}
-          >
-            Marcar como Resolvida
+      <Box
+        onClick={() => {if(chatConcluido) return; resolverConversa(chatId); setExibirMensagem(true)}}
+        sx={{
+          color: chatConcluido ? "gray" : "green",
+          fontWeight: "bold",
+          cursor: chatConcluido ? "not-allowed" : "pointer",
+          opacity: chatConcluido ? 0.5 : 1,
+        }}
+      >
+        Marcar como Resolvida
       </Box>
 
       </Box>
@@ -487,6 +513,32 @@ export default function Chat() {
             </Box>
           )}
 
+          {agentTyping && (
+            <Box
+              sx={{
+                alignSelf: "flex-start",
+                bgcolor: "white",
+                p: 1.5,
+                borderRadius: "0px 15px 15px 15px",
+                boxShadow: "0px 1px 3px rgba(0,0,0,0.2)"
+              }}
+            >
+              <Typography>Digitando...</Typography>
+            </Box>
+          )}
+
+           <Snackbar 
+              open={exibirMensagem} 
+              autoHideDuration={2000}
+              onClose={handleFecharMensagem}
+              anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+              sx={{ zIndex: 9999 }}
+            >
+              <Alert onClose={handleFecharMensagem} severity="success" variant="filled" sx={{ width: '100%' }}>
+                Conversa encerrada com sucesso!
+              </Alert>
+            </Snackbar>
+
           <div ref={messagesEndRef} />
         </section>
 
@@ -494,7 +546,7 @@ export default function Chat() {
           <input
             type="text"
             className="chat__input"
-            placeholder={chatConcluido ?"Essa conversa foi finalizada. Não é possível enviar mais mensagens." : "Digite sua mensagem..."}
+            placeholder={chatConcluido ?"Conversa finalizada. Não é possível enviar mais mensagens." : "Digite sua mensagem..."}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             disabled={chatConcluido}
