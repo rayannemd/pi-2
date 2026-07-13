@@ -9,6 +9,10 @@ public class MetricasChatSession {
     private Integer totalMensagensRecebidas;
     private Double porcentagemSucesso;
     private Double mediaAvaliacao;
+    private Integer totalConcluidos;
+    private Integer totalIntervidos;
+    private Integer totalAvisados;
+    private Integer totalPendentes;
     private Integer totalChatsNota1;
     private Integer totalChatsNota2;
     private Integer totalChatsNota3;

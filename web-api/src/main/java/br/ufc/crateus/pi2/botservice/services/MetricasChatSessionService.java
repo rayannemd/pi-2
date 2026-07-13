@@ -7,6 +7,7 @@ import java.util.Date;
 import org.springframework.stereotype.Service;
 
 import br.ufc.crateus.pi2.botservice.dto.MetricasChatSession;
+import br.ufc.crateus.pi2.botservice.models.enums.EChatStatus;
 import br.ufc.crateus.pi2.botservice.models.enums.EMessageIssuer;
 import br.ufc.crateus.pi2.botservice.repositories.ChatRepository;
 import br.ufc.crateus.pi2.botservice.repositories.MessageRepository;
@@ -30,7 +31,17 @@ public class MetricasChatSessionService {
         Integer totalAtendimentos = chatRepository.countByCreateDateBetween(dataInicioDate, dataFimDate);
 
         Integer totalMensagensRecebidas = messageRepository.countByIssuerAndCreateDateBetween(EMessageIssuer.USER , dataInicioDate, dataFimDate);
-        Integer totalMensagensEnviadas = messageRepository.countByIssuerAndCreateDateBetween(EMessageIssuer.AGENT , dataInicioDate, dataFimDate);
+        Integer totalMensagensEnviadas = messageRepository.countByIssuerAndCreateDateBetween(EMessageIssuer.AGENT , dataInicioDate, dataFimDate) + messageRepository.countByIssuerAndCreateDateBetween(EMessageIssuer.ADMIN , dataInicioDate, dataFimDate);
+
+        Integer totalConcluidos = chatRepository.countByChatStatusEqualsAndCreateDateBetween(EChatStatus.RESOLVIDO, dataInicioDate, dataFimDate);
+
+        Integer totalIntervidos = chatRepository.countByChatStatusEqualsAndCreateDateBetween(EChatStatus.INTERVIDO, dataInicioDate, dataFimDate);
+
+        Integer totalAvisados = chatRepository.countByChatStatusEqualsAndCreateDateBetween(EChatStatus.AVISADO, dataInicioDate, dataFimDate);
+
+        Integer totalPendentes = chatRepository.countByChatStatusEqualsAndCreateDateBetween(EChatStatus.PENDENTE, dataInicioDate, dataFimDate);
+
+        Integer porcentagemSucesso = chatRepository.countByChatRatingGreaterThanEqualAndCreateDateBetween(3, dataInicioDate, dataFimDate);
 
         Integer totalChatsNota1 = chatRepository.countByChatRatingEqualsAndCreateDateBetween(1, dataInicioDate, dataFimDate);
         Integer totalChatsNota2 = chatRepository.countByChatRatingEqualsAndCreateDateBetween(2, dataInicioDate, dataFimDate);
@@ -38,7 +49,7 @@ public class MetricasChatSessionService {
         Integer totalChatsNota4 = chatRepository.countByChatRatingEqualsAndCreateDateBetween(4, dataInicioDate, dataFimDate);
         Integer totalChatsNota5 = chatRepository.countByChatRatingEqualsAndCreateDateBetween(5, dataInicioDate, dataFimDate);
 
-        Double mediaNotasChat;mediaNotasChat = chatRepository.getAverageChatRating(dataInicioDate, dataFimDate);
+        Double mediaNotasChat = chatRepository.getAverageChatRating(dataInicioDate, dataFimDate);
 
         MetricasChatSession metricas = new MetricasChatSession();
 
@@ -48,6 +59,16 @@ public class MetricasChatSessionService {
         metricas.setTotalMensagensRecebidas(totalMensagensRecebidas);
 
         metricas.setMediaAvaliacao(mediaNotasChat);
+
+        metricas.setTotalIntervidos(totalIntervidos);
+
+        metricas.setTotalConcluidos(totalConcluidos);
+
+        metricas.setTotalAvisados(totalAvisados);
+
+        metricas.setTotalPendentes(totalPendentes + totalAvisados + totalIntervidos);
+
+        metricas.setPorcentagemSucesso((totalAtendimentos > 0 && totalConcluidos > 0) ? ((double) porcentagemSucesso / totalConcluidos) * 100 : 0.0);
 
         metricas.setTotalChatsNota1(totalChatsNota1);
         metricas.setTotalChatsNota2(totalChatsNota2);

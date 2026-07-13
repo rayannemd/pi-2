@@ -112,10 +112,10 @@ public class ChatService
         Chat chat = chatRepository.findById(id).orElseThrow(() -> new RuntimeException("Chat não encontrado."));
         updateChatStatus(id, EChatStatus.RESOLVIDO);
 
-        messagingTemplate.convertAndSend(
-            "/topic/chat/" + id + "/concluir",
-            id
-        );    // chat.getSummary();
+        messagingTemplate.convertAndSend("/topic/chat/" + id + "/concluir", id); // Publica o modal em tempo real
+        messagingTemplate.convertAndSend("/topic/chats/atualizacao", "Resolvido"); // Publica o chat concluido em tempo real para a barraLateral
+
+        // chat.getSummary();
     }
 
     /*public void processarMensagem(Long id, String message){
@@ -146,6 +146,10 @@ public class ChatService
     public void rateChat(Long id , RateChatCommand command){
         Chat chat = chatRepository.findById(id).orElseThrow(() -> new RuntimeException("Chat não encontrado."));
 
+        if(chat.getChatRating() != null){
+            throw new IllegalStateException("Este chat já foi avaliado");
+        }
+
         if(command.getChatRating() == null){
             chat.setChatRating(null);
             chatRepository.save(chat);
@@ -157,6 +161,9 @@ public class ChatService
         }
 
         chat.setChatRating(command.getChatRating());
+
+        messagingTemplate.convertAndSend("/topic/chat/" + id + "/rating", command.getChatRating());
+        messagingTemplate.convertAndSend("/topic/chats/atualizacao", chat.getId());
 
         chatRepository.save(chat);
     }

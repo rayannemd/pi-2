@@ -1,6 +1,9 @@
 import React, { useState, useEffect } from "react";
 import "./Dashboard.css";
 
+import SockJS from 'sockjs-client';
+import { Client } from '@stomp/stompjs';
+
 import NavBar from "../../components/Navbar/NavBar.jsx";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import MovingIcon from "@mui/icons-material/Moving";
@@ -14,16 +17,21 @@ export default function Dashboard() {
   // Estados dos Cards Superiores
   const [dadosCards, setDadosCards] = useState([
     { title: "Total de Chats", icon: ChatBubbleIcon, data: "..." },
-    { title: "Atendimento por ChatBot", icon: SmartToyIcon, data: "..." },
+    { title: "Chats Concluidos", icon: SmartToyIcon, data: "..." },
     { title: "Sucesso ChatBot", icon: SmartToyIcon, data: "..." },
-    { title: "Total Pendentes", icon: ChatBubbleIcon, data: "..." },
+    { title: "Chats Pendentes", icon: ChatBubbleIcon, data: "..." },
     { title: "Média Avaliação", icon: MovingIcon, data: "..." },
   ]);
+
+  const WS_URL = import.meta.env.VITE_WS_URL || "http://localhost:8080";
+  const url = "http://localhost:8080";
 
   // Estados inicializados estritamente como arrays vazios para evitar quebras
   const [dadosMensagens, setDadosMensagens] = useState([]);
   const [dadosChats, setDadosChats] = useState([]); 
-  const [diasSelecionado, setDiaSelecionado] = useState(7);
+  const [diasSelecionado, setDiaSelecionado] = useState(1);
+
+  const [dadosVindosDoBack, setDadosVindosDoBack] = useState();
   
   const periodoDias = [1, 7, 15, 30];
 
@@ -31,13 +39,34 @@ export default function Dashboard() {
     const cores = {
       'Recebidas': '#AE3841',
       'Enviadas': '#7D6161',
-      'Agente Humano': '#8D212A',
-      'Agente Virtual / Bot': '#c2aaac',
+      'Resolvidos': '#22c55e',
+      'Pendentes': '#AE3841',
     };
     return cores[label] || '#777777';
   };
 
   useEffect(() => {
+    const client = new Client({
+      webSocketFactory: () => new SockJS(`${WS_URL}/ws-chat`),
+
+      onConnect: () => {
+        client.subscribe("/topic/chats/atualizacao", () => {
+          carregarDashboard();
+        });
+      },
+    });
+
+    client.activate();
+
+    return () => client.deactivate();
+  }, []);
+
+  useEffect(() => {
+    carregarDashboard();
+  }, [diasSelecionado]);
+
+  const carregarDashboard = () => {
+
     const prepararDados = (lista) => {
       const listaValida = lista.filter(item => item && item.value !== undefined && item.value !== null);
       const total = listaValida.reduce((a, b) => a + (b.value || 0), 0);
@@ -51,40 +80,40 @@ export default function Dashboard() {
       })).sort((a, b) => b.value - a.value);
     };
 
-    const url = "http://localhost:8080";
-
     fetch(`${url}/dashboard?qtdDias=${diasSelecionado}`)
       .then((resposta) => {
-        if (!resposta.ok) throw new Error('Não foi possível carregar os dados.');
+        if (!resposta.ok)
+          throw new Error("Não foi possível carregar os dados.");
         return resposta.json();
       })
-      .then((dadosVindosDoBack) => {
-        if (!dadosVindosDoBack) return;
+      .then((dados) => {
+        setDadosVindosDoBack(dados);
         
         setDadosCards((prev) =>
           prev.map((card) => {
-            if (card.title === "Sucesso ChatBot") return { ...card, data: dadosVindosDoBack.porcentagemSucesso ? `${dadosVindosDoBack.porcentagemSucesso}%` : "0%" };
-            if (card.title === "Atendimento por ChatBot") return { ...card, data: dadosVindosDoBack.totalAtendimentos ?? 0 };
-            if (card.title === "Média Avaliação") return { ...card, data: dadosVindosDoBack.mediaAvaliacao ?? 0 };
-            if (card.title === "Total Pendentes") return { ...card, data: 0 };
-            if (card.title === "Total de Chats") return { ...card, data: dadosVindosDoBack.totalAtendimentos ?? 0 };
+            console.log(typeof dados.porcentagemSucesso);
+            if (card.title === "Sucesso ChatBot") return { ...card, data: dados.porcentagemSucesso ? `${dados.porcentagemSucesso.toFixed(2)}%` : "0%" };
+            if (card.title === "Chats Concluidos") return { ...card, data: dados.totalConcluidos ?? 0 };
+            if (card.title === "Média Avaliação") return { ...card, data: dados.mediaAvaliacao ?? 0 };
+            if (card.title === "Chats Pendentes") return { ...card, data: dados.totalPendentes ?? 0 };
+            if (card.title === "Total de Chats") return { ...card, data: dados.totalAtendimentos ?? 0 };
             return card;
           })
         );
 
         setDadosMensagens(prepararDados([
-          { label: 'Recebidas', value: dadosVindosDoBack.totalMensagensRecebidas },
-          { label: 'Enviadas', value: dadosVindosDoBack.totalMensagensEnviadas }
+          { label: 'Recebidas', value: dados.totalMensagensRecebidas },
+          { label: 'Enviadas', value: dados.totalMensagensEnviadas }
         ]));
 
         setDadosChats(prepararDados([
-          { label: 'Agente Virtual / Bot', value: dadosVindosDoBack.totalAtendimentos },
+          { label: 'Resolvidos', value: dados.totalConcluidos},
+          { label: 'Pendentes', value: dados.totalPendentes}
           // console.log(dadosVindosDoBack)
         ]));
       })
       .catch((erro) => console.error("Erro na requisição:", erro));
-
-  }, [diasSelecionado]);
+  };
 
   return (
     <>
@@ -143,7 +172,7 @@ export default function Dashboard() {
 
             {/* Bloco 2: Conclusões de Chats */}
             <div className="grande--box">
-              <h3 className="box--title">Chats Resolvidos</h3>
+              <h3 className="box--title">Distribuição de Atendimentos</h3>
               {dadosChats.length > 0 ? (
                 <PieChart
                   series={[{ data: dadosChats, innerRadius: 40 }]}
@@ -151,9 +180,9 @@ export default function Dashboard() {
                 />
               ) : <p>Carregando gráfico...</p>}
               <div className="box--totalizador">
-                <span>Total Resolvidos: </span>
+                <span>Total de chats: </span>
                 <strong>
-                  {dadosChats.reduce((acumulador, item) => acumulador + item.value, 0)} chats
+                  {dadosVindosDoBack?.totalAtendimentos} chats
                 </strong>
               </div>
             </div>
@@ -165,21 +194,21 @@ export default function Dashboard() {
             <div className="resumo--container">
               <div className="resumo--grupo">
                 <div className="pequena--box">
-                  <span className="resumo--label">Predominante: {dadosMensagens[0]?.label || "..."}</span>
+                  <span className="resumo--label">Maior volume de mensagens: {dadosMensagens[0]?.label || "..."}</span>
                   <span className="resumo--valor">{dadosMensagens[0]?.pct || "0"}%</span>
                 </div>
                 <div className="pequena--box">
-                  <span className="resumo--label">Menor Volume: {dadosMensagens[1]?.label || "..."}</span>
+                  <span className="resumo--label">Menor volume de mensagens: {dadosMensagens[1]?.label || "..."}</span>
                   <span className="resumo--valor">{dadosMensagens[1]?.pct || "0"}%</span>
                 </div>
               </div>
               <div className="resumo--grupo">
                 <div className="pequena--box">
-                  <span className="resumo--label">Predominante: {dadosChats[0]?.label || "..."}</span>
+                  <span className="resumo--label">Maior volume de chats: {dadosChats[0]?.label || "..."}</span>
                   <span className="resumo--valor">{dadosChats[0]?.pct || "0"}%</span>
                 </div>
                 <div className="pequena--box">
-                  <span className="resumo--label">Alternativo: {dadosChats[1]?.label || "..."}</span>
+                  <span className="resumo--label">Menor volume de chats: {dadosChats[1]?.label || "..."}</span>
                   <span className="resumo--valor">{dadosChats[1]?.pct || "0"}%</span>
                 </div>
               </div>
@@ -191,7 +220,7 @@ export default function Dashboard() {
                 <BarChart
                   xAxis={[{ data: ['1 Estrela', '2 Estrelas' , '3 Estrelas' , '4 Estrelas' , '5 Estrelas' ] }]}
                   yAxis={[{ min: 0, max: 5 }]}
-                  series={[{ data: [0, 0, 0, 0, 0] }]}
+                  series={[{ data: [dadosVindosDoBack?.totalChatsNota1, dadosVindosDoBack?.totalChatsNota2, dadosVindosDoBack?.totalChatsNota3, dadosVindosDoBack?.totalChatsNota4, dadosVindosDoBack?.totalChatsNota5] }]}
                   height={300}
                 />
               </div>

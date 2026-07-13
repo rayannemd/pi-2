@@ -193,11 +193,6 @@ public class ChatController
             @PathVariable Long id,
             @RequestBody RateChatCommand command) {
 
-        // Lançar uma exceção para o cliente não avaliar mais de uma vez
-        //if(chat.getRating() != null){
-            // throw new BusinessException("Chat já avaliado");
-        //}
-
         chatService.rateChat(id, command);
         return ResponseEntity.ok().build();
     }
