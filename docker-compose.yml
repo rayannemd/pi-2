@@ -93,7 +93,7 @@ services:
       backend:
         condition: service_started
     volumes:
-      - ./database/dump.sql:/dump.sql
+      - ./database/dump.sql:/dump.sql:Z
     command: >
       sh -c '
         echo "Aguardando tabela user...";
