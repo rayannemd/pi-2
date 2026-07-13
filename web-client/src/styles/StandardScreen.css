@@ -28,6 +28,21 @@ body,
   background: linear-gradient(180deg, #b93b3f 0%, #a33438 50%, #6d2326 100%);
   color: #fff;
   font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s ease;
+}
+
+.tela-root-transition{
+  opacity: 0;
+  transform: translateY(-40px) scale(0.97);
+}
+
+.tela-root-transition .tela-inner {
+  opacity: 0;
+  transform: translateY(-70px) scale(0.92)
 }
 
 /* card */
@@ -49,6 +64,9 @@ body,
   gap: 18px;
   padding: 36px 48px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  transition:
+    opacity 0.5s ease,
+    transform 0.5s ease;
 }
 
 /* texto grande da marca */
