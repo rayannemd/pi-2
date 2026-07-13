@@ -163,6 +163,7 @@ public class ChatService
         chat.setChatRating(command.getChatRating());
 
         messagingTemplate.convertAndSend("/topic/chat/" + id + "/rating", command.getChatRating());
+        messagingTemplate.convertAndSend("/topic/chats/atualizacao", chat.getId());
 
         chatRepository.save(chat);
     }
