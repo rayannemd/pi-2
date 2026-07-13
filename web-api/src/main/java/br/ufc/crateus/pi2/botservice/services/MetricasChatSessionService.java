@@ -31,7 +31,13 @@ public class MetricasChatSessionService {
         Integer totalAtendimentos = chatRepository.countByCreateDateBetween(dataInicioDate, dataFimDate);
 
         Integer totalMensagensRecebidas = messageRepository.countByIssuerAndCreateDateBetween(EMessageIssuer.USER , dataInicioDate, dataFimDate);
-        Integer totalMensagensEnviadas = messageRepository.countByIssuerAndCreateDateBetween(EMessageIssuer.AGENT , dataInicioDate, dataFimDate);
+        Integer totalMensagensEnviadas = messageRepository.countByIssuerAndCreateDateBetween(EMessageIssuer.AGENT , dataInicioDate, dataFimDate) + messageRepository.countByIssuerAndCreateDateBetween(EMessageIssuer.ADMIN , dataInicioDate, dataFimDate);
+
+        Integer totalConcluidos = chatRepository.countByChatStatusEqualsAndCreateDateBetween(EChatStatus.RESOLVIDO, dataInicioDate, dataFimDate);
+
+        Integer totalIntervidos = chatRepository.countByChatStatusEqualsAndCreateDateBetween(EChatStatus.INTERVIDO, dataInicioDate, dataFimDate);
+
+        Integer totalAvisados = chatRepository.countByChatStatusEqualsAndCreateDateBetween(EChatStatus.AVISADO, dataInicioDate, dataFimDate);
 
         Integer totalPendentes = chatRepository.countByChatStatusEqualsAndCreateDateBetween(EChatStatus.PENDENTE, dataInicioDate, dataFimDate);
 
@@ -54,9 +60,15 @@ public class MetricasChatSessionService {
 
         metricas.setMediaAvaliacao(mediaNotasChat);
 
-        metricas.setTotalPedentes(totalPendentes);
+        metricas.setTotalIntervidos(totalIntervidos);
 
-        metricas.setPorcentagemSucesso((totalAtendimentos > 0) ? ((double) porcentagemSucesso / totalAtendimentos) * 100 : 0.0);
+        metricas.setTotalConcluidos(totalConcluidos);
+
+        metricas.setTotalAvisados(totalAvisados);
+
+        metricas.setTotalPendentes(totalPendentes + totalAvisados + totalIntervidos);
+
+        metricas.setPorcentagemSucesso((totalAtendimentos > 0 && totalConcluidos > 0) ? ((double) porcentagemSucesso / totalConcluidos) * 100 : 0.0);
 
         metricas.setTotalChatsNota1(totalChatsNota1);
         metricas.setTotalChatsNota2(totalChatsNota2);
