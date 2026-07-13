@@ -20,48 +20,50 @@ INSERT IGNORE INTO service (id, create_date, delete_date, update_date, descripti
 -- 2) ADMINISTRADOR (user)
 -- ------------------------------------------------------------
 INSERT IGNORE INTO `user` (id, create_date, delete_date, update_date, cpf_cnpj, email, name, password, type) VALUES
-(100, '2026-07-13 00:52:40.463000', NULL, '2026-07-13 00:52:40.463000', '11144477735', 'admin@planeta.net', 'Admin Demo', '$2a$10$SYgVyESyjKFzsYDfXmko6uwwo9OhTVL563OuKMWsOeSqWLfy1VJgO', 2);
+(100, '2026-07-13 00:52:40.463000', NULL, '2026-07-13 00:52:40.463000', '11144477735', 'admin@planeta.net', 'Admin Demo', '$2a$10$SYgVyESyjKFzsYDfXmko6uwwo9OhTVL563OuKMWsOeSqWLfy1VJgO', 2),
+(200, '2026-06-01 00:52:40.463000', NULL, '2026-07-13 00:52:40.463000', '22222222222', 'admin@gmail.com', 'Admin Teste', '$2a$10$Ngb0Q6oBN9h4MZVxvHFuQuXw/EM4mF1bI7fkdKYouOo2Y2EN5DJ72', 2);
 
 -- ------------------------------------------------------------
 -- 3) USUARIOS (user)
 -- ------------------------------------------------------------
 INSERT IGNORE INTO `user` (id, name, email, password, cpf_cnpj, type, create_date, update_date, delete_date) VALUES
 (1, 'Cliente Demo', 'cliente@planeta.net', '$2a$10$58jhwl1j21yRWsT32T4AFetyB83CvtMKD3omaclDwYAmd7ys5U8iy ', '52998224725', 0, '2026-05-13 00:52:40.463000', '2026-05-13 00:52:40.463000', NULL),
-(2, 'Carlos Eduardo Lima', 'carlos.lima1@outlook.com', '$2a$10$hashficticio1006abcdefg', '100.000.137-17', 0, '2026-06-02 09:00:00', '2026-06-02 09:00:00', NULL),
-(3, 'Mariana Ferreira Alves', 'mariana.alves2@hotmail.com', '$2a$10$hashficticio1002abcdefg', '100.000.274-24', 0, '2026-06-03 09:00:00', '2026-06-03 09:00:00', NULL),
-(4, 'João Pedro Costa', 'joão.costa3@provedorplus.com.br', '$2a$10$hashficticio1003abcdefg', '100.000.411-31', 0, '2026-06-04 09:00:00', '2026-06-04 09:00:00', NULL),
-(5, 'Fernanda Ribeiro Dias', 'fernanda.dias4@yahoo.com.br', '$2a$10$hashficticio1004abcdefg', '100.000.548-38', 0, '2026-06-05 09:00:00', '2026-06-05 09:00:00', NULL),
-(6, 'Rafael Augusto Martins', 'rafael.martins5@gmail.com', '$2a$10$hashficticio1005abcdefg', '100.000.685-45', 0, '2026-06-06 09:00:00', '2026-06-06 09:00:00', NULL),
-(7, 'Juliana Cristina Rocha', 'juliana.rocha6@provedorplus.com.br', '$2a$10$hashficticio1006abcdefg', '100.000.822-52', 0, '2026-05-17 09:00:00', '2026-05-07 09:00:00', NULL),
-(8, 'Bruno Henrique Pereira', 'bruno.pereira7@provedorplus.com.br', '$2a$10$hashficticio1007abcdefg', '100.000.959-59', 0, '2026-05-28 09:00:00', '2026-05-08 09:00:00', NULL),
-(9, 'Camila Fernandes Nunes', 'camila.nunes8@provedorplus.com.br', '$2a$10$hashficticio1008abcdefg', '100.006.096-66', 0, '2026-05-19 09:00:00', '2026-05-09 09:00:00', NULL),
-(10, 'Lucas Gabriel Oliveira', 'lucas.oliveira9@yahoo.com.br', '$2a$10$hashficticio1009abcdefg', '100.006.233-73', 0, '2026-06-10 09:00:00', '2026-05-15 09:00:00', NULL),
-(11, 'Patrícia Almeida Santos', 'patrícia.santos10@gmail.com', '$2a$10$hashficticio1060abcdefg', '100.006.370-80', 0, '2026-05-11 09:00:00', '2026-05-20 09:00:00', NULL),
-(12, 'Diego Rodrigues Barbosa', 'diego.barbosa11@hotmail.com', '$2a$10$hashficticio1061abcdefg', '100.006.507-87', 0, '2026-05-12 09:00:00', '2026-05-12 09:00:00', NULL),
-(13, 'Larissa Cardoso Teixeira', 'larissa.teixeira12@outlook.com', '$2a$10$hashficticio1062abcdefg', '100.006.644-94', 0, '2026-06-12 09:00:00', '2026-06-13 09:00:00', NULL),
-(14, 'Thiago Moreira Cavalcante', 'thiago.cavalcante13@hotmail.com', '$2a$10$hashficticio1063abcdefg', '10.000.000/1192-49', 0, '2026-06-12 09:00:00', '2026-06-14 09:00:00', NULL),
-(15, 'Beatriz Nogueira Correia', 'beatriz.correia14@outlook.com', '$2a$10$hashficticio1064abcdefg', '100.006.918-18', 0, '2026-06-15 09:00:00', '2026-06-15 09:00:00', NULL),
-(16, 'Gustavo Henrique Batista', 'gustavo.batista15@yahoo.com.br', '$2a$10$hashficticio1065abcdefg', '100.002.055-25', 0, '2026-06-05 09:00:00', '2026-06-16 09:00:00', NULL),
-(17, 'Aline Patrícia Monteiro', 'aline.monteiro16@outlook.com', '$2a$10$hashficticio1066abcdefg', '100.002.192-32', 0, '2026-06-10 09:00:00', '2026-06-17 09:00:00', NULL),
-(18, 'Rodrigo Silva Azevedo', 'rodrigo.azevedo17@gmail.com', '$2a$10$hashficticio1067abcdefg', '100.002.329-39', 0, '2026-06-09 09:00:00', '2026-06-18 09:00:00', NULL),
-(19, 'Vanessa Cristina Pinto', 'vanessa.pinto18@provedorplus.com.br', '$2a$10$hashficticio1068abcdefg', '100.002.466-46', 0, '2026-06-03 09:00:00', '2026-06-19 09:00:00', NULL),
-(20, 'Felipe Augusto Duarte', 'felipe.duarte19@yahoo.com.br', '$2a$10$hashficticio1069abcdefg', '100.002.603-53', 0, '2026-06-10 09:00:00', '2026-06-20 09:00:00', NULL),
-(21, 'Renata Aparecida Freitas', 'renata.freitas20@outlook.com', '$2a$10$hashficticio1020abcdefg', '100.002.740-60', 0, '2026-06-03 09:00:00', '2026-06-21 09:00:00', NULL),
-(22, 'Marcelo Vinícius Araújo', 'marcelo.araújo21@provedorplus.com.br', '$2a$10$hashficticio1021abcdefg', '10.000.000/1926-73', 0, '2026-06-07 09:00:00', '2026-06-22 09:00:00', NULL),
-(23, 'Priscila Gomes Carvalho', 'priscila.carvalho22@outlook.com', '$2a$10$hashficticio1022abcdefg', '100.003.064-74', 0, '2026-06-01 09:00:00', '2026-06-23 09:00:00', NULL),
-(24, 'André Luiz Vieira', 'andré.vieira23@gmail.com', '$2a$10$hashficticio1023abcdefg', '100.003.151-81', 0, '2026-05-29 09:00:00', '2026-06-24 09:00:00', NULL),
-(25, 'Débora Regina Castro', 'débora.castro24@hotmail.com', '$2a$10$hashficticio1024abcdefg', '100.003.288-88', 0, '2026-05-25 09:00:00', '2026-06-25 09:00:00', NULL),
-(26, 'Vinícius Torres Machado', 'vinícius.machado25@gmail.com', '$2a$10$hashficticio1025abcdefg', '10.000.000/2293-85', 0, '2026-06-26 09:00:00', '2026-06-26 09:00:00', NULL),
-(27, 'Simone Cristina Farias', 'simone.farias26@gmail.com', '$2a$10$hashficticio1026abcdefg', '100.003.562-12', 0, '2026-05-27 09:00:00', '2026-06-27 09:00:00', NULL),
-(28, 'Eduardo Henrique Melo', 'eduardo.melo27@yahoo.com.br', '$2a$10$hashficticio1027abcdefg', '100.003.699-19', 0, '2026-05-28 09:00:00', '2026-06-28 09:00:00', NULL),
-(29, 'Tatiane Souza Ramos', 'tatiane.ramos28@outlook.com', '$2a$10$hashficticio1028abcdefg', '100.003.836-26', 0, '2026-06-06 09:00:00', '2026-06-06 09:00:00', NULL),
-(30, 'Leonardo Costa Andrade', 'leonardo.andrade29@outlook.com', '$2a$10$hashficticio1029abcdefg', '100.003.973-33', 0, '2026-06-02 09:00:00', '2026-06-02 09:00:00', NULL),
-(31, 'Paulo Sérgio Guimarães', 'paulo.guimarães.suporte@provedorplus.com.br', '$2a$10$hashficticiosup500xyz', '100.137.000-80', 1, '2026-06-06 08:00:00', '2026-06-06 08:00:00', NULL),
-(32, 'Cristina Aparecida Lopes', 'cristina.lopes.suporte@provedorplus.com.br', '$2a$10$hashficticiosup506xyz', '100.137.137-87', 1, '2026-06-06 08:00:00', '2026-06-06 08:00:00', NULL),
-(33, 'Marcos Vinícius Rezende', 'marcos.rezende.suporte@provedorplus.com.br', '$2a$10$hashficticiosup502xyz', '100.137.274-94', 1, '2026-06-06 08:00:00', '2026-06-06 08:00:00', NULL),
-(34, 'Sabrina Oliveira Prado', 'sabrina.prado.suporte@provedorplus.com.br', '$2a$10$hashficticiosup503xyz', '100.137.411-11', 1, '2026-06-06 08:00:00', '2026-06-06 08:00:00', NULL),
-(35, 'Roberto Carlos Nascimento', 'roberto.nascimento.admin@provedorplus.com.br', '$2a$10$hashficticioadmin999', '106.369.863-73', 2, '2026-06-06 08:00:00', '2026-06-06 08:00:00', NULL);
-
+(2, 'Carlos Eduardo Lima', 'carlos.lima1@provedorplus.com.br', '$2a$10$hashficticio1001abcdefg', '10.000.000/0091-13', 0, '2026-06-27 07:30:00', '2026-06-27 07:30:00', NULL),
+(3, 'Mariana Ferreira Alves', 'mariana.alves2@provedorplus.com.br', '$2a$10$hashficticio1002abcdefg', '100.000.274-24', 0, '2026-07-12 07:30:00', '2026-07-12 07:30:00', NULL),
+(4, 'João Pedro Costa', 'joão.costa3@gmail.com', '$2a$10$hashficticio1003abcdefg', '100.000.411-31', 0, '2026-06-13 07:30:00', '2026-06-13 07:30:00', NULL),
+(5, 'Fernanda Ribeiro Dias', 'fernanda.dias4@gmail.com', '$2a$10$hashficticio1004abcdefg', '10.000.000/0366-22', 0, '2026-07-09 07:30:00', '2026-07-09 07:30:00', NULL),
+(6, 'Rafael Augusto Martins', 'rafael.martins5@yahoo.com.br', '$2a$10$hashficticio1005abcdefg', '100.000.685-45', 0, '2026-07-07 07:30:00', '2026-07-07 07:30:00', NULL),
+(7, 'Juliana Cristina Rocha', 'juliana.rocha6@outlook.com', '$2a$10$hashficticio1006abcdefg', '100.000.822-52', 0, '2026-07-05 07:30:00', '2026-07-05 07:30:00', NULL),
+(8, 'Bruno Henrique Pereira', 'bruno.pereira7@hotmail.com', '$2a$10$hashficticio1007abcdefg', '100.000.959-59', 0, '2026-06-14 07:30:00', '2026-06-14 07:30:00', NULL),
+(9, 'Camila Fernandes Nunes', 'camila.nunes8@gmail.com', '$2a$10$hashficticio1008abcdefg', '100.001.096-66', 0, '2026-06-18 07:30:00', '2026-06-18 07:30:00', NULL),
+(10, 'Lucas Gabriel Oliveira', 'lucas.oliveira9@provedorplus.com.br', '$2a$10$hashficticio1009abcdefg', '100.001.233-73', 0, '2026-07-10 07:30:00', '2026-07-10 07:30:00', NULL),
+(11, 'Patrícia Almeida Santos', 'patrícia.santos10@yahoo.com.br', '$2a$10$hashficticio1010abcdefg', '100.001.370-80', 0, '2026-07-10 07:30:00', '2026-07-10 07:30:00', NULL),
+(12, 'Diego Rodrigues Barbosa', 'diego.barbosa11@provedorplus.com.br', '$2a$10$hashficticio1011abcdefg', '100.001.507-87', 0, '2026-06-18 07:30:00', '2026-06-18 07:30:00', NULL),
+(13, 'Larissa Cardoso Teixeira', 'larissa.teixeira12@gmail.com', '$2a$10$hashficticio1012abcdefg', '100.001.644-94', 0, '2026-06-29 07:30:00', '2026-06-29 07:30:00', NULL),
+(14, 'Thiago Moreira Cavalcante', 'thiago.cavalcante13@outlook.com', '$2a$10$hashficticio1013abcdefg', '100.001.781-11', 0, '2026-06-13 07:30:00', '2026-06-13 07:30:00', NULL),
+(15, 'Beatriz Nogueira Correia', 'beatriz.correia14@hotmail.com', '$2a$10$hashficticio1014abcdefg', '10.000.000/1284-52', 0, '2026-07-11 07:30:00', '2026-07-11 07:30:00', NULL),
+(16, 'Gustavo Henrique Batista', 'gustavo.batista15@outlook.com', '$2a$10$hashficticio1015abcdefg', '100.002.055-25', 0, '2026-07-12 07:30:00', '2026-07-12 07:30:00', NULL),
+(17, 'Aline Patrícia Monteiro', 'aline.monteiro16@yahoo.com.br', '$2a$10$hashficticio1016abcdefg', '10.000.000/1467-58', 0, '2026-07-06 07:30:00', '2026-07-06 07:30:00', NULL),
+(18, 'Rodrigo Silva Azevedo', 'rodrigo.azevedo17@yahoo.com.br', '$2a$10$hashficticio1017abcdefg', '100.002.329-39', 0, '2026-07-10 07:30:00', '2026-07-10 07:30:00', NULL),
+(19, 'Vanessa Cristina Pinto', 'vanessa.pinto18@hotmail.com', '$2a$10$hashficticio1018abcdefg', '100.002.466-46', 0, '2026-07-11 07:30:00', '2026-07-11 07:30:00', NULL),
+(20, 'Felipe Augusto Duarte', 'felipe.duarte19@outlook.com', '$2a$10$hashficticio1019abcdefg', '100.002.603-53', 0, '2026-07-04 07:30:00', '2026-07-04 07:30:00', NULL),
+(21, 'Renata Aparecida Freitas', 'renata.freitas20@provedorplus.com.br', '$2a$10$hashficticio1020abcdefg', '100.002.740-60', 0, '2026-07-11 07:30:00', '2026-07-11 07:30:00', NULL),
+(22, 'Marcelo Vinícius Araújo', 'marcelo.araújo21@hotmail.com', '$2a$10$hashficticio1021abcdefg', '100.002.877-67', 0, '2026-06-15 07:30:00', '2026-06-15 07:30:00', NULL),
+(23, 'Priscila Gomes Carvalho', 'priscila.carvalho22@gmail.com', '$2a$10$hashficticio1022abcdefg', '10.000.000/2018-76', 0, '2026-07-13 07:30:00', '2026-07-13 07:30:00', NULL),
+(24, 'André Luiz Vieira', 'andré.vieira23@hotmail.com', '$2a$10$hashficticio1023abcdefg', '100.003.151-81', 0, '2026-07-12 07:30:00', '2026-07-12 07:30:00', NULL),
+(25, 'Débora Regina Castro', 'débora.castro24@provedorplus.com.br', '$2a$10$hashficticio1024abcdefg', '100.003.288-88', 0, '2026-07-11 07:30:00', '2026-07-11 07:30:00', NULL),
+(26, 'Vinícius Torres Machado', 'vinícius.machado25@provedorplus.com.br', '$2a$10$hashficticio1025abcdefg', '10.000.000/2293-85', 0, '2026-07-07 07:30:00', '2026-07-07 07:30:00', NULL),
+(27, 'Simone Cristina Farias', 'simone.farias26@outlook.com', '$2a$10$hashficticio1026abcdefg', '10.000.000/2384-88', 0, '2026-07-09 07:30:00', '2026-07-09 07:30:00', NULL),
+(28, 'Eduardo Henrique Melo', 'eduardo.melo27@gmail.com', '$2a$10$hashficticio1027abcdefg', '100.003.699-19', 0, '2026-07-10 07:30:00', '2026-07-10 07:30:00', NULL),
+(29, 'Tatiane Souza Ramos', 'tatiane.ramos28@outlook.com', '$2a$10$hashficticio1028abcdefg', '100.003.836-26', 0, '2026-07-11 07:30:00', '2026-07-11 07:30:00', NULL),
+(30, 'Leonardo Costa Andrade', 'leonardo.andrade29@gmail.com', '$2a$10$hashficticio1029abcdefg', '100.003.973-33', 0, '2026-07-09 07:30:00', '2026-07-09 07:30:00', NULL),
+(31, 'Paulo Sérgio Guimarães', 'paulo.guimarães.suporte@provedorplus.com.br', '$2a$10$hashficticiosup500xyz', '100.137.000-80', 1, '2026-06-13 00:00:00', '2026-06-13 00:00:00', NULL),
+(32, 'Cristina Aparecida Lopes', 'cristina.lopes.suporte@provedorplus.com.br', '$2a$10$hashficticiosup501xyz', '100.137.137-87', 1, '2026-06-13 00:00:00', '2026-06-13 00:00:00', NULL),
+(33, 'Marcos Vinícius Rezende', 'marcos.rezende.suporte@provedorplus.com.br', '$2a$10$hashficticiosup502xyz', '100.137.274-94', 1, '2026-06-13 00:00:00', '2026-06-13 00:00:00', NULL),
+(34, 'Sabrina Oliveira Prado', 'sabrina.prado.suporte@provedorplus.com.br', '$2a$10$hashficticiosup503xyz', '100.137.411-11', 1, '2026-06-13 00:00:00', '2026-06-13 00:00:00', NULL),
+(35, 'Roberto Carlos Nascimento', 'roberto.nascimento.admin@provedorplus.com.br', '$2a$10$hashficticioadmin999', '101.369.863-73', 2, '2026-06-13 00:00:00', '2026-06-13 00:00:00', NULL),
+(36, 'Usuário Teste 1', 'teste1@gmail.com', '$2a$10$gnNAry7HrGPUc9w80777R.k0gy6bZpGfieo0.f6wHCwnTZ7gx7m/O', '11111111111', 0, '2026-06-13 00:00:00', '2026-06-13 00:00:00', NULL),
+(37, 'Usuário Teste 2', 'teste2@gmail.com', '$2a$10$o5TOKPHPKDQgv2/ERryHs.mUICGHyad09nXPUIX4aOTBv.0b4Kmze', '33333333333', 0, '2026-06-13 00:00:00', '2026-06-13 00:00:00', NULL);
 
 -- =========================
 -- 4) RELACIONAMENTO CLIENTE x PLANO
