@@ -28,7 +28,7 @@ export default function TelaChatClient() {
           id: chat.id,
           nome: chat.user?.name || "Cliente",
           ultimaMsg: chat.lastMessage || "Sem mensagens",
-          categoria: chat.chatStatus === "PENDENTE" ? "pendente" : "resolvido",
+          categoria: chat.chatStatus === "RESOLVIDO" ? "resolvido" : "pendente",
           horario: new Date(chat.updateDate).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" }),
           foto: "",
           updateDate: chat.updateDate,
