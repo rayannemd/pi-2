@@ -4,6 +4,8 @@
 -- Convencao de nomes: snake_case (JPA/Hibernate)
 -- ============================================================
 
+SET NAMES utf8mb4;
+
 START TRANSACTION;
 
 -- =========================
