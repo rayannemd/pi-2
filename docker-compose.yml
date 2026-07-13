@@ -81,6 +81,38 @@ services:
       EFI_WEBHOOK_URL: ${EFI_WEBHOOK_URL:-}
     networks:
       - default
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/actuator/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  dump-seed:
+    image: mysql:8.0
+    depends_on:
+      backend:
+        condition: service_started
+    volumes:
+      - ./database/dump.sql:/dump.sql
+    command: >
+      sh -c '
+        echo "Aguardando tabela user...";
+
+        until mysql -h mysql -u root -proot chatbot -e "SELECT 1 FROM user LIMIT 1" >/dev/null 2>&1
+        do
+          sleep 2
+        done
+
+        COUNT=$$(mysql -h mysql -u root -proot chatbot -N -e "SELECT COUNT(*) FROM user")
+
+        if [ $$COUNT -eq 0 ]; then
+          echo "Executando dump...";
+          mysql -h mysql -u root -proot chatbot < /dump.sql;
+        else
+          echo "Banco já populado";
+        fi
+      '
+    restart: "no"
   frontend:
     build:
       context: ./web-client
