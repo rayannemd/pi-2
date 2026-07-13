@@ -9,77 +9,66 @@ BEGIN;
 -- ------------------------------------------------------------
 -- 1) USUARIOS (user)
 -- ------------------------------------------------------------
-INSERT INTO user (id, name, email, password, cpf_cnpj, type, create_date, update_date, delete_date) VALUES
-(1, 'Ana Beatriz Souza', 'ana.souza0@provedorplus.com.br', '$2a$10$hashficticio1000abcdefg', '100.000.000-10', '0', '2026-07-11 07:30:00', '2026-07-11 07:30:00', NULL),
-(2, 'Carlos Eduardo Lima', 'carlos.lima1@provedorplus.com.br', '$2a$10$hashficticio1001abcdefg', '10.000.000/0091-13', '0', '2026-06-27 07:30:00', '2026-06-27 07:30:00', NULL),
-(3, 'Mariana Ferreira Alves', 'mariana.alves2@provedorplus.com.br', '$2a$10$hashficticio1002abcdefg', '100.000.274-24', '0', '2026-07-12 07:30:00', '2026-07-12 07:30:00', NULL),
-(4, 'João Pedro Costa', 'joão.costa3@gmail.com', '$2a$10$hashficticio1003abcdefg', '100.000.411-31', '0', '2026-06-13 07:30:00', '2026-06-13 07:30:00', NULL),
-(5, 'Fernanda Ribeiro Dias', 'fernanda.dias4@gmail.com', '$2a$10$hashficticio1004abcdefg', '10.000.000/0366-22', '0', '2026-07-09 07:30:00', '2026-07-09 07:30:00', NULL),
-(6, 'Rafael Augusto Martins', 'rafael.martins5@yahoo.com.br', '$2a$10$hashficticio1005abcdefg', '100.000.685-45', '0', '2026-07-07 07:30:00', '2026-07-07 07:30:00', NULL),
-(7, 'Juliana Cristina Rocha', 'juliana.rocha6@outlook.com', '$2a$10$hashficticio1006abcdefg', '100.000.822-52', '0', '2026-07-05 07:30:00', '2026-07-05 07:30:00', NULL),
-(8, 'Bruno Henrique Pereira', 'bruno.pereira7@hotmail.com', '$2a$10$hashficticio1007abcdefg', '100.000.959-59', '0', '2026-06-14 07:30:00', '2026-06-14 07:30:00', NULL),
-(9, 'Camila Fernandes Nunes', 'camila.nunes8@gmail.com', '$2a$10$hashficticio1008abcdefg', '100.001.096-66', '0', '2026-06-18 07:30:00', '2026-06-18 07:30:00', NULL),
-(10, 'Lucas Gabriel Oliveira', 'lucas.oliveira9@provedorplus.com.br', '$2a$10$hashficticio1009abcdefg', '100.001.233-73', '0', '2026-07-10 07:30:00', '2026-07-10 07:30:00', NULL),
-(11, 'Patrícia Almeida Santos', 'patrícia.santos10@yahoo.com.br', '$2a$10$hashficticio1010abcdefg', '100.001.370-80', '0', '2026-07-10 07:30:00', '2026-07-10 07:30:00', NULL),
-(12, 'Diego Rodrigues Barbosa', 'diego.barbosa11@provedorplus.com.br', '$2a$10$hashficticio1011abcdefg', '100.001.507-87', '0', '2026-06-18 07:30:00', '2026-06-18 07:30:00', NULL),
-(13, 'Larissa Cardoso Teixeira', 'larissa.teixeira12@gmail.com', '$2a$10$hashficticio1012abcdefg', '100.001.644-94', '0', '2026-06-29 07:30:00', '2026-06-29 07:30:00', NULL),
-(14, 'Thiago Moreira Cavalcante', 'thiago.cavalcante13@outlook.com', '$2a$10$hashficticio1013abcdefg', '100.001.781-11', '0', '2026-06-13 07:30:00', '2026-06-13 07:30:00', NULL),
-(15, 'Beatriz Nogueira Correia', 'beatriz.correia14@hotmail.com', '$2a$10$hashficticio1014abcdefg', '10.000.000/1284-52', '0', '2026-07-11 07:30:00', '2026-07-11 07:30:00', NULL),
-(16, 'Gustavo Henrique Batista', 'gustavo.batista15@outlook.com', '$2a$10$hashficticio1015abcdefg', '100.002.055-25', '0', '2026-07-12 07:30:00', '2026-07-12 07:30:00', NULL),
-(17, 'Aline Patrícia Monteiro', 'aline.monteiro16@yahoo.com.br', '$2a$10$hashficticio1016abcdefg', '10.000.000/1467-58', '0', '2026-07-06 07:30:00', '2026-07-06 07:30:00', NULL),
-(18, 'Rodrigo Silva Azevedo', 'rodrigo.azevedo17@yahoo.com.br', '$2a$10$hashficticio1017abcdefg', '100.002.329-39', '0', '2026-07-10 07:30:00', '2026-07-10 07:30:00', NULL),
-(19, 'Vanessa Cristina Pinto', 'vanessa.pinto18@hotmail.com', '$2a$10$hashficticio1018abcdefg', '100.002.466-46', '0', '2026-07-11 07:30:00', '2026-07-11 07:30:00', NULL),
-(20, 'Felipe Augusto Duarte', 'felipe.duarte19@outlook.com', '$2a$10$hashficticio1019abcdefg', '100.002.603-53', '0', '2026-07-04 07:30:00', '2026-07-04 07:30:00', NULL),
-(21, 'Renata Aparecida Freitas', 'renata.freitas20@provedorplus.com.br', '$2a$10$hashficticio1020abcdefg', '100.002.740-60', '0', '2026-07-11 07:30:00', '2026-07-11 07:30:00', NULL),
-(22, 'Marcelo Vinícius Araújo', 'marcelo.araújo21@hotmail.com', '$2a$10$hashficticio1021abcdefg', '100.002.877-67', '0', '2026-06-15 07:30:00', '2026-06-15 07:30:00', NULL),
-(23, 'Priscila Gomes Carvalho', 'priscila.carvalho22@gmail.com', '$2a$10$hashficticio1022abcdefg', '10.000.000/2018-76', '0', '2026-07-13 07:30:00', '2026-07-13 07:30:00', NULL),
-(24, 'André Luiz Vieira', 'andré.vieira23@hotmail.com', '$2a$10$hashficticio1023abcdefg', '100.003.151-81', '0', '2026-07-12 07:30:00', '2026-07-12 07:30:00', NULL),
-(25, 'Débora Regina Castro', 'débora.castro24@provedorplus.com.br', '$2a$10$hashficticio1024abcdefg', '100.003.288-88', '0', '2026-07-11 07:30:00', '2026-07-11 07:30:00', NULL),
-(26, 'Vinícius Torres Machado', 'vinícius.machado25@provedorplus.com.br', '$2a$10$hashficticio1025abcdefg', '10.000.000/2293-85', '0', '2026-07-07 07:30:00', '2026-07-07 07:30:00', NULL),
-(27, 'Simone Cristina Farias', 'simone.farias26@outlook.com', '$2a$10$hashficticio1026abcdefg', '10.000.000/2384-88', '0', '2026-07-09 07:30:00', '2026-07-09 07:30:00', NULL),
-(28, 'Eduardo Henrique Melo', 'eduardo.melo27@gmail.com', '$2a$10$hashficticio1027abcdefg', '100.003.699-19', '0', '2026-07-10 07:30:00', '2026-07-10 07:30:00', NULL),
-(29, 'Tatiane Souza Ramos', 'tatiane.ramos28@outlook.com', '$2a$10$hashficticio1028abcdefg', '100.003.836-26', '0', '2026-07-11 07:30:00', '2026-07-11 07:30:00', NULL),
-(30, 'Leonardo Costa Andrade', 'leonardo.andrade29@gmail.com', '$2a$10$hashficticio1029abcdefg', '100.003.973-33', '0', '2026-07-09 07:30:00', '2026-07-09 07:30:00', NULL),
-(31, 'Paulo Sérgio Guimarães', 'paulo.guimarães.suporte@provedorplus.com.br', '$2a$10$hashficticiosup500xyz', '100.137.000-80', '1', '2026-06-13 00:00:00', '2026-06-13 00:00:00', NULL),
-(32, 'Cristina Aparecida Lopes', 'cristina.lopes.suporte@provedorplus.com.br', '$2a$10$hashficticiosup501xyz', '100.137.137-87', '1', '2026-06-13 00:00:00', '2026-06-13 00:00:00', NULL),
-(33, 'Marcos Vinícius Rezende', 'marcos.rezende.suporte@provedorplus.com.br', '$2a$10$hashficticiosup502xyz', '100.137.274-94', '1', '2026-06-13 00:00:00', '2026-06-13 00:00:00', NULL),
-(34, 'Sabrina Oliveira Prado', 'sabrina.prado.suporte@provedorplus.com.br', '$2a$10$hashficticiosup503xyz', '100.137.411-11', '1', '2026-06-13 00:00:00', '2026-06-13 00:00:00', NULL),
-(35, 'Roberto Carlos Nascimento', 'roberto.nascimento.2@provedorplus.com.br', '$2a$10$hashficticio2999', '101.369.863-73', '2', '2026-06-13 00:00:00', '2026-06-13 00:00:00', NULL);
+INSERT IGNORE INTO `user` (id, create_date, delete_date, update_date, cpf_cnpj, email, name, password, type) VALUES
+(100, '2026-07-13 00:52:40.463000', NULL, '2026-07-13 00:52:40.463000', '11144477735', 'admin@planeta.net', 'Admin Demo', '$2a$10$SYgVyESyjKFzsYDfXmko6uwwo9OhTVL563OuKMWsOeSqWLfy1VJgO', 2),
+(200, '2026-06-01 00:52:40.463000', NULL, '2026-07-13 00:52:40.463000', '22222222222', 'admin@gmail.com', 'Admin Teste', '$2a$10$Ngb0Q6oBN9h4MZVxvHFuQuXw/EM4mF1bI7fkdKYouOo2Y2EN5DJ72', 2);
 
 -- ------------------------------------------------------------
 -- 2) CHATS (chat)
 -- ------------------------------------------------------------
-INSERT INTO chat (id, title, summary, type, chat_rating, chat_status, user_id, last_message, create_date, update_date, delete_date) VALUES
-(1, 'Cobrança duplicada na fatura', 'Cliente identificou cobrança duplicada; suporte confirmou erro e realizou estorno.', 'URGENT', 5, 'RESOLVIDO', 1, 'Disponha! Pedimos desculpas pelo transtorno.', '2026-07-13 15:35:00', '2026-07-13 17:24:00', NULL),
-(2, 'Wi-Fi caindo constantemente', 'Cliente relatou quedas frequentes de Wi-Fi; suporte orientou reposicionamento do roteador.', 'NORMAL', 5, 'RESOLVIDO', 2, 'Entendido, vou ficar de olho por aqui.', '2026-06-28 12:25:00', '2026-06-28 14:10:00', NULL),
-(3, 'Dúvida sobre planos disponíveis', 'Cliente questionou sobre upgrade de plano de internet; suporte apresentou opções disponíveis.', 'NORMAL', 5, 'RESOLVIDO', 3, 'Consigo agendar a migração para amanhã pela manhã, sem custo de instalação.', '2026-07-12 11:00:00', '2026-07-12 11:38:00', NULL),
-(4, 'Mudança de endereço da instalação', 'Cliente solicitou transferência do serviço para novo endereço; suporte verificou cobertura.', 'NORMAL', 2, 'RESOLVIDO', 4, 'Claro, vou te passar aqui.', '2026-06-13 13:04:00', '2026-06-13 13:46:00', NULL),
-(5, 'Solicitação de cancelamento do serviço', 'Cliente solicitou cancelamento do plano; suporte informou processo e prazo de encerramento.', 'URGENT', 5, 'RESOLVIDO', 5, 'Só mais uma dúvida, isso pode acontecer novamente?', '2026-07-09 10:46:00', '2026-07-09 12:30:00', NULL),
-(6, 'Erro ao pagar fatura via Pix', 'Cliente enfrentou erro ao tentar pagar a fatura via Pix; suporte gerou novo código de pagamento.', 'URGENT', NULL, 'PENDENTE', 6, 'Aproveitando, o valor da minha próxima fatura já está disponível?', '2026-07-09 13:27:00', '2026-07-09 15:55:00', NULL),
-(7, 'Internet totalmente sem sinal', 'Cliente relatou perda total de sinal; suporte identificou rompimento de cabo na região.', 'URGENT', 3, 'RESOLVIDO', 7, 'É pouco provável, mas caso ocorra, é só entrar em contato conosco novamente.', '2026-07-06 11:34:00', '2026-07-06 13:30:00', NULL),
-(8, 'Agendamento de instalação', 'Cliente solicitou agendamento de instalação de nova conexão; suporte confirmou data e horário.', 'NORMAL', NULL, 'RESOLVIDO', 8, 'Isso mesmo, lá você encontra todos os detalhes da fatura.', '2026-06-16 18:34:00', '2026-06-16 20:42:00', NULL),
-(9, 'Internet lenta durante o dia', 'Cliente relatou lentidão na conexão; suporte realizou diagnóstico remoto e reiniciou o sinal.', 'NORMAL', NULL, 'PENDENTE', 9, 'Melhorou bastante, obrigado!', '2026-06-18 12:59:00', '2026-06-18 14:30:00', NULL),
-(10, 'Canais de TV fora do ar', 'Cliente relatou canais fora do ar no pacote de TV; suporte identificou manutenção programada.', 'NORMAL', NULL, 'PENDENTE', 10, 'Show, muito obrigado pela paciência em me explicar tudo.', '2026-07-10 10:12:00', '2026-07-10 12:26:00', NULL),
-(11, 'Cobrança duplicada na fatura', 'Cliente identificou cobrança duplicada; suporte confirmou erro e realizou estorno.', 'URGENT', 2, 'RESOLVIDO', 11, 'Podemos fazer o estorno direto no cartão ou creditar na próxima fatura, qual prefere?', '2026-07-12 10:04:00', '2026-07-12 11:01:00', NULL),
-(12, 'Wi-Fi caindo constantemente', 'Cliente relatou quedas frequentes de Wi-Fi; suporte orientou reposicionamento do roteador.', 'NORMAL', 5, 'RESOLVIDO', 12, 'Aproveitando, o valor da minha próxima fatura já está disponível?', '2026-06-19 17:02:00', '2026-06-19 19:17:00', NULL),
-(13, 'Dúvida sobre planos disponíveis', 'Cliente questionou sobre upgrade de plano de internet; suporte apresentou opções disponíveis.', 'NORMAL', 5, 'RESOLVIDO', 13, 'Entendido, vou ficar de olho por aqui.', '2026-06-29 18:19:00', '2026-06-29 19:56:00', NULL),
-(14, 'Mudança de endereço da instalação', 'Cliente solicitou transferência do serviço para novo endereço; suporte verificou cobertura.', 'NORMAL', NULL, 'PENDENTE', 14, 'Claro, vou te passar aqui.', '2026-06-13 10:59:00', '2026-06-13 11:27:00', NULL),
-(15, 'Solicitação de cancelamento do serviço', 'Cliente solicitou cancelamento do plano; suporte informou processo e prazo de encerramento.', 'URGENT', 4, 'RESOLVIDO', 15, 'Sim, um técnico passará para retirar o equipamento em data a combinar.', '2026-07-13 16:45:00', '2026-07-13 17:52:00', NULL),
-(16, 'Erro ao pagar fatura via Pix', 'Cliente enfrentou erro ao tentar pagar a fatura via Pix; suporte gerou novo código de pagamento.', 'URGENT', NULL, 'PENDENTE', 16, 'Isso mesmo, lá você encontra todos os detalhes da fatura.', '2026-07-13 18:06:00', '2026-07-13 20:37:00', NULL),
-(17, 'Internet totalmente sem sinal', 'Cliente relatou perda total de sinal; suporte identificou rompimento de cabo na região.', 'URGENT', NULL, 'PENDENTE', 17, 'Entendido, vou ficar de olho por aqui.', '2026-07-08 12:57:00', '2026-07-08 14:45:00', NULL),
-(18, 'Agendamento de instalação', 'Cliente solicitou agendamento de instalação de nova conexão; suporte confirmou data e horário.', 'NORMAL', 5, 'RESOLVIDO', 18, 'Pode ser na quinta de manhã, por favor.', '2026-07-10 15:35:00', '2026-07-10 16:08:00', NULL),
-(19, 'Internet lenta durante o dia', 'Cliente relatou lentidão na conexão; suporte realizou diagnóstico remoto e reiniciou o sinal.', 'NORMAL', NULL, 'RESOLVIDO', 19, 'Que ótimo! Qualquer instabilidade, é só chamar novamente.', '2026-07-13 19:57:00', '2026-07-13 21:08:00', NULL),
-(20, 'Canais de TV fora do ar', 'Cliente relatou canais fora do ar no pacote de TV; suporte identificou manutenção programada.', 'NORMAL', NULL, 'RESOLVIDO', 20, 'Tudo bem, só queria confirmar se não era problema no meu decodificador.', '2026-07-05 12:23:00', '2026-07-05 13:18:00', NULL),
-(21, 'Cobrança duplicada na fatura', 'Cliente identificou cobrança duplicada; suporte confirmou erro e realizou estorno.', 'URGENT', 5, 'RESOLVIDO', 21, 'Combinado, já registrei o crédito para a próxima fatura.', '2026-07-11 09:22:00', '2026-07-11 10:57:00', NULL),
-(22, 'Wi-Fi caindo constantemente', 'Cliente relatou quedas frequentes de Wi-Fi; suporte orientou reposicionamento do roteador.', 'NORMAL', 2, 'RESOLVIDO', 22, 'Perfeito, estamos à disposição para o que precisar.', '2026-06-15 10:56:00', '2026-06-15 13:15:00', NULL),
-(23, 'Dúvida sobre planos disponíveis', 'Cliente questionou sobre upgrade de plano de internet; suporte apresentou opções disponíveis.', 'NORMAL', 4, 'RESOLVIDO', 23, 'Agendado! Você receberá uma confirmação por SMS.', '2026-07-13 08:54:00', '2026-07-13 10:05:00', NULL),
-(24, 'Mudança de endereço da instalação', 'Cliente solicitou transferência do serviço para novo endereço; suporte verificou cobertura.', 'NORMAL', 3, 'RESOLVIDO', 24, 'Agendado! Você receberá a confirmação por e-mail.', '2026-07-13 08:42:00', '2026-07-13 10:05:00', NULL),
-(25, 'Solicitação de cancelamento do serviço', 'Cliente solicitou cancelamento do plano; suporte informou processo e prazo de encerramento.', 'URGENT', NULL, 'PENDENTE', 25, 'Obrigado pelo atendimento durante esse tempo.', '2026-07-12 18:53:00', '2026-07-12 19:47:00', NULL),
-(26, 'Erro ao pagar fatura via Pix', 'Cliente enfrentou erro ao tentar pagar a fatura via Pix; suporte gerou novo código de pagamento.', 'URGENT', NULL, 'PENDENTE', 26, 'Show, muito obrigado pela paciência em me explicar tudo.', '2026-07-09 13:46:00', '2026-07-09 16:46:00', NULL),
-(27, 'Internet totalmente sem sinal', 'Cliente relatou perda total de sinal; suporte identificou rompimento de cabo na região.', 'URGENT', 4, 'RESOLVIDO', 27, 'Só mais uma dúvida, isso pode acontecer novamente?', '2026-07-09 14:04:00', '2026-07-09 15:58:00', NULL),
-(28, 'Agendamento de instalação', 'Cliente solicitou agendamento de instalação de nova conexão; suporte confirmou data e horário.', 'NORMAL', NULL, 'PENDENTE', 28, 'É pouco provável, mas caso ocorra, é só entrar em contato conosco novamente.', '2026-07-12 13:25:00', '2026-07-12 15:00:00', NULL),
-(29, 'Internet lenta durante o dia', 'Cliente relatou lentidão na conexão; suporte realizou diagnóstico remoto e reiniciou o sinal.', 'NORMAL', NULL, 'PENDENTE', 29, 'Por nada! Tenha uma ótima tarde.', '2026-07-12 14:35:00', '2026-07-12 16:12:00', NULL),
-(30, 'Canais de TV fora do ar', 'Cliente relatou canais fora do ar no pacote de TV; suporte identificou manutenção programada.', 'NORMAL', NULL, 'PENDENTE', 30, 'Aproveitando, o valor da minha próxima fatura já está disponível?', '2026-07-09 15:28:00', '2026-07-09 17:44:00', NULL);
+INSERT IGNORE INTO `user` (id, name, email, password, cpf_cnpj, type, create_date, update_date, delete_date) VALUES
+(1, 'Cliente Demo', 'cliente@planeta.net', '$2a$10$58jhwl1j21yRWsT32T4AFetyB83CvtMKD3omaclDwYAmd7ys5U8iy ', '52998224725', 0, '2026-05-13 00:52:40.463000', '2026-05-13 00:52:40.463000', NULL),
+(2, 'Carlos Eduardo Lima', 'carlos.lima1@provedorplus.com.br', '$2a$10$hashficticio1001abcdefg', '10.000.000/0091-13', 0, '2026-06-27 07:30:00', '2026-06-27 07:30:00', NULL),
+(3, 'Mariana Ferreira Alves', 'mariana.alves2@provedorplus.com.br', '$2a$10$hashficticio1002abcdefg', '100.000.274-24', 0, '2026-07-12 07:30:00', '2026-07-12 07:30:00', NULL),
+(4, 'João Pedro Costa', 'joão.costa3@gmail.com', '$2a$10$hashficticio1003abcdefg', '100.000.411-31', 0, '2026-06-13 07:30:00', '2026-06-13 07:30:00', NULL),
+(5, 'Fernanda Ribeiro Dias', 'fernanda.dias4@gmail.com', '$2a$10$hashficticio1004abcdefg', '10.000.000/0366-22', 0, '2026-07-09 07:30:00', '2026-07-09 07:30:00', NULL),
+(6, 'Rafael Augusto Martins', 'rafael.martins5@yahoo.com.br', '$2a$10$hashficticio1005abcdefg', '100.000.685-45', 0, '2026-07-07 07:30:00', '2026-07-07 07:30:00', NULL),
+(7, 'Juliana Cristina Rocha', 'juliana.rocha6@outlook.com', '$2a$10$hashficticio1006abcdefg', '100.000.822-52', 0, '2026-07-05 07:30:00', '2026-07-05 07:30:00', NULL),
+(8, 'Bruno Henrique Pereira', 'bruno.pereira7@hotmail.com', '$2a$10$hashficticio1007abcdefg', '100.000.959-59', 0, '2026-06-14 07:30:00', '2026-06-14 07:30:00', NULL),
+(9, 'Camila Fernandes Nunes', 'camila.nunes8@gmail.com', '$2a$10$hashficticio1008abcdefg', '100.001.096-66', 0, '2026-06-18 07:30:00', '2026-06-18 07:30:00', NULL),
+(10, 'Lucas Gabriel Oliveira', 'lucas.oliveira9@provedorplus.com.br', '$2a$10$hashficticio1009abcdefg', '100.001.233-73', 0, '2026-07-10 07:30:00', '2026-07-10 07:30:00', NULL),
+(11, 'Patrícia Almeida Santos', 'patrícia.santos10@yahoo.com.br', '$2a$10$hashficticio1010abcdefg', '100.001.370-80', 0, '2026-07-10 07:30:00', '2026-07-10 07:30:00', NULL),
+(12, 'Diego Rodrigues Barbosa', 'diego.barbosa11@provedorplus.com.br', '$2a$10$hashficticio1011abcdefg', '100.001.507-87', 0, '2026-06-18 07:30:00', '2026-06-18 07:30:00', NULL),
+(13, 'Larissa Cardoso Teixeira', 'larissa.teixeira12@gmail.com', '$2a$10$hashficticio1012abcdefg', '100.001.644-94', 0, '2026-06-29 07:30:00', '2026-06-29 07:30:00', NULL),
+(14, 'Thiago Moreira Cavalcante', 'thiago.cavalcante13@outlook.com', '$2a$10$hashficticio1013abcdefg', '100.001.781-11', 0, '2026-06-13 07:30:00', '2026-06-13 07:30:00', NULL),
+(15, 'Beatriz Nogueira Correia', 'beatriz.correia14@hotmail.com', '$2a$10$hashficticio1014abcdefg', '10.000.000/1284-52', 0, '2026-07-11 07:30:00', '2026-07-11 07:30:00', NULL),
+(16, 'Gustavo Henrique Batista', 'gustavo.batista15@outlook.com', '$2a$10$hashficticio1015abcdefg', '100.002.055-25', 0, '2026-07-12 07:30:00', '2026-07-12 07:30:00', NULL),
+(17, 'Aline Patrícia Monteiro', 'aline.monteiro16@yahoo.com.br', '$2a$10$hashficticio1016abcdefg', '10.000.000/1467-58', 0, '2026-07-06 07:30:00', '2026-07-06 07:30:00', NULL),
+(18, 'Rodrigo Silva Azevedo', 'rodrigo.azevedo17@yahoo.com.br', '$2a$10$hashficticio1017abcdefg', '100.002.329-39', 0, '2026-07-10 07:30:00', '2026-07-10 07:30:00', NULL),
+(19, 'Vanessa Cristina Pinto', 'vanessa.pinto18@hotmail.com', '$2a$10$hashficticio1018abcdefg', '100.002.466-46', 0, '2026-07-11 07:30:00', '2026-07-11 07:30:00', NULL),
+(20, 'Felipe Augusto Duarte', 'felipe.duarte19@outlook.com', '$2a$10$hashficticio1019abcdefg', '100.002.603-53', 0, '2026-07-04 07:30:00', '2026-07-04 07:30:00', NULL),
+(21, 'Renata Aparecida Freitas', 'renata.freitas20@provedorplus.com.br', '$2a$10$hashficticio1020abcdefg', '100.002.740-60', 0, '2026-07-11 07:30:00', '2026-07-11 07:30:00', NULL),
+(22, 'Marcelo Vinícius Araújo', 'marcelo.araújo21@hotmail.com', '$2a$10$hashficticio1021abcdefg', '100.002.877-67', 0, '2026-06-15 07:30:00', '2026-06-15 07:30:00', NULL),
+(23, 'Priscila Gomes Carvalho', 'priscila.carvalho22@gmail.com', '$2a$10$hashficticio1022abcdefg', '10.000.000/2018-76', 0, '2026-07-13 07:30:00', '2026-07-13 07:30:00', NULL),
+(24, 'André Luiz Vieira', 'andré.vieira23@hotmail.com', '$2a$10$hashficticio1023abcdefg', '100.003.151-81', 0, '2026-07-12 07:30:00', '2026-07-12 07:30:00', NULL),
+(25, 'Débora Regina Castro', 'débora.castro24@provedorplus.com.br', '$2a$10$hashficticio1024abcdefg', '100.003.288-88', 0, '2026-07-11 07:30:00', '2026-07-11 07:30:00', NULL),
+(26, 'Vinícius Torres Machado', 'vinícius.machado25@provedorplus.com.br', '$2a$10$hashficticio1025abcdefg', '10.000.000/2293-85', 0, '2026-07-07 07:30:00', '2026-07-07 07:30:00', NULL),
+(27, 'Simone Cristina Farias', 'simone.farias26@outlook.com', '$2a$10$hashficticio1026abcdefg', '10.000.000/2384-88', 0, '2026-07-09 07:30:00', '2026-07-09 07:30:00', NULL),
+(28, 'Eduardo Henrique Melo', 'eduardo.melo27@gmail.com', '$2a$10$hashficticio1027abcdefg', '100.003.699-19', 0, '2026-07-10 07:30:00', '2026-07-10 07:30:00', NULL),
+(29, 'Tatiane Souza Ramos', 'tatiane.ramos28@outlook.com', '$2a$10$hashficticio1028abcdefg', '100.003.836-26', 0, '2026-07-11 07:30:00', '2026-07-11 07:30:00', NULL),
+(30, 'Leonardo Costa Andrade', 'leonardo.andrade29@gmail.com', '$2a$10$hashficticio1029abcdefg', '100.003.973-33', 0, '2026-07-09 07:30:00', '2026-07-09 07:30:00', NULL),
+(31, 'Paulo Sérgio Guimarães', 'paulo.guimarães.suporte@provedorplus.com.br', '$2a$10$hashficticiosup500xyz', '100.137.000-80', 1, '2026-06-13 00:00:00', '2026-06-13 00:00:00', NULL),
+(32, 'Cristina Aparecida Lopes', 'cristina.lopes.suporte@provedorplus.com.br', '$2a$10$hashficticiosup501xyz', '100.137.137-87', 1, '2026-06-13 00:00:00', '2026-06-13 00:00:00', NULL),
+(33, 'Marcos Vinícius Rezende', 'marcos.rezende.suporte@provedorplus.com.br', '$2a$10$hashficticiosup502xyz', '100.137.274-94', 1, '2026-06-13 00:00:00', '2026-06-13 00:00:00', NULL),
+(34, 'Sabrina Oliveira Prado', 'sabrina.prado.suporte@provedorplus.com.br', '$2a$10$hashficticiosup503xyz', '100.137.411-11', 1, '2026-06-13 00:00:00', '2026-06-13 00:00:00', NULL),
+(35, 'Roberto Carlos Nascimento', 'roberto.nascimento.admin@provedorplus.com.br', '$2a$10$hashficticioadmin999', '101.369.863-73', 2, '2026-06-13 00:00:00', '2026-06-13 00:00:00', NULL),
+(36, 'Usuário Teste 1', 'teste1@gmail.com', '$2a$10$gnNAry7HrGPUc9w80777R.k0gy6bZpGfieo0.f6wHCwnTZ7gx7m/O', '11111111111', 0, '2026-06-13 00:00:00', '2026-06-13 00:00:00', NULL),
+(37, 'Usuário Teste 2', 'teste2@gmail.com', '$2a$10$o5TOKPHPKDQgv2/ERryHs.mUICGHyad09nXPUIX4aOTBv.0b4Kmze', '33333333333', 0, '2026-06-13 00:00:00', '2026-06-13 00:00:00', NULL);
+
+-- =========================
+-- 4) RELACIONAMENTO CLIENTE x PLANO
+-- =========================
+
+INSERT IGNORE INTO user_services (users_id, services_id) VALUES (1, 3);
+
+-- =========================
+-- 5) MENSALIDADES ABERTAS
+-- =========================
+
+INSERT IGNORE INTO installment (id, create_date, delete_date, update_date, amount, reference_month, status, service_id, user_id) VALUES
+(1, NOW(6), NULL, NOW(6), 129.90, '04/2026', 'OPEN', 3, 1),
+(2, NOW(6), NULL, NOW(6), 129.90, '05/2026', 'OPEN', 3, 1),
+(3, NOW(6), NULL, NOW(6), 129.90, '06/2026', 'OPEN', 3, 1);
 
 -- ------------------------------------------------------------
 -- 3) MENSAGENS (message)
