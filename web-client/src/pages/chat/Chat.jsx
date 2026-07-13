@@ -40,6 +40,7 @@ export default function Chat() {
   const [layoutInicial, setLayoutInicial] = useState(true);
   const [loadingChat, setLoadingChat] = useState(true);
   const [agentTyping, setAgentTyping] = useState(false);
+  const [transition, setTransition] = useState(false);
 
   const [modalAberto, setModalAberto] = useState(false);
   const [chatConcluido, setChatConcluido] = useState(false);
@@ -197,6 +198,9 @@ export default function Chat() {
   }
 
   async function handleSendFirstMessage(firstMessage) {
+    setTransition(true);
+    await new Promise(resolve => setTimeout(resolve, 600));
+    
     try{
       setLayoutInicial(false);
       const showFirstMessage = {
@@ -370,7 +374,7 @@ export default function Chat() {
   if(loadingChat) return null;
   if(layoutInicial){
     return (
-      <div className="tela-root">
+      <div className={`tela-root ${transition ? "tela-root-transition" : ""}`}>
         <div className="tela-inner">
           <div className="flex">
             <Logo />
@@ -530,7 +534,7 @@ export default function Chat() {
                 boxShadow: "0px 1px 3px rgba(0,0,0,0.2)"
               }}
             >
-              <Typography>Digitando...</Typography>
+              <Typography variant="body2" sx={{ color: 'gray' }}>Digitando...</Typography>
             </Box>
           )}
 
