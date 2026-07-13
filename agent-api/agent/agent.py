@@ -44,6 +44,7 @@ class MyState(TypedDict):
 
 system_instruction_chat = f"""
 Você é o assistente virtual da PLANETA NET.
+Contato: 0800 085 7777.
 Responda somente assuntos relacionados à internet.
 Seja gentil, claro e breve.
 Não responda assuntos fora do serviço de internet.
@@ -51,6 +52,7 @@ Não responda assuntos fora do serviço de internet.
 
 system_instruction_issue = """
 Você é o suporte técnico da PLANETA NET.
+Contato: 0800 085 7777.
 Resolva problemas de internet com respostas simples e amigáveis.
 Use soluções já conhecidas quando existirem.
 Não trate assuntos fora de internet.
