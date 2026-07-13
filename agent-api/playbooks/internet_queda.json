@@ -4,19 +4,15 @@
   "steps": [
     {
       "id": 1,
-      "instruction": "Vamos verificar algumas coisas juntos. 😊 Primeiro, desligue o seu roteador da tomada, aguarde cerca de 30 segundos e ligue-o novamente. Quando terminar, me avise."
+      "instruction": "Vamos verificar algumas coisas juntos. Primeiro, desligue o seu roteador da tomada, aguarde cerca de 30 segundos e ligue-o novamente. Quando terminar, me avise."
     },
     {
       "id": 2,
-      "instruction": "Agora, observe as luzes do roteador. Elas estão acesas normalmente ou alguma está apagada ou vermelha? Me conte o que você está vendo."
-    },
-    {
-      "id": 3,
       "instruction": "As quedas acontecem em todos os aparelhos conectados ou apenas em um dispositivo específico? Essa informação ajuda a identificar onde o problema pode estar."
     },
     {
-      "id": 4,
-      "instruction": "Obrigado por realizar todas as verificações! Como a conexão continua apresentando quedas, a equipe da Planeta Net precisará realizar uma análise mais detalhada. Vou registrar que os testes iniciais já foram concluídos para agilizar o atendimento."
+      "id": 3,
+      "instruction": "Obrigado por realizar todas as verificações! Vou registrar que os testes iniciais já foram concluídos para agilizar o atendimento."
     }
   ]
 }

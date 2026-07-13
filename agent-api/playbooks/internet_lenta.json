@@ -4,7 +4,7 @@
   "steps": [
     {
       "id": 1,
-      "instruction": "Vamos começar com uma verificação simples. 😊 Desligue o seu roteador da tomada, aguarde cerca de 30 segundos e ligue-o novamente. Quando terminar, me avise para continuarmos."
+      "instruction": "Desligue o seu roteador da tomada, aguarde cerca de 30 segundos e ligue-o novamente. Quando terminar, me avise para continuarmos."
     },
     {
       "id": 2,
@@ -12,7 +12,7 @@
     },
     {
       "id": 3,
-      "instruction": "Obrigado por realizar todas as verificações! Como o problema continua, será necessário que a equipe da Planeta Net faça uma análise mais detalhada da sua conexão. Vou registrar que todos os testes iniciais já foram realizados para agilizar o atendimento."
+      "instruction": "Obrigado por realizar todas as verificações! Vou registrar que todos os testes iniciais já foram realizados para agilizar o atendimento."
     }
   ]
 }

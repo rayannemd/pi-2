@@ -42,10 +42,20 @@ class MyState(TypedDict):
     test: str
 
 
-system_instruction_chat = f"""Você é um assistente virtual da provedora de internet PLANETA NET e deve responder APENAS perguntas que possuam relação com o serviço de internet de forma concisa e resumida. Seja sempre gentil, amigável. NÃO responda ou dê soluções de assuntos que não sejam sobre internet.
+system_instruction_chat = f"""
+Você é o assistente virtual da PLANETA NET.
+Responda somente assuntos relacionados à internet.
+Seja gentil, claro e breve.
+Não responda assuntos fora do serviço de internet.
 """
 
-system_instruction_issue = f"""Você é um assistente virtual da provedora de internet PLANETA NET e deve responder APENAS perguntas que possuam relação com o serviço de internet de forma concisa e resumida. Sua tarefa é solucionar o problema do usuário oferecendo soluções simples ou que já funcionaram com outros clientes.Seja sempre gentil e amigável. NÃO responda ou dê soluções de assuntos que não sejam sobre internet. NÃO peça para o usuário configurar nada por conta própria e nem ofereça um técnico. Ofereça UMA solução que não tenha sido oferecida anteriormente com base no resumo da conversa.
+system_instruction_issue = """
+Você é o suporte técnico da PLANETA NET.
+Resolva problemas de internet com respostas simples e amigáveis.
+Use soluções já conhecidas quando existirem.
+Não trate assuntos fora de internet.
+Não peça configurações avançadas e não ofereça técnico.
+Dê apenas uma solução por vez.
 """
 
 async def user_input(state: MyState):
@@ -125,20 +135,20 @@ async def router(state: MyState):
 
     Playbook atual: {state.get('playbook')}
 
-    Classifique em apenas um destes tipos:
+    Classifique em:
+    consulta_plano
+    pagamento_plano
+    status_pagamento
+    internet_lenta
+    internet_queda
+    cancelamento
+    problema
+    chat
+    finalizado
 
-    - consulta_plano
-    - pagamento_plano
-    - status_pagamento
-    - internet_lenta
-    - internet_queda
-    - cancelamento
-    - problema
-    - chat
+    Use finalizado quando o usuário confirmar que resolveu ou agradecer após uma solução.
 
-    Se o cliente enviar uma mensagem confirmando que resolveu o problema ou agradecer ao assistente porque uma solução funcionou,  classifique como 'finalizado'. (Exemplos: "melhorou", "funcionou", "obrigado", após uma instrução proposta pelo agente.)
-
-    Caso não se encaixe nesses casos, existir playbook atual e a mensagem apenas continuar o atendimento, mantenha o mesmo tipo.
+    Se existir playbook e a mensagem continuar o atendimento, mantenha o tipo atual.
     """
     model_classifier = model.with_structured_output(PromptType)
     classification = await model_classifier.ainvoke([{"role": "user", "content": classification_prompt}])
@@ -182,27 +192,32 @@ async def answer(state: MyState):
 
 
         instruction_userstate = f"""
-            Última mensagem do assistente: {state.get('lastMessage')}
+            Última resposta:
+            {state.get('lastMessage')}
 
-            Playbook atual: {state.get('playbook')}
+            Playbook:
+            {state.get('playbook')}
 
-            Última mensagem do usuario: {state.get('message')}
+            Usuário:
+            {state.get('message')}
 
-            Classifique seguindo esta ordem:
+            Classifique:
 
-            1. Se o playbook atual for 'None'-> 'primeiro_passo'.
+            primeiro_passo:
+            - playbook é None
 
-            2. Se a mensagem do usuário indicar dúvida sobre a instrução atual, pedir explicação, esclarecimento ou perguntar como fazer algo (mesmo que seja apenas "como", "como?", "não entendi", "o que faço?", "pode explicar?", etc.) -> 'em_execucao'.
+            em_execucao:
+            - usuário pede explicação
+            - não entendeu
+            - não sabe responder
+            - resposta vaga
 
-            3. Se o usuário:
-            - informar claramente que concluiu a última instrução (ex.: "pronto", "feito", "já fiz", "terminei", "reiniciei");
-            - responder de forma objetiva uma pergunta feita pelo assistente, fornecendo uma resposta suficiente para dar continuidade ao atendimento (ex.: "sim", "não", "não consigo", "está piscando", "a luz apagou", "continua sem internet");
-            - ou pedir explicitamente o próximo passo ("e agora?", "qual o próximo passo?", "pode continuar?");
-            -> 'proximo_passo'.
+            proximo_passo:
+            - concluiu instrução
+            - respondeu pergunta do assistente
+            - pediu próximo passo
 
-            4. Se a resposta do usuário for vaga, inconclusiva, indicar que ele não sabe responder ou não fornecer informação suficiente para continuar (ex.: "não sei", "sei lá", "talvez", "acho", "não entendi") -> 'em_execucao'.
-
-            5. Caso contrário -> 'em_execucao'.
+        Escolha apenas uma opção.
         """
 
         model_classifier = model.with_structured_output(InstructionState)
@@ -256,9 +271,7 @@ async def answer(state: MyState):
                 Mensagem do usuário:
                 {state['message']}
 
-                Caso o usuário apresente uma dúvida em relação à instrução anterior, responda de forma contextualizada. Pergunte APENAS se o usuário já seguiu as intruções anteriores.
-
-                Se o usuário não apresentar dúvidas, só responda de forma amigável e diga que está disponível.
+                Apenas ajude o cliente a concluir a instrução anterior. NÃO forneça nenhuma solução nova.
             """
 
         answer = await model.ainvoke([{"role": "system", "content": answer_system_instruction}, {"role": "user", "content": prompt}])
