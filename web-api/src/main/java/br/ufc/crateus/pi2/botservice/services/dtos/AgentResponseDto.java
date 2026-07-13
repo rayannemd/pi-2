@@ -20,6 +20,9 @@ public class AgentResponseDto
 
     private Map<String, Object> classification;
 
+    private String playbook;
+    private Integer currentStep;
+
     private String summary;
 
     private String answer;

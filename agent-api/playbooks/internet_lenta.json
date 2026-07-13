@@ -1,19 +1,18 @@
 {
-    "id":"internet_lenta",
-    "steps":[
-        {
-            "id":1,
-            "instruction": "Reinicie o roteador e pule corda 50 vezes."
-        },
-        {
-            "id":2,
-            "instruction": "Veja se a sua janela está aberta."
-        },
-        {
-            "id":3,
-            "instruction": "Lave o seu roteador com sabão e detergente."
-        }
-    ]
-
-
+  "name": "internet_lenta",
+  "description": "Fluxo inicial para identificar e resolver problemas de lentidão na conexão de internet.",
+  "steps": [
+    {
+      "id": 1,
+      "instruction": "Vamos começar com uma verificação simples. 😊 Desligue o seu roteador da tomada, aguarde cerca de 30 segundos e ligue-o novamente. Quando terminar, me avise para continuarmos."
+    },
+    {
+      "id": 2,
+      "instruction": "Agora, confira se todos os cabos do roteador estão bem conectados e sem folgas. Se estiver tudo certo, é só me avisar."
+    },
+    {
+      "id": 3,
+      "instruction": "Obrigado por realizar todas as verificações! Como o problema continua, será necessário que a equipe da Planeta Net faça uma análise mais detalhada da sua conexão. Vou registrar que todos os testes iniciais já foram realizados para agilizar o atendimento."
+    }
+  ]
 }

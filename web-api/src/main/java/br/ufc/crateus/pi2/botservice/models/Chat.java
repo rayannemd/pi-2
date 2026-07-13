@@ -42,6 +42,10 @@ public class Chat extends BaseEntity
     @Column(columnDefinition = "TEXT")
     private String summary;
 
+    private String playbook;
+
+    private Integer currentStep;
+
     @Enumerated(EnumType.STRING)
     private EChatType type;
 

@@ -10,11 +10,11 @@ model = ChatGroq(model="llama-3.3-70b-versatile", temperature=1)
 
 
 class InstructionState(TypedDict):
-    intention: Literal['proximo_passo', 'em_execucao']
+    intention: Literal['primeiro_passo', 'proximo_passo', 'em_execucao']
 
 
 class PromptType(TypedDict):
-    type: Literal['chat', 'consulta_plano', 'pagamento_plano', 'status_pagamento', 'finalizado', 'problema', 'internet_lenta']
+    type: Literal['chat', 'consulta_plano', 'pagamento_plano', 'status_pagamento', 'finalizado', 'problema', 'internet_lenta', 'internet_queda', 'cancelamento', 'problema']
 
 class IssueClassification(TypedDict):
     issue: Literal['suporte', 'técnico', 'financeiro', 'none']
@@ -29,8 +29,11 @@ class MyState(TypedDict):
     message: str
     classification: PromptType
     issue_classification: IssueClassification
+
     summary: str
+    lastMessage: str
     answer: str
+
 
     playbook: str
     currentStep: int
@@ -39,27 +42,17 @@ class MyState(TypedDict):
     test: str
 
 
-system_instruction_chat = f"""Você é um assistente virtual da provedora de internet PLANETA NET e deve responder APENAS perguntas que possuam relação com o serviço de internet. Seja sempre gentil, amigável e responda o usuário de forma resumida. NÃO responda ou dê soluções de assuntos que não sejam sobre internet.
-
-<exemplos>
-Estou com um problema na minha internet, ela está caindo o tempo todo. (Responder com solução)
-Minha internet está caindo o tempo todo e quero derrotar o Ender Dragon, como faço? (Ignorar a parte do Ender Dragon e responder apenas sobre a internet.)
-
+system_instruction_chat = f"""Você é um assistente virtual da provedora de internet PLANETA NET e deve responder APENAS perguntas que possuam relação com o serviço de internet de forma concisa e resumida. Seja sempre gentil, amigável. NÃO responda ou dê soluções de assuntos que não sejam sobre internet.
 """
 
-system_instruction_issue = f"""Você é um assistente virtual da provedora de internet PLANETA NET e deve responder APENAS perguntas que possuam relação com o serviço de internet. Sua tarefa é solucionar o problema do usuário propondo soluções com base no histórico de mensagens e oferecendo soluções que já funcionaram com outros clientes. Seja sempre gentil e amigável. NÃO responda ou dê soluções de assuntos que não sejam sobre internet. Sempre responda oferecendo APENAS UMA solução por vez. Ofereça UMA solução que não tenha sido oferecida anteriormente com base no resumo da conversa.
-
-<exemplos>
-Estou com um problema na minha internet, ela está caindo o tempo todo. (Responder com solução)
-Minha internet está caindo o tempo todo e quero derrotar o Ender Dragon, como faço? (Ignorar a parte do Ender Dragon e responder apenas sobre a internet.)
-
+system_instruction_issue = f"""Você é um assistente virtual da provedora de internet PLANETA NET e deve responder APENAS perguntas que possuam relação com o serviço de internet de forma concisa e resumida. Sua tarefa é solucionar o problema do usuário oferecendo soluções simples ou que já funcionaram com outros clientes.Seja sempre gentil e amigável. NÃO responda ou dê soluções de assuntos que não sejam sobre internet. NÃO peça para o usuário configurar nada por conta própria e nem ofereça um técnico. Ofereça UMA solução que não tenha sido oferecida anteriormente com base no resumo da conversa.
 """
 
 async def user_input(state: MyState):
     if not state.get('summary'):
-        return {'summary': f"user: {state['message']}\n"}
+        return {'summary': f"Usuário: {state['message']}\n"}
     else:
-        return {'summary': state['summary'] + f"user: {state['message']}\n"}
+        return {'summary': state['summary'] + f"Usuário: {state['message']}\n"}
 
 async def finished_router(state: MyState):
     return state['timedOut']
@@ -70,13 +63,10 @@ async def issue_classification(state: MyState):
     issue_classification_prompt = f"""
         {last_messages}
 
-        Se o histórico da conversa apresentar problemas relacionados à parte financeira dos serviços da provedora de internet, como problemas com pagamento do plano ou cobrança indevida, classifique como 'financeiro'.
-
-        Se o resumo da conversa apresentar problemas relacionados à parte técnica dos serviços da provedora de internet, como problemas de equipamento, lentidão ou instabilidade de sinal, classifique como 'técnico'.
-
-        Se o resumo da conversa apresentar problemas relacionados à parte de suporte dos serviços da provedora de internet, como atendimento ineficiente ou prazos longos para a visita técnica, classifique como 'suporte'.
-
-        Caso contrário, classifique como 'none'.
+        Classifique em apenas um desses tipos:
+        - técnico
+        - suporte
+        - financeiro
     """
 
     classifier_model = model.with_structured_output(IssueClassification)
@@ -133,20 +123,22 @@ async def router(state: MyState):
     classification_prompt = f"""
     Histórico de mensagens: {last_messages}
 
-    Mensagem do usuário: {state['message']}
+    Playbook atual: {state.get('playbook')}
 
-    Se o usuário informar que deseja consultar seu plano de internet atual, classifique como 'consulta_plano'.
+    Classifique em apenas um destes tipos:
 
-    Se o usuário deseja saber ou consultar o status ou a situação de um pagamento ou cobrança já gerada (ex.: "meu pagamento já caiu?", "qual o status da cobrança?"), classifique como 'status_pagamento'.
+    - consulta_plano
+    - pagamento_plano
+    - status_pagamento
+    - internet_lenta
+    - internet_queda
+    - cancelamento
+    - problema
+    - chat
 
-    Se o usuário NÃO informar nenhuma dificuldade, mas deseja realizar o pagamento do seu plano de internet, classifique como 'pagamento_plano'.
+    Se o cliente enviar uma mensagem confirmando que resolveu o problema ou agradecer ao assistente porque uma solução funcionou,  classifique como 'finalizado'. (Exemplos: "melhorou", "funcionou", "obrigado", após uma instrução proposta pelo agente.)
 
-    Se o usuário informar que a sua conexão de internet está lenta ou o assistente tiver proposto anteriormente uma solução para internet lenta e o usuário estiver no processo para solucionar seguindo os passos do assistente, classifique como 'internet_lenta'.
-
-    Se o usuário informar que o problema foi resolvido e no resumo da conversa realmente existir um problema citado anteriormente, classifique como 'finalizado'.
-
-    Caso não se encaixe em nenhuma das opções acima, classifique como 'chat'.
-    
+    Caso não se encaixe nesses casos, existir playbook atual e a mensagem apenas continuar o atendimento, mantenha o mesmo tipo.
     """
     model_classifier = model.with_structured_output(PromptType)
     classification = await model_classifier.ainvoke([{"role": "user", "content": classification_prompt}])
@@ -173,27 +165,44 @@ async def answer(state: MyState):
         answer_system_instruction = f"""
         {system_instruction_chat}
 
-        Histórico da conversa: {state['summary']}
+        Histórico da conversa: {last_messages}
         
         Use o histórico da conversa com o usuário para responder de maneira eficiente."""
 
         answer = await model.ainvoke([{"role": "system", "content": answer_system_instruction}, {"role": "user", "content": state["message"]}])
 
-        return {"answer": answer.content, "summary":state['summary'] + f"assistant: {answer.content}\n"}
+        return {"answer": answer.content, "summary":state['summary'] + f"Assistente: {answer.content}\n"}
     
 
     # Caso o playbook de fato exista e o cliente esteja enfrentando um problema que pode ser classificado.
     else:
+        print("------------- last message -------------")
+        print(f"{state.get('lastMessage')}")
+        print("------------- last message -------------")
+
+
         instruction_userstate = f"""
-            Histórico de mensages: {state['summary']}
+            Última mensagem do assistente: {state.get('lastMessage')}
 
-            Mensagem do usuário: {state['message']}
+            Playbook atual: {state.get('playbook')}
 
-            Com base no histórico de mensagens e na mensagem do usuário, classifique a mensagem do usuário seguindo as regras:
+            Última mensagem do usuario: {state.get('message')}
 
-            Se o usuário informar que concluiu a instrução proposta pelo assistente, ou que deseja saber qual o próximo passo/instrução, classifique como 'proximo_passo'.
+            Classifique seguindo esta ordem:
 
-            Caso contrário, classifique como 'em_execucao'.
+            1. Se o playbook atual for 'None'-> 'primeiro_passo'.
+
+            2. Se a mensagem do usuário indicar dúvida sobre a instrução atual, pedir explicação, esclarecimento ou perguntar como fazer algo (mesmo que seja apenas "como", "como?", "não entendi", "o que faço?", "pode explicar?", etc.) -> 'em_execucao'.
+
+            3. Se o usuário:
+            - informar claramente que concluiu a última instrução (ex.: "pronto", "feito", "já fiz", "terminei", "reiniciei");
+            - responder de forma objetiva uma pergunta feita pelo assistente, fornecendo uma resposta suficiente para dar continuidade ao atendimento (ex.: "sim", "não", "não consigo", "está piscando", "a luz apagou", "continua sem internet");
+            - ou pedir explicitamente o próximo passo ("e agora?", "qual o próximo passo?", "pode continuar?");
+            -> 'proximo_passo'.
+
+            4. Se a resposta do usuário for vaga, inconclusiva, indicar que ele não sabe responder ou não fornecer informação suficiente para continuar (ex.: "não sei", "sei lá", "talvez", "acho", "não entendi") -> 'em_execucao'.
+
+            5. Caso contrário -> 'em_execucao'.
         """
 
         model_classifier = model.with_structured_output(InstructionState)
@@ -204,18 +213,6 @@ async def answer(state: MyState):
         #Sempre começa da primeira instrução, por padrão.
         nextStep = 1
 
-        print(f"""
-              
-        < -------------------------------------------------------- >
-              
-        GetPlaybook: {state.get('playbook')}
-
-        ClassificationType: {state['classification']['type']}
-
-        < -------------------------------------------------------- >
-
-        """)
-
 
         if state.get('playbook') and state.get('playbook') == state['classification']['type']:
             print("ENTROU AQUI PAIZAO DA CROACIA!!")
@@ -224,12 +221,16 @@ async def answer(state: MyState):
                 nextStep = state['currentStep'] + 1
 
         print(f"VALOR DE NEXTSTEP: {nextStep}")
-        instruction = read_playbook(nextStep, playbook)
 
-        print(f"\n\n\nINSTRUCAO: {instruction}\n\n\n")
+        if (classification['intention'] == 'primeiro_passo' or classification['intention'] == 'proximo_passo'):
+            instruction = read_playbook(nextStep, playbook)
+            if instruction != '\n\nPROXIMO PASSO DO FLUXO GERAL\n\n':
+                return {"answer": instruction, "summary":state['summary'] + f"Assistente: {instruction}\n", "playbook": playbook_to_load['type'], "currentStep": nextStep}
+            
+            # SE FOR IGUAL ENTÃO É AQUI ----------------- <><><><><><><><><>>><>><
 
-        if instruction != '\n\nPROXIMO PASSO DO FLUXO GERAL\n\n':
-            return {"answer": instruction, "summary":state['summary'] + f"assistant: {instruction}\n"}
+        #if instruction != '\n\nPROXIMO PASSO DO FLUXO GERAL\n\n':
+        #    return {"answer": instruction, "summary":state['summary'] + f"assistant: {instruction}\n", "playbook": playbook_to_load['type'], "currentStep": nextStep}
 
 
         test = await search_in_documents(state['message'])
@@ -237,27 +238,34 @@ async def answer(state: MyState):
         answer_system_instruction = f"""
         {system_instruction_issue}
         """
+
         if test != "None":
             prompt = f"""
                 Soluções que funcionaram com outros usuários: {test}
 
-                Com base nisso, proponha uma solução para o problema do usuário com base no histórico de conversa:
-                {last_messages}
+                Com base nisso, proponha uma solução para o problema do usuário.
             """
         else:
+            print(f'CAIU AQUI E O HISTÓRICO DE MENSAGENS É: \n\n{last_messages}\n\n\n')
+
+
             prompt = f"""
-                Histórico de mensagnes:
+                Histórico de mensagens:
                 {last_messages}
 
-                Proponha uma solução para o seguinte problema do usuário:
+                Mensagem do usuário:
                 {state['message']}
+
+                Caso o usuário apresente uma dúvida em relação à instrução anterior, responda de forma contextualizada. Pergunte APENAS se o usuário já seguiu as intruções anteriores.
+
+                Se o usuário não apresentar dúvidas, só responda de forma amigável e diga que está disponível.
             """
 
         answer = await model.ainvoke([{"role": "system", "content": answer_system_instruction}, {"role": "user", "content": prompt}])
 
         #summary = f"{state['summary']}\nSolução proposta pelo assistente: {answer.content}\n"
 
-        return {"answer": answer.content, "summary":state['summary'] + f"assistant: {answer.content}\n", "test": test}
+        return {"answer": answer.content, "summary":state['summary'] + f"Assistente: {answer.content}\n", "test": test}
 
 
 
@@ -278,7 +286,7 @@ graph.add_edge("issue_classification", "answer")
 #graph.add_edge("summary", "router")
 #graph.add_conditional_edges("router", lambda state: state['classification']['type'] if state['classification']['type'] == 'chat' else 'output',{'chat': 'answer', 'output': 'output'})
 
-graph.add_conditional_edges("router", define_route, {'chat': 'answer', 'internet_lenta': 'answer', 'pagamento_plano': 'output', 'consulta_plano': 'output', 'status_pagamento': 'output', 'finalizado':'issue_classification'})
+graph.add_conditional_edges("router", define_route, {'chat': 'answer', 'internet_lenta': 'answer', 'cancelamento': 'answer', 'internet_queda': 'answer', 'problema':'answer', 'pagamento_plano': 'output', 'consulta_plano': 'output', 'status_pagamento': 'output', 'finalizado':'issue_classification'})
 
 graph.add_edge("output", END)
 graph.add_edge("answer", END)

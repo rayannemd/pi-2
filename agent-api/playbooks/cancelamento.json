@@ -1,0 +1,26 @@
+{
+  "name": "cancelamento",
+  "description": "Fluxo para solicitação de cancelamento do serviço.",
+  "steps": [
+    {
+      "id": 1,
+      "instruction": "Entendi. 😊 Você deseja realmente solicitar o cancelamento do seu serviço da Planeta Net? Por favor, confirme para que eu possa continuar."
+    },
+    {
+      "id": 2,
+      "instruction": "Antes de prosseguirmos, você poderia me informar o principal motivo do cancelamento? Sua resposta nos ajuda a melhorar nossos serviços."
+    },
+    {
+      "id": 3,
+      "instruction": "Obrigado por compartilhar o motivo. Gostaria de saber se existe algo que a Planeta Net possa fazer para resolver essa situação antes de prosseguirmos com o cancelamento."
+    },
+    {
+      "id": 4,
+      "instruction": "Tudo bem. Vou registrar sua solicitação. Antes da conclusão do cancelamento, nossa equipe poderá verificar informações do contrato, como possíveis pendências ou equipamentos vinculados ao serviço."
+    },
+    {
+      "id": 5,
+      "instruction": "Sua solicitação foi registrada com sucesso! A equipe responsável da Planeta Net dará continuidade ao processo de cancelamento e entrará em contato caso seja necessário."
+    }
+  ]
+}

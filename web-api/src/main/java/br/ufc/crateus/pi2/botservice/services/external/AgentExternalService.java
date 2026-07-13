@@ -11,6 +11,7 @@ import br.ufc.crateus.pi2.botservice.models.Chat;
 import br.ufc.crateus.pi2.botservice.models.enums.EMessageIssuer;
 import br.ufc.crateus.pi2.botservice.repositories.ChatRepository;
 import br.ufc.crateus.pi2.botservice.services.ChargeService;
+import br.ufc.crateus.pi2.botservice.services.ChatService;
 import br.ufc.crateus.pi2.botservice.services.MessageService;
 import br.ufc.crateus.pi2.botservice.services.commands.SendMessageCommand;
 import br.ufc.crateus.pi2.botservice.services.dtos.AgentHandledResponseDto;
@@ -34,6 +35,9 @@ public class AgentExternalService
     @Autowired
     private ChargeService chargeService;
 
+    @Autowired
+    private ChatService chatService;
+
     public AgentHandledResponseDto sendMessage(Long chatId, SendMessageCommand command)
     {
         var chat = chatRepository.findById(chatId)
@@ -42,6 +46,14 @@ public class AgentExternalService
         if(chat.getSummary() != null)
             command.setSummary(chat.getSummary());
         
+        if(chat.getPlaybook() != null && chat.getCurrentStep() != null)
+            command.setPlaybook(chat.getPlaybook());
+            command.setCurrentStep(chat.getCurrentStep());
+
+        if(chat.getLastMessage() != null)
+            command.setLastMessage(chat.getLastMessage());
+
+
         command.setTimedOut(false);
 
         messageService.save(new ChatMessageDTO(command.getMessage(), EMessageIssuer.USER, chat));
@@ -66,6 +78,8 @@ public class AgentExternalService
     private AgentHandledResponseDto handleResponseType(Chat chat, AgentResponseDto response)
     {
         var type = normalizeType(String.valueOf(response.getClassification().get("type")));
+
+        System.out.println("TYPE = " + type);
 
         switch (type)
         {
@@ -113,6 +127,27 @@ public class AgentExternalService
                 return AgentHandledResponseDto.payload(type, charge);
             }
 
+            case "internet_lenta", "internet_queda", "cancelamento" -> {
+                chat.setSummary(response.getSummary());
+                chat.setPlaybook(response.getPlaybook());
+                chat.setCurrentStep(response.getCurrentStep());
+
+                System.out.println("PLAYBOOK: " + response.getPlaybook());
+                System.out.println("CURRENT_STEP: " + response.getCurrentStep());
+
+                chatRepository.save(chat);
+                messageService.save(new ChatMessageDTO(response.getAnswer(), EMessageIssuer.AGENT, chat));
+                return AgentHandledResponseDto.chat(response);
+            }
+
+            case "finalizado" -> {
+                chat.setSummary(response.getSummary());
+                chatRepository.save(chat);
+                messageService.save(new ChatMessageDTO(response.getAnswer(), EMessageIssuer.AGENT, chat));
+                chatService.concluirChat(chat.getId());
+                return AgentHandledResponseDto.chat(response);
+            }
+
             default -> {
                 return null;
             }
@@ -138,7 +173,7 @@ public class AgentExternalService
 
         return switch (value)
         {
-            case "chat", "consulta_plano", "pagamento_plano", "status_pagamento" -> value;
+            case "chat", "consulta_plano", "pagamento_plano", "status_pagamento", "internet_lenta", "internet_queda", "cancelamento", "finalizado" -> value;
             default -> "chat";
         };
     }

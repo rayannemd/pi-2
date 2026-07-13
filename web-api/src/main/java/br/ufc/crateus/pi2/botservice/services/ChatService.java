@@ -115,9 +115,7 @@ public class ChatService
         messagingTemplate.convertAndSend(
             "/topic/chat/" + id + "/concluir",
             id
-        );
-
-        // chat.getSummary();
+        );    // chat.getSummary();
     }
 
     /*public void processarMensagem(Long id, String message){

@@ -14,4 +14,8 @@ public class SendMessageCommand
     private String message;
     private String summary;
     private Boolean timedOut;
+    private String playbook;
+    private Integer currentStep;
+    private String lastMessage;
+
 }

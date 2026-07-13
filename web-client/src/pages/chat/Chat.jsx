@@ -239,7 +239,9 @@ export default function Chat() {
     switch (data.type) {
       case "chat": {
         const answer = data?.chatResponse?.answer;
+        const type = data?.chatResponse?.classification?.type;
         if (answer) pushAgentText(answer);
+        if (type === "finalizado") resolverConversa()
         return;
       }
       case "pagamento_plano": {
@@ -281,6 +283,11 @@ export default function Chat() {
       }
       case "consulta_plano": {
         pushAgentText("Aqui estão os seus planos contratados.");
+        return;
+      }
+
+      case "finalizado":{
+        resolverConversa();
         return;
       }
       default:
